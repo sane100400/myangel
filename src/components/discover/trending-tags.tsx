@@ -53,9 +53,9 @@ export function TrendingTags({ tags, selectedTag, onTagClick }: TrendingTagsProp
               #{tag}
             </button>
 
-            {/* Tooltip */}
+            {/* Tooltip — desktop only */}
             {hoveredTag === tag && TAG_DESCRIPTIONS[tag] && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 rounded-lg bg-white/90 backdrop-blur-xl px-3 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+              <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 rounded-lg bg-white/90 backdrop-blur-xl px-3 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
                 <div className="flex gap-2 whitespace-nowrap">
                   {TAG_DESCRIPTIONS[tag].map((desc) => (
                     <span

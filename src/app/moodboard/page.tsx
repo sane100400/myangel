@@ -92,7 +92,7 @@ function MoodboardContent() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-5 pt-24 pb-10">
+    <div className="mx-auto max-w-5xl px-4 pt-10 pb-10 md:px-5 md:pt-24">
       {/* Header */}
       <div className="mb-8 text-center">
         <h1
@@ -111,9 +111,9 @@ function MoodboardContent() {
       </div>
 
       {/* Upload Area */}
-      <div className="mx-auto max-w-2xl mb-10">
+      <div className="mx-auto max-w-2xl mb-6 md:mb-10">
         {/* Image Input Row */}
-        <div className="mb-3 flex gap-2">
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row">
           <input
             type="text"
             placeholder="이미지 URL을 붙여넣기..."
@@ -126,11 +126,11 @@ function MoodboardContent() {
             }}
             onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
             disabled={isLoading}
-            className="flex-1 rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-2.5 text-[13px] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)]"
+            className="flex-1 rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)]"
           />
           <button
             onClick={handleCenterClick}
-            className="shrink-0 rounded-xl border border-[var(--angel-border)] bg-white/70 px-4 py-2.5 text-[12px] text-[var(--angel-text-soft)] transition-all hover:bg-white hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
+            className="shrink-0 rounded-xl border border-[var(--angel-border)] bg-white/70 px-4 py-3 text-[13px] text-[var(--angel-text-soft)] transition-all hover:bg-white hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
           >
             파일 업로드
           </button>

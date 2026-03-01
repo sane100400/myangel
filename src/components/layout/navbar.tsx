@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { AngelLogo } from "@/components/ui/angel-logo";
-import { GothicCross } from "@/components/ui/gothic-cross";
 
 const NAV_ITEMS = [
+  { href: "/", label: "Home" },
   { href: "/discover", label: "Discover" },
   { href: "/moodboard", label: "Moodboard" },
   { href: "/boards", label: "Mypage" },
@@ -21,13 +21,12 @@ export function Navbar() {
       {/* Glassmorphism background */}
       <div className="absolute inset-0 bg-[#f0f4fb]/85 backdrop-blur-xl" />
 
-      <nav className="relative mx-auto flex h-16 max-w-5xl items-center justify-between px-5">
+      <nav className="relative mx-auto flex h-14 max-w-5xl items-center justify-between px-4 md:h-[72px] md:px-5">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <AngelLogo size={36} priority className="transition-transform duration-300 group-hover:scale-110" />
-          <span
-            className="text-lg tracking-[0.1em] text-[var(--angel-text)] font-heading"
-          >
+          <AngelLogo size={32} priority className="transition-transform duration-300 group-hover:scale-110 md:hidden" />
+          <AngelLogo size={36} priority className="hidden transition-transform duration-300 group-hover:scale-110 md:block" />
+          <span className="text-base tracking-[0.1em] text-[var(--angel-text)] font-heading md:text-lg">
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </span>
         </Link>
@@ -68,10 +67,10 @@ export function Navbar() {
         {/* Mobile Toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-white/50 md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors active:bg-white/50 md:hidden"
           aria-label="메뉴"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[var(--angel-text-soft)]">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="text-[var(--angel-text-soft)]">
             {mobileOpen ? (
               <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
             ) : (
@@ -87,29 +86,31 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="relative border-t border-white/20 bg-[#edf1fa]/90 backdrop-blur-xl px-5 pb-4 pt-2 md:hidden">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-2 py-2.5 text-[12px] tracking-[0.08em] transition-colors ${
-                pathname === item.href
-                  ? "text-[var(--angel-text)]"
-                  : "text-[var(--angel-text-soft)]"
-              }`}
-            >
-              <span className="text-[8px] text-[var(--angel-lavender)] opacity-40">✦</span>
-              {item.label}
-            </Link>
-          ))}
-          <div className="mt-2 pt-2 border-t border-white/15">
+        <div className="relative border-t border-white/20 bg-[#edf1fa]/95 backdrop-blur-xl px-5 pb-4 pt-2 md:hidden">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-3 py-3 text-[14px] tracking-[0.06em] transition-colors ${
+                  isActive
+                    ? "text-[var(--angel-text)] font-medium"
+                    : "text-[var(--angel-text-soft)]"
+                }`}
+              >
+                <span className={`text-[8px] text-[var(--angel-lavender)] ${isActive ? "opacity-100" : "opacity-30"}`}>✦</span>
+                {item.label}
+              </Link>
+            );
+          })}
+          <div className="mt-2 pt-3 border-t border-white/20">
             <Link
               href="/auth/login"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 py-2.5 text-[12px] tracking-[0.08em] text-[var(--angel-text-soft)]"
+              className="flex items-center justify-center py-2.5 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 text-[13px] tracking-[0.06em] text-[var(--angel-text-soft)]"
             >
-              <GothicCross size={16} color="var(--angel-lavender)" />
               Login
             </Link>
           </div>

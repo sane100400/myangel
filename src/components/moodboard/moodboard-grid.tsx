@@ -23,8 +23,8 @@ export function MoodboardGrid({
   });
 
   return (
-    <div className="mx-auto max-w-[520px]">
-      <div className="grid grid-cols-3 gap-2">
+    <div className="mx-auto w-full max-w-[520px]">
+      <div className="grid grid-cols-3 gap-1.5 md:gap-2">
         {cells.map((cell, i) => (
           <div
             key={i}

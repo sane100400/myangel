@@ -17,7 +17,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ══ Hero Section ══ */}
-      <section className="relative flex flex-col items-center justify-center px-5 pt-48 pb-32 text-center md:pt-52 md:pb-40 overflow-hidden star-bg bg-gradient-to-b from-[#d6deee] to-[#dce4f2]">
+      <section className="relative flex flex-col items-center justify-center px-5 pt-32 pb-20 text-center md:pt-52 md:pb-40 overflow-hidden star-bg bg-gradient-to-b from-[#d6deee] to-[#dce4f2]">
         {/* Floating orbs */}
         <div className="absolute top-12 left-[8%] h-40 w-40 rounded-full bg-[var(--angel-blue)]/8 blur-[80px]" />
         <div className="absolute bottom-16 right-[10%] h-48 w-48 rounded-full bg-[var(--angel-lavender)]/10 blur-[80px]" />
@@ -25,12 +25,13 @@ export default function HomePage() {
         <div className="absolute bottom-32 left-[20%] h-32 w-32 rounded-full bg-[var(--angel-blue)]/6 blur-[70px]" />
 
         {/* Large decorative circles */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] md:w-[580px] md:h-[580px] rounded-full border-[3px] border-[var(--angel-blue)]/40 rotate-slow" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] md:w-[620px] md:h-[620px] rounded-full border-[2.5px] border-[var(--angel-lavender)]/35" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[580px] md:h-[580px] rounded-full border-[3px] border-[var(--angel-blue)]/40 rotate-slow" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[310px] h-[310px] md:w-[620px] md:h-[620px] rounded-full border-[2.5px] border-[var(--angel-lavender)]/35" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
 
         {/* Wing logo */}
         <div className="float-gentle mb-6 relative z-10">
-          <AngelLogo size={120} priority />
+          <AngelLogo size={80} priority className="md:hidden" />
+          <AngelLogo size={120} priority className="hidden md:block" />
         </div>
 
         {/* Title */}
@@ -75,7 +76,7 @@ export default function HomePage() {
       </div>
 
       {/* ══ Why MyAngel ══ */}
-      <section className="snap-section relative mx-auto w-full px-5 py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
+      <section className="snap-section relative mx-auto w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
         <div className="mx-auto max-w-2xl">
           <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
             Why MyAngel?
@@ -121,7 +122,7 @@ export default function HomePage() {
       </div>
 
       {/* ══ How it works ══ */}
-      <section className="snap-section relative mx-auto w-full px-5 py-16 bg-gradient-to-b from-[#e0e7f4] to-[#dce4f2]">
+      <section className="snap-section relative mx-auto w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#dce4f2]">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
             How it works
@@ -157,7 +158,7 @@ export default function HomePage() {
       </div>
 
       {/* ══ Brands ══ */}
-      <section className="snap-section w-full px-5 py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
+      <section className="snap-section w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
         <div className="mx-auto max-w-3xl">
           <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
             Brands
@@ -201,7 +202,7 @@ export default function HomePage() {
       </div>
 
       {/* ══ Trending Moods ══ */}
-      <section className="snap-section w-full px-5 py-16 bg-gradient-to-b from-[#e0e7f4] to-[#dce4f2]">
+      <section className="snap-section w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#dce4f2]">
         <div className="mx-auto max-w-3xl">
           <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
             Trending moods

@@ -21,7 +21,7 @@ function DiscoverContent() {
   }, [selectedTag]);
 
   return (
-    <div className="mx-auto max-w-5xl px-5 pt-24 pb-10">
+    <div className="mx-auto max-w-5xl px-4 pt-10 pb-10 md:px-5 md:pt-24">
       {/* Header */}
       <div className="mb-10 text-center">
         <h1
