@@ -524,6 +524,28 @@
 ::-webkit-scrollbar-thumb { background: #d4deee; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--angel-blue-light); }
 
+/* ═══════════════════════════════════
+   ASCII Heart Background Decorations
+   ═══════════════════════════════════ */
+.ascii-heart {
+  font-family: monospace;
+  font-size: 10px;
+  line-height: 1.15;
+  white-space: pre;
+  animation: heart-drift 8s ease-in-out infinite;
+}
+@media (min-width: 768px) {
+  .ascii-heart { font-size: 12px; }
+}
+@media (min-width: 1024px) {
+  .ascii-heart { font-size: 14px; }
+}
+
+@keyframes heart-drift {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -10px; }
+}
+
 ::selection {
   background: rgba(91, 155, 213, 0.25);
   color: #2d3748;

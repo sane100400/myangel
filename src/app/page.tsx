@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AngelLogo } from "@/components/ui/angel-logo";
+import { AsciiHearts } from "@/components/ui/ascii-hearts";
 import { SEED_TAGS } from "@/lib/seed-data";
 
 const BRANDS_PREVIEW = [
@@ -15,7 +16,10 @@ const BRANDS_PREVIEW = [
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col">
+    <div className="relative flex flex-col">
+      {/* ── ASCII heart background decorations ── */}
+      <AsciiHearts />
+
       {/* ══ Hero Section ══ */}
       <section className="relative flex flex-col items-center justify-center px-5 pt-28 pb-16 text-center md:pt-52 md:pb-40 overflow-hidden bg-gradient-to-b from-[#d6deee] to-[#dce4f2] star-bg-desktop">
         {/* Floating orbs — desktop only (GPU heavy) */}
