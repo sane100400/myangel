@@ -1,85 +1,83 @@
 /**
- * 4 dot-art hearts for the hero section.
- * Grid-aligned for perfect symmetry. Tiny dot size for delicate look.
+ * 4 dot-pattern SVG hearts for the hero section.
+ * Renders perfectly on every device — no font dependency.
+ * White dots + glow, mimics braille/ASCII dot-art aesthetic.
  */
 
-/* 11 wide × 9 tall — large filled */
-const H1 = [
-  "  ●●   ●●",
-  " ●●●● ●●●●",
-  "●●●●●●●●●●●",
-  "●●●●●●●●●●●",
-  " ●●●●●●●●●",
-  "  ●●●●●●●",
-  "   ●●●●●",
-  "    ●●●",
-  "     ●",
-].join("\n");
+/* Chubby heart SVG path (wide, round lobes) */
+const HEART_PATH =
+  "M50 88 C50 88 2 58 2 30 C2 10 16 0 34 0 C43 0 50 6 50 14 C50 6 57 0 66 0 C84 0 98 10 98 30 C98 58 50 88 50 88Z";
 
-/* 9 wide × 7 tall — medium filled */
-const H2 = [
-  " ●●   ●●",
-  "●●●● ●●●●",
-  "●●●●●●●●●",
-  " ●●●●●●●",
-  "  ●●●●●",
-  "   ●●●",
-  "    ●",
-].join("\n");
+function DotHeart({
+  size,
+  dotR,
+  gap,
+  className,
+  style,
+}: {
+  size: number;
+  /** dot radius */
+  dotR: number;
+  /** grid cell size (controls dot density) */
+  gap: number;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  /* Unique pattern id per instance */
+  const id = `dots-${size}-${dotR}-${gap}`;
 
-/* 9 wide × 8 tall — medium outline */
-const H3 = [
-  " ○○   ○○",
-  "○  ○ ○  ○",
-  "○   ○   ○",
-  "○       ○",
-  " ○     ○",
-  "  ○   ○",
-  "   ○ ○",
-  "    ○",
-].join("\n");
-
-/* 7 wide × 5 tall — small filled */
-const H4 = [
-  " ●   ●",
-  "●●● ●●●",
-  " ●●●●●",
-  "  ●●●",
-  "   ●",
-].join("\n");
-
-const SHADOW = "0 0 8px rgba(255,255,255,0.85), 0 0 20px rgba(180,160,220,0.2)";
+  return (
+    <svg
+      viewBox="0 0 100 90"
+      width={size}
+      height={size * 0.9}
+      className={className}
+      style={style}
+      aria-hidden="true"
+    >
+      <defs>
+        <pattern
+          id={id}
+          width={gap}
+          height={gap}
+          patternUnits="userSpaceOnUse"
+        >
+          <circle cx={gap / 2} cy={gap / 2} r={dotR} fill="white" />
+        </pattern>
+      </defs>
+      <path
+        d={HEART_PATH}
+        fill={`url(#${id})`}
+        filter="drop-shadow(0 0 6px rgba(255,255,255,0.7)) drop-shadow(0 0 14px rgba(180,160,220,0.25))"
+      />
+    </svg>
+  );
+}
 
 const HEARTS = [
-  { art: H1, top: "6%",  left: "3%",  fontSize: 6 },
-  { art: H3, top: "8%",  right: "4%", fontSize: 7 },
-  { art: H4, top: "70%", left: "5%",  fontSize: 7 },
-  { art: H2, top: "66%", right: "3%", fontSize: 6 },
+  { size: 80,  dotR: 1.8, gap: 6,  top: "5%",  left: "3%" },
+  { size: 60,  dotR: 1.5, gap: 5,  top: "10%", right: "4%" },
+  { size: 50,  dotR: 1.4, gap: 5,  top: "68%", right: "3%" },
+  { size: 40,  dotR: 1.2, gap: 4.5, top: "74%", left: "5%" },
 ];
 
 export function AsciiHearts() {
   return (
     <>
       {HEARTS.map((h, i) => (
-        <pre
+        <DotHeart
           key={i}
-          aria-hidden="true"
+          size={h.size}
+          dotR={h.dotR}
+          gap={h.gap}
           className="ascii-heart pointer-events-none absolute z-[1] select-none"
           style={{
             top: h.top,
             left: h.left,
             right: h.right,
-            color: "#ffffff",
-            fontSize: h.fontSize,
-            fontFamily: "monospace",
-            lineHeight: 1.4,
-            letterSpacing: "0.02em",
-            textShadow: SHADOW,
             animationDelay: `${i * 1.5}s`,
           }}
-        >
-          {h.art}
-        </pre>
+        />
       ))}
     </>
   );
