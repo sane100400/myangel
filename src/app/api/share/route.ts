@@ -3,6 +3,7 @@ import crypto from "crypto";
 import path from "path";
 import fs from "fs/promises";
 import sharp from "sharp";
+import { genai } from "@/lib/gemini";
 import { SEED_TAGS } from "@/lib/seed-data";
 import {
   readStore,
@@ -150,13 +151,68 @@ export async function POST(request: NextRequest) {
       .toBuffer();
 
     // ── 9. 텍스트 살균 ──
-    const cleanTitle = sanitizeText(title || "공유 이미지", 100);
     const cleanPrompt = sanitizeText(prompt || "", 2000);
 
-    // ── 10. 태그 화이트리스트 ──
-    const cleanTags = (tags || [])
-      .filter((t): t is string => typeof t === "string" && TAGS_SET.has(t))
-      .slice(0, 5);
+    // ── 10. AI 자동 제목 + 태그 생성 (Gemini) ──
+    let aiTitle = "";
+    let aiTags: string[] = [];
+    try {
+      const tagList = SEED_TAGS.join(", ");
+      const response = await genai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                inlineData: {
+                  mimeType: "image/webp",
+                  data: webpBuffer.toString("base64"),
+                },
+              },
+              {
+                text: `이 이미지를 분석하고 두 가지를 생성해주세요.
+
+1) 제목: 이미지의 분위기와 내용을 담은 한국어 제목 (15자 이내, 감성적으로)
+2) 태그: 다음 목록에서 가장 어울리는 태그 정확히 3개
+   태그 목록: [${tagList}]
+
+출력 형식 (정확히 이 형식만, 다른 텍스트 없이):
+제목: 여기에 제목
+태그: 태그1, 태그2, 태그3`,
+              },
+            ],
+          },
+        ],
+      });
+
+      const text = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (text) {
+        // 제목 파싱
+        const titleMatch = text.match(/제목:\s*(.+)/);
+        if (titleMatch) {
+          aiTitle = sanitizeText(titleMatch[1], 50);
+        }
+        // 태그 파싱
+        const tagsMatch = text.match(/태그:\s*(.+)/);
+        if (tagsMatch) {
+          aiTags = tagsMatch[1]
+            .split(/[,，]+/)
+            .map((t) => t.trim())
+            .filter((t) => TAGS_SET.has(t))
+            .slice(0, 3);
+        }
+      }
+    } catch {
+      // AI 실패 시 무시 — 클라이언트 값으로 fallback
+    }
+
+    // AI 결과 우선, 부족하면 클라이언트 값으로 보충
+    const cleanTitle = aiTitle || sanitizeText(title || "공유 이미지", 100);
+    const clientTags = (tags || [])
+      .filter((t): t is string => typeof t === "string" && TAGS_SET.has(t));
+    const mergedSet = new Set([...aiTags, ...clientTags]);
+    const cleanTags = [...mergedSet].slice(0, 3);
 
     // ── 저장 ──
     const id = `shared-${crypto.randomUUID()}`;
