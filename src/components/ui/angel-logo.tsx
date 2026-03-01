@@ -1,7 +1,4 @@
-import Image from "next/image";
-
 interface AngelLogoProps {
-  /** Mobile size (px). Desktop will use desktopSize if provided. */
   size?: number;
   desktopSize?: number;
   className?: string;
@@ -9,20 +6,16 @@ interface AngelLogoProps {
 }
 
 export function AngelLogo({ size = 32, desktopSize, className = "", priority = false }: AngelLogoProps) {
-  const ds = desktopSize ?? size;
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src="/logo.webp"
       alt="MyAngel"
-      width={Math.round(ds * 0.8)}
-      height={ds}
+      width={desktopSize ?? size}
+      height={desktopSize ?? size}
       className={className}
-      style={{
-        transform: "scaleX(0.85)",
-        width: desktopSize ? undefined : Math.round(size * 0.8),
-        height: desktopSize ? undefined : size,
-      }}
-      priority={priority}
+      style={{ transform: "scaleX(0.85)" }}
+      {...(priority ? { fetchPriority: "high" } : {})}
     />
   );
 }
