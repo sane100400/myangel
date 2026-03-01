@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       styleTags.push(preset.label);
     }
     // 프롬프트에서 스타일 키워드 추출
-    const keywords = ["지뢰계", "천사계", "양산형", "로리타", "고스로리", "페어리코어", "Y2K", "고딕", "다크로맨틱", "스위트", "페미닌"];
+    const keywords = ["지뢰계", "천사계", "양산형", "로리타", "고스로리", "페어리코어", "Y2K", "위시코어", "고딕", "다크로맨틱", "스위트", "페미닌"];
     for (const kw of keywords) {
       if (prompt.includes(kw) && !styleTags.includes(kw)) {
         styleTags.push(kw);
