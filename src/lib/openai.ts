@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "dummy",
 });
 
 // 무드 이미지 분석 + 서브컬쳐 스타일 판별 + 브랜드 추천 프롬프트
