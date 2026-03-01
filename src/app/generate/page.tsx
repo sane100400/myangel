@@ -26,20 +26,52 @@ const EST_PREMIUM = 35;
 const MAX_IMAGES = 3;
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
+type AllowedType = typeof ALLOWED_TYPES[number];
 
-function readFileAsBase64(file: File): Promise<{ base64: string; mimeType: string }> {
-  return new Promise((resolve, reject) => {
+// Magic bytes → 실제 MIME 판별 (MIME spoofing 방지)
+const MAGIC_BYTES: { mime: AllowedType; bytes: number[] }[] = [
+  { mime: "image/png",  bytes: [0x89, 0x50, 0x4e, 0x47] },         // \x89PNG
+  { mime: "image/jpeg", bytes: [0xff, 0xd8, 0xff] },                // JPEG SOI
+  { mime: "image/webp", bytes: [0x52, 0x49, 0x46, 0x46] },          // RIFF
+];
+
+function detectMimeFromBytes(header: Uint8Array): AllowedType | null {
+  for (const { mime, bytes } of MAGIC_BYTES) {
+    if (bytes.every((b, i) => header[i] === b)) return mime;
+  }
+  return null;
+}
+
+// 파일의 실제 바이너리 magic bytes를 읽어서 MIME 검증
+async function validateAndReadFile(
+  file: File
+): Promise<{ base64: string; mimeType: AllowedType }> {
+  // 1) magic bytes 읽기 (첫 16바이트면 충분)
+  const headerBuf = await file.slice(0, 16).arrayBuffer();
+  const header = new Uint8Array(headerBuf);
+  const realMime = detectMimeFromBytes(header);
+
+  if (!realMime) {
+    throw new Error("지원하지 않는 이미지 형식입니다.");
+  }
+
+  // 2) 선언된 MIME과 실제 MIME 불일치 → 실제 MIME 사용 (spoofing 방지)
+  const mimeType = realMime;
+
+  // 3) base64 변환
+  const base64 = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
-      // "data:image/png;base64,XXXX" → extract base64 part
-      const base64 = dataUrl.split(",")[1];
-      if (!base64) return reject(new Error("파일을 읽을 수 없습니다."));
-      resolve({ base64, mimeType: file.type });
+      const b64 = dataUrl.split(",")[1];
+      if (!b64) return reject(new Error("파일을 읽을 수 없습니다."));
+      resolve(b64);
     };
     reader.onerror = () => reject(new Error("파일을 읽을 수 없습니다."));
     reader.readAsDataURL(file);
   });
+
+  return { base64, mimeType };
 }
 
 export default function GeneratePage() {
@@ -103,7 +135,8 @@ export default function GeneratePage() {
     const toProcess = files.slice(0, available);
 
     for (const file of toProcess) {
-      if (!ALLOWED_TYPES.includes(file.type as typeof ALLOWED_TYPES[number])) {
+      // 1차: 선언된 MIME 화이트리스트 (SVG 등 조기 차단)
+      if (!ALLOWED_TYPES.includes(file.type as AllowedType)) {
         setError("PNG, JPEG, WebP 이미지만 업로드할 수 있어요.");
         continue;
       }
@@ -113,7 +146,8 @@ export default function GeneratePage() {
       }
 
       try {
-        const { base64, mimeType } = await readFileAsBase64(file);
+        // 2차: magic bytes 검증 (MIME spoofing 방지)
+        const { base64, mimeType } = await validateAndReadFile(file);
         const preview = URL.createObjectURL(file);
         setRefImages((prev) => [
           ...prev,
@@ -139,9 +173,11 @@ export default function GeneratePage() {
       const items = e.clipboardData?.items;
       if (!items) return;
 
+      const allowedSet = new Set<string>(ALLOWED_TYPES);
       const imageFiles: File[] = [];
       for (const item of items) {
-        if (item.type.startsWith("image/")) {
+        // 정확한 MIME 화이트리스트 (image/svg+xml 등 차단)
+        if (allowedSet.has(item.type)) {
           const file = item.getAsFile();
           if (file) imageFiles.push(file);
         }
