@@ -528,17 +528,8 @@
    ASCII Heart Background Decorations
    ═══════════════════════════════════ */
 .ascii-heart {
-  font-family: monospace;
-  font-size: 10px;
-  line-height: 1.15;
   white-space: pre;
   animation: heart-drift 8s ease-in-out infinite;
-}
-@media (min-width: 768px) {
-  .ascii-heart { font-size: 12px; }
-}
-@media (min-width: 1024px) {
-  .ascii-heart { font-size: 14px; }
 }
 
 @keyframes heart-drift {

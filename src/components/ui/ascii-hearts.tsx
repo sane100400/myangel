@@ -1,35 +1,35 @@
 /**
- * Decorative ASCII-art hearts — fixed overlay on the viewport.
- * Uses braille-dot characters for the heart shapes.
+ * Decorative ASCII-art heart patterns — fixed overlay.
+ * Uses universally-supported Unicode hearts (♡ ♥ ✦ ✧).
  * pointer-events: none so all clicks pass through.
- * Responsive: fewer hearts on mobile, more on desktop.
  */
 
-const TINY = `\
- ⣀⡀ ⣀⡀
- ⠹⣿⣿⠏
-  ⠙⠋`;
+const HEART_A = `\
+  ♡♡  ♡♡
+ ♡♡♡♡♡♡♡
+ ♡♡♡♡♡♡♡
+  ♡♡♡♡♡
+   ♡♡♡
+    ♡`;
 
-const SM = `\
- ⣠⣶⣄ ⣠⣶⣄
-⢰⣿⣿⣿⣿⣿⣿⡆
- ⠻⣿⣿⣿⣿⠟
-   ⠻⠟`;
+const HEART_B = `\
+ ♥♥ ♥♥
+♥♥♥♥♥♥♥
+ ♥♥♥♥♥
+  ♥♥♥
+   ♥`;
 
-const MD = `\
-  ⣠⣶⣶⣄ ⣠⣶⣶⣄
- ⣾⣿⣿⣿⣿⣿⣿⣿⣿⣷
-  ⠻⣿⣿⣿⣿⣿⣿⠟
-    ⠻⣿⣿⠟
-     ⠙⠋`;
+const HEART_C = `\
+ ♡  ♡
+♡♡♡♡♡
+ ♡♡♡
+  ♡`;
 
-const LG = `\
-   ⣠⣶⣶⣶⣄ ⣠⣶⣶⣶⣄
-  ⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷
-  ⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏
-    ⠹⣿⣿⣿⣿⣿⠏
-      ⠹⣿⠏
-       ⠁`;
+const HEART_D = `\
+✧ ♡ ✧`;
+
+const HEART_E = `\
+♡`;
 
 interface HeartDef {
   art: string;
@@ -39,25 +39,28 @@ interface HeartDef {
   rotate: number;
   opacity: number;
   color: string;
-  /** "all" | "md" | "lg" — minimum breakpoint to show */
+  fontSize: string;
   show: "all" | "md" | "lg";
   delay: string;
 }
 
 const HEARTS: HeartDef[] = [
-  // ── mobile + all ──
-  { art: TINY, top: "10%",  left: "3%",   rotate: -12, opacity: 0.18, color: "var(--angel-blue)",     show: "all", delay: "0s" },
-  { art: TINY, top: "75%",  right: "4%",  rotate: 15,  opacity: 0.15, color: "var(--angel-lavender)", show: "all", delay: "2s" },
+  // ── mobile (small, visible) ──
+  { art: HEART_C, top: "8%",   left: "2%",   rotate: -10, opacity: 0.10, color: "var(--angel-blue)",     fontSize: "14px", show: "all", delay: "0s" },
+  { art: HEART_E, top: "35%",  right: "5%",  rotate: 15,  opacity: 0.12, color: "var(--angel-lavender)", fontSize: "28px", show: "all", delay: "1.5s" },
+  { art: HEART_D, top: "62%",  left: "3%",   rotate: -5,  opacity: 0.10, color: "var(--angel-pink)",     fontSize: "16px", show: "all", delay: "3s" },
+  { art: HEART_E, top: "85%",  right: "4%",  rotate: 12,  opacity: 0.11, color: "var(--angel-blue)",     fontSize: "24px", show: "all", delay: "2s" },
 
-  // ── tablet+ ──
-  { art: SM,   top: "30%",  right: "3%",  rotate: 10,  opacity: 0.13, color: "var(--angel-pink)",     show: "md",  delay: "0.8s" },
-  { art: SM,   top: "60%",  left: "2%",   rotate: -10, opacity: 0.14, color: "var(--angel-lavender)", show: "md",  delay: "1.5s" },
-  { art: TINY, top: "90%",  left: "8%",   rotate: 20,  opacity: 0.16, color: "var(--angel-blue)",     show: "md",  delay: "3s" },
+  // ── tablet ──
+  { art: HEART_B, top: "18%",  right: "3%",  rotate: 8,   opacity: 0.08, color: "var(--angel-lavender)", fontSize: "14px", show: "md", delay: "0.5s" },
+  { art: HEART_C, top: "50%",  left: "2%",   rotate: -12, opacity: 0.09, color: "var(--angel-blue)",     fontSize: "16px", show: "md", delay: "1.8s" },
+  { art: HEART_E, top: "72%",  right: "8%",  rotate: -18, opacity: 0.10, color: "var(--angel-pink)",     fontSize: "20px", show: "md", delay: "2.5s" },
 
   // ── desktop ──
-  { art: MD,   top: "15%",  right: "2%",  rotate: 8,   opacity: 0.10, color: "var(--angel-pink)",     show: "lg",  delay: "0.5s" },
-  { art: LG,   top: "45%",  left: "1%",   rotate: -6,  opacity: 0.08, color: "var(--angel-blue)",     show: "lg",  delay: "1.2s" },
-  { art: MD,   top: "82%",  right: "1%",  rotate: 12,  opacity: 0.09, color: "var(--angel-lavender)", show: "lg",  delay: "2.8s" },
+  { art: HEART_A, top: "12%",  left: "1%",   rotate: -6,  opacity: 0.07, color: "var(--angel-blue)",     fontSize: "16px", show: "lg", delay: "0s" },
+  { art: HEART_B, top: "42%",  right: "1%",  rotate: 10,  opacity: 0.06, color: "var(--angel-pink)",     fontSize: "18px", show: "lg", delay: "1.2s" },
+  { art: HEART_A, top: "75%",  left: "0%",   rotate: 5,   opacity: 0.06, color: "var(--angel-lavender)", fontSize: "14px", show: "lg", delay: "2.8s" },
+  { art: HEART_D, top: "92%",  right: "3%",  rotate: -8,  opacity: 0.09, color: "var(--angel-blue)",     fontSize: "18px", show: "lg", delay: "3.5s" },
 ];
 
 const showClass: Record<string, string> = {
@@ -75,7 +78,7 @@ export function AsciiHearts() {
       {HEARTS.map((h, i) => (
         <pre
           key={i}
-          className={`ascii-heart absolute leading-tight ${showClass[h.show]}`}
+          className={`ascii-heart absolute leading-[1.1] ${showClass[h.show]}`}
           style={{
             top: h.top,
             left: h.left,
@@ -83,6 +86,7 @@ export function AsciiHearts() {
             transform: `rotate(${h.rotate}deg)`,
             opacity: h.opacity,
             color: h.color,
+            fontSize: h.fontSize,
             animationDelay: h.delay,
           }}
         >
