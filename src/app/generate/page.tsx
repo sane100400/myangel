@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BrandCard } from "@/components/moodboard/brand-card";
+import { saveImage } from "@/lib/saved-images";
 import type { Brand } from "@/lib/brands";
 
 interface GenerateResult {
@@ -15,12 +16,14 @@ export default function GeneratePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setIsSaved(false);
 
     try {
       const res = await fetch("/api/generate", {
@@ -49,6 +52,17 @@ export default function GeneratePage() {
     link.href = result.image;
     link.download = `myangel-${Date.now()}.png`;
     link.click();
+  };
+
+  const handleSave = () => {
+    if (!result?.image || isSaved) return;
+    saveImage({
+      prompt: prompt.trim(),
+      style: result.style_tags[0] || null,
+      image: result.image,
+      style_tags: result.style_tags,
+    });
+    setIsSaved(true);
   };
 
   return (
@@ -155,7 +169,7 @@ export default function GeneratePage() {
               </div>
             )}
 
-            {/* Download button */}
+            {/* Action buttons */}
             <div className="mt-5 flex justify-center gap-3">
               <button onClick={handleDownload} className="angel-btn angel-btn-secondary text-[12px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -166,9 +180,35 @@ export default function GeneratePage() {
                 다운로드
               </button>
               <button
+                onClick={handleSave}
+                disabled={isSaved}
+                className={`angel-btn text-[12px] ${
+                  isSaved ? "angel-btn-primary" : "angel-btn-secondary"
+                }`}
+              >
+                {isSaved ? (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    저장됨
+                  </>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                      <polyline points="17 21 17 13 7 13 7 21" />
+                      <polyline points="7 3 7 8 15 8" />
+                    </svg>
+                    저장하기
+                  </>
+                )}
+              </button>
+              <button
                 onClick={() => {
                   setResult(null);
                   setPrompt("");
+                  setIsSaved(false);
                 }}
                 className="angel-btn angel-btn-secondary text-[12px]"
               >

@@ -29,10 +29,14 @@ export async function POST(request: NextRequest) {
 
     // Gemini 이미지 생성 호출
     const response = await genai.models.generateContent({
-      model: "gemini-2.0-flash-exp-image-generation",
+      model: "gemini-3-pro-image-preview",
       contents: fullPrompt,
       config: {
         responseModalities: ["IMAGE", "TEXT"],
+        imageConfig: {
+          aspectRatio: "1:1",
+          imageSize: "1K",
+        },
       },
     });
 
