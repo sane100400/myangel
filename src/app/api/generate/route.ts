@@ -5,7 +5,7 @@ import { STYLE_PRESETS } from "@/lib/seed-data";
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, style } = await request.json();
+    const { prompt, style, premium } = await request.json();
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         responseModalities: ["IMAGE", "TEXT"],
         imageConfig: {
           aspectRatio: "1:1",
-          imageSize: "1K",
+          imageSize: premium ? "2K" : "1K",
         },
       },
     });

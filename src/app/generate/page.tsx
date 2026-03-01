@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { BrandCard } from "@/components/moodboard/brand-card";
 import { saveImage } from "@/lib/saved-images";
 import type { Brand } from "@/lib/brands";
@@ -11,12 +11,45 @@ interface GenerateResult {
   brands: Brand[];
 }
 
+const EST_STANDARD = 20; // 1K 예상 초
+const EST_PREMIUM = 35;  // 2K 예상 초
+
 export default function GeneratePage() {
   const [prompt, setPrompt] = useState("");
+  const [premium, setPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+
+  // Progress bar state
+  const [elapsed, setElapsed] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const estimatedTime = premium ? EST_PREMIUM : EST_STANDARD;
+
+  const startTimer = useCallback(() => {
+    setElapsed(0);
+    timerRef.current = setInterval(() => {
+      setElapsed((prev) => prev + 0.5);
+    }, 500);
+  }, []);
+
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => stopTimer();
+  }, [stopTimer]);
+
+  // Progress percentage — eases near 95% so it never hits 100 before done
+  const progress = Math.min(95, (elapsed / estimatedTime) * 90);
+  const remaining = Math.max(0, Math.ceil(estimatedTime - elapsed));
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -24,6 +57,7 @@ export default function GeneratePage() {
     setError(null);
     setResult(null);
     setIsSaved(false);
+    startTimer();
 
     try {
       const res = await fetch("/api/generate", {
@@ -31,6 +65,7 @@ export default function GeneratePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: prompt.trim(),
+          premium,
         }),
       });
       if (!res.ok) {
@@ -42,6 +77,7 @@ export default function GeneratePage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.");
     } finally {
+      stopTimer();
       setIsLoading(false);
     }
   };
@@ -100,6 +136,36 @@ export default function GeneratePage() {
         />
       </div>
 
+      {/* Quality Toggle */}
+      <div className="mb-4 flex items-center justify-center">
+        <button
+          type="button"
+          onClick={() => setPremium((v) => !v)}
+          disabled={isLoading}
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-medium transition-all border ${
+            premium
+              ? "bg-[#ffd700]/15 border-[#ffd700]/50 text-[#b8860b]"
+              : "bg-white/50 border-[var(--angel-border)] text-[var(--angel-text-soft)]"
+          }`}
+        >
+          {/* Crown icon */}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z"
+              fill={premium ? "#ffd700" : "none"}
+              stroke={premium ? "#b8860b" : "currentColor"}
+              strokeWidth="1.5"
+            />
+          </svg>
+          {premium ? "프리미엄 2K 고해상도" : "일반 1K"}
+          {premium && (
+            <span className="ml-1 rounded-full bg-[#ffd700]/30 px-1.5 py-0.5 text-[9px] text-[#b8860b]">
+              2K
+            </span>
+          )}
+        </button>
+      </div>
+
       {/* Generate Button */}
       <button
         onClick={handleGenerate}
@@ -120,16 +186,59 @@ export default function GeneratePage() {
         )}
       </button>
 
-      {/* Loading Animation */}
+      {/* Loading — Progress Bar */}
       {isLoading && (
-        <div className="mt-10 flex flex-col items-center gap-4">
-          <div className="relative h-40 w-40">
-            <div className="absolute inset-0 rounded-2xl bg-[var(--angel-blue)]/5 pulse-glow" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-3xl twinkle">✦</div>
-            </div>
+        <div className="mt-8 mx-auto max-w-md">
+          {/* Progress bar */}
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-[var(--angel-blue)]/10">
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[var(--angel-blue)] to-[var(--angel-lavender)] transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+            {/* Shimmer effect */}
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              style={{
+                width: `${progress}%`,
+                animation: "shimmer 1.5s infinite",
+              }}
+            />
           </div>
-          <p className="text-[12px] text-[var(--angel-text-soft)]">잠시만 기다려주세요...</p>
+
+          {/* Time info */}
+          <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--angel-text-soft)]">
+            <span>{Math.floor(elapsed)}초 경과</span>
+            <span>
+              {remaining > 0 ? `약 ${remaining}초 남음` : "거의 완성..."}
+            </span>
+          </div>
+
+          {/* Status message */}
+          <div className="mt-5 flex flex-col items-center gap-3">
+            <div className="relative h-24 w-24">
+              <div className="absolute inset-0 rounded-2xl bg-[var(--angel-blue)]/5 pulse-glow" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-2xl twinkle">✦</div>
+              </div>
+            </div>
+            <p className="text-[12px] text-[var(--angel-text-soft)]">
+              {elapsed < 5
+                ? "프롬프트를 분석하고 있어요..."
+                : elapsed < estimatedTime * 0.5
+                ? "이미지를 그리고 있어요..."
+                : elapsed < estimatedTime * 0.8
+                ? "디테일을 다듬고 있어요..."
+                : "거의 다 됐어요! 조금만 기다려주세요..."}
+            </p>
+            {premium && (
+              <div className="flex items-center gap-1.5 rounded-full bg-[#ffd700]/10 px-3 py-1">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="#ffd700" stroke="#b8860b" strokeWidth="1">
+                  <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
+                </svg>
+                <span className="text-[10px] text-[#b8860b]">2K 고해상도로 생성 중</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -148,7 +257,7 @@ export default function GeneratePage() {
             <div className="celestial-divider mb-6">
               <span className="text-[10px] tracking-[0.3em] text-[var(--angel-lavender)]">RESULT</span>
             </div>
-            <div className="glass-card rounded-2xl p-3 inline-block">
+            <div className="glass-card rounded-2xl p-3 inline-block relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={result.image}
@@ -156,6 +265,15 @@ export default function GeneratePage() {
                 className="max-w-full rounded-xl"
                 style={{ maxHeight: "512px" }}
               />
+              {/* Premium badge on result */}
+              {premium && (
+                <div className="absolute top-5 right-5 flex items-center gap-1.5 rounded-full bg-[#ffd700]/90 px-2.5 py-1 shadow-md">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" stroke="#b8860b" strokeWidth="1">
+                    <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
+                  </svg>
+                  <span className="text-[10px] font-medium text-white">2K</span>
+                </div>
+              )}
             </div>
 
             {/* Style tags */}
