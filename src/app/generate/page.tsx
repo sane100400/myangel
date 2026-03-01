@@ -92,23 +92,21 @@ export default function GeneratePage() {
 
   // ── Reference image handlers ──
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  // Track current count via ref so paste listener never goes stale
+  const refImagesCountRef = useRef(refImages.length);
+  refImagesCountRef.current = refImages.length;
 
-    const newFiles = Array.from(files);
-    const available = MAX_IMAGES - refImages.length;
+  const addRefFiles = useCallback(async (files: File[]) => {
+    const available = MAX_IMAGES - refImagesCountRef.current;
     if (available <= 0) return;
 
-    const toProcess = newFiles.slice(0, available);
+    const toProcess = files.slice(0, available);
 
     for (const file of toProcess) {
-      // Type validation
       if (!ALLOWED_TYPES.includes(file.type as typeof ALLOWED_TYPES[number])) {
         setError("PNG, JPEG, WebP 이미지만 업로드할 수 있어요.");
         continue;
       }
-      // Size validation
       if (file.size > MAX_FILE_SIZE) {
         setError("이미지 크기는 4MB 이하만 가능해요.");
         continue;
@@ -125,10 +123,39 @@ export default function GeneratePage() {
         setError("이미지를 읽는 중 오류가 발생했어요.");
       }
     }
+  }, []);
 
-    // Reset file input so same file can be re-selected
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    await addRefFiles(Array.from(files));
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  // Clipboard paste handler
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (isLoading) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const imageFiles: File[] = [];
+      for (const item of items) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) imageFiles.push(file);
+        }
+      }
+
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        addRefFiles(imageFiles);
+      }
+    };
+
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [addRefFiles, isLoading]);
 
   const removeRefImage = (id: string) => {
     setRefImages((prev) => {
@@ -270,7 +297,7 @@ export default function GeneratePage() {
             <polyline points="21 15 16 10 5 21" />
           </svg>
           <span className="text-[12px] text-[var(--angel-text-soft)]">
-            레퍼런스 이미지
+            레퍼런스 이미지 <span className="text-[10px] text-[var(--angel-text-faint)]">(붙여넣기 가능)</span>
           </span>
           <span className="text-[10px] text-[var(--angel-text-faint)]">
             ({refImages.length}/{MAX_IMAGES})
