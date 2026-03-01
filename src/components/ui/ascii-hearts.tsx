@@ -1,12 +1,16 @@
+"use client";
+
+import { useMemo } from "react";
+
 /**
  * 4 visually distinct SVG hearts for the hero section.
- * Each uses a different fill pattern for genuine variety.
+ * Each appears at a random position within its designated zone on every visit.
  */
 
 const HEART =
   "M50 88 C50 88 2 58 2 30 C2 10 16 0 34 0 C43 0 50 6 50 14 C50 6 57 0 66 0 C84 0 98 10 98 30 C98 58 50 88 50 88Z";
 
-/* ── 1. Dot-filled heart (브레일 도트 느낌) ── */
+/* ── 1. Dot-filled (브레일 도트) ── */
 function DotHeart({ size, style, className }: HProps) {
   return (
     <svg viewBox="0 0 100 90" width={size} height={size * 0.9}
@@ -22,7 +26,7 @@ function DotHeart({ size, style, className }: HProps) {
   );
 }
 
-/* ── 2. Outline heart (윤곽선만, ○ 느낌) ── */
+/* ── 2. Outline dashed (윤곽선) ── */
 function OutlineHeart({ size, style, className }: HProps) {
   return (
     <svg viewBox="0 0 100 90" width={size} height={size * 0.9}
@@ -34,7 +38,7 @@ function OutlineHeart({ size, style, className }: HProps) {
   );
 }
 
-/* ── 3. Striped heart (가로줄 패턴) ── */
+/* ── 3. Striped (가로줄) ── */
 function StripedHeart({ size, style, className }: HProps) {
   return (
     <svg viewBox="0 0 100 90" width={size} height={size * 0.9}
@@ -50,7 +54,7 @@ function StripedHeart({ size, style, className }: HProps) {
   );
 }
 
-/* ── 4. Cross-hatch heart (격자 패턴, ┏┛ 프레임 느낌) ── */
+/* ── 4. Cross-hatch (격자) ── */
 function CrossHeart({ size, style, className }: HProps) {
   return (
     <svg viewBox="0 0 100 90" width={size} height={size * 0.9}
@@ -73,27 +77,46 @@ interface HProps {
   style?: React.CSSProperties;
 }
 
-const POSITIONS = [
-  { Comp: DotHeart,     size: 140, top: "18%", left: "12%" },
-  { Comp: OutlineHeart, size: 110, top: "25%", right: "14%" },
-  { Comp: CrossHeart,   size: 100, top: "65%", right: "12%" },
-  { Comp: StripedHeart, size: 80,  top: "72%", left: "15%" },
+/** Random float between min and max */
+const rand = (min: number, max: number) => Math.random() * (max - min) + min;
+
+/**
+ * Each heart has a zone (top/left ranges in %) and size range.
+ * Position is randomized within the zone on every page load.
+ */
+const ZONE_DEFS = [
+  { Comp: DotHeart,     sizeRange: [120, 160], topRange: [12, 30], leftRange: [5, 25]  },
+  { Comp: OutlineHeart, sizeRange: [90, 130],  topRange: [10, 28], rightRange: [5, 25] },
+  { Comp: CrossHeart,   sizeRange: [80, 120],  topRange: [55, 75], rightRange: [5, 25] },
+  { Comp: StripedHeart, sizeRange: [60, 100],  topRange: [60, 80], leftRange: [5, 25]  },
 ];
 
 export function AsciiHearts() {
+  const hearts = useMemo(
+    () =>
+      ZONE_DEFS.map((z) => ({
+        ...z,
+        size: Math.round(rand(z.sizeRange[0], z.sizeRange[1])),
+        top: `${rand(z.topRange[0], z.topRange[1]).toFixed(1)}%`,
+        left: z.leftRange ? `${rand(z.leftRange[0], z.leftRange[1]).toFixed(1)}%` : undefined,
+        right: z.rightRange ? `${rand(z.rightRange[0], z.rightRange[1]).toFixed(1)}%` : undefined,
+      })),
+    [],
+  );
+
   return (
     <>
-      {POSITIONS.map((p, i) => {
-        const Comp = p.Comp;
+      {hearts.map((h, i) => {
+        const Comp = h.Comp;
         return (
           <Comp
             key={i}
-            size={p.size}
+            size={h.size}
             className="ascii-heart pointer-events-none absolute z-[1] select-none"
             style={{
-              top: p.top,
-              left: p.left,
-              right: p.right,
+              top: h.top,
+              left: h.left,
+              right: h.right,
               animationDelay: `${i * 1.5}s`,
             }}
           />
