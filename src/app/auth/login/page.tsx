@@ -34,7 +34,7 @@ export default function LoginPage() {
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </h1>
           <p className="mt-2 text-[13px] text-[var(--angel-text-soft)]">
-            로그인하면 무드보드를 저장할 수 있어요
+            로그인하고 나만의 이미지와 프롬프트를 관리하세요
           </p>
         </div>
 

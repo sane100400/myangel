@@ -36,9 +36,9 @@ const logo = Libre_Bodoni({
 });
 
 export const metadata: Metadata = {
-  title: "MyAngel — your angelic mood curator",
+  title: "MyAngel — AI 이미지 생성 & 프롬프트 마켓",
   description:
-    "무드 이미지 한 장으로 3x3 무드보드를 완성하고, 서브컬쳐 브랜드를 추천받으세요.",
+    "트렌드에 맞는 프롬프트 큐레이팅으로 나만의 이미지를 만들고, 취향 담긴 프롬프트를 사고팔아요.",
 };
 
 export default function RootLayout({

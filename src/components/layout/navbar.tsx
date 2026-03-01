@@ -7,8 +7,8 @@ import { AngelLogo } from "@/components/ui/angel-logo";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
+  { href: "/generate", label: "Generate" },
   { href: "/discover", label: "Discover" },
-  { href: "/moodboard", label: "Moodboard" },
   { href: "/boards", label: "Mypage" },
 ];
 

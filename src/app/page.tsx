@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AngelLogo } from "@/components/ui/angel-logo";
 import { AsciiHearts } from "@/components/ui/ascii-hearts";
-import { SEED_TAGS } from "@/lib/seed-data";
+import { StylePresetGrid } from "@/components/home/style-preset-grid";
 
 const BRANDS_PREVIEW = [
   { name: "MA*RS", url: "https://lilimpark.jp/shopbrand/mars_all/" },
@@ -47,7 +47,7 @@ export default function HomePage() {
         </h1>
 
         <p className="relative z-10 mt-5 text-[10px] font-medium tracking-[0.3em] text-[var(--angel-text-soft)] uppercase md:mt-8 md:text-[12px]">
-          ✦ your angelic mood curator ✦
+          ✦ prompt curator & image creator ✦
         </p>
 
         {/* Celestial divider */}
@@ -58,16 +58,16 @@ export default function HomePage() {
         </div>
 
         <p className="relative z-10 mt-5 max-w-sm text-[13px] leading-[1.8] text-[var(--angel-text)] md:mt-6 md:text-[14px]">
-          이 느낌, <strong className="text-[var(--angel-blue)]">나도 입고 싶다.</strong>
+          트렌드에 맞는 <strong className="text-[var(--angel-blue)]">나만의 이미지</strong>를 만들고,
           <br />
-          마음에 드는 사진 한 장이면
+          취향이 담긴 프롬프트를
           <br />
-          어울리는 아이템과 브랜드를 바로 알려줄게요.
+          공유하고 사고팔아요.
         </p>
 
         {/* CTA Button */}
         <div className="relative z-10 mt-5">
-          <Link href="/discover" className="angel-btn angel-btn-primary">
+          <Link href="/generate" className="angel-btn angel-btn-primary">
             <span className="text-[10px]">✦</span>
             바로 시작하기
           </Link>
@@ -86,14 +86,14 @@ export default function HomePage() {
             Why MyAngel?
           </h2>
           <p className="mb-10 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)]">
-            ✦ 이런 고민, 있지 않나요? ✦
+            ✦ 다른 AI 이미지 생성과 뭐가 다를까? ✦
           </p>
 
           <div className="space-y-3 mb-10">
             {[
-              "이 코디 너무 예쁜데, 어떤 아이템을 사야 이렇게 입을 수 있을까?",
-              "검색해도 내가 원하는 느낌의 옷이 안 나와요",
-              "이런 스타일의 브랜드가 있다는데, 어디서 찾아야 할지 모르겠어요",
+              "최신 트렌드에 맞춰 큐레이팅된 프롬프트로 바로 이미지를 만들 수 있어요",
+              "내가 만든 프롬프트를 올려서 수익을 얻고, 마음에 드는 프롬프트를 구매할 수 있어요",
+              "생성한 이미지 스타일에 딱 맞는 패션 아이템과 브랜드까지 추천받아요",
             ].map((text, i) => (
               <div
                 key={i}
@@ -107,14 +107,14 @@ export default function HomePage() {
 
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-[var(--angel-blue)]/10 px-5 py-2 text-[12px] font-medium text-[var(--angel-blue)] mb-4">
-              MyAngel이 도와줄게요
+              프롬프트가 곧 취향이에요
             </div>
             <p className="text-[13px] leading-[1.9] text-[var(--angel-text)]">
-              마음에 드는 코디 사진만 보여주세요.
+              트렌드에 맞춘 <strong className="text-[var(--angel-blue)]">프롬프트 큐레이팅</strong>로
               <br />
-              <strong className="text-[var(--angel-blue)]">그 느낌에 어울리는 아이템과 브랜드</strong>를
+              나만의 이미지를 만들고, 프롬프트를 거래하세요.
               <br />
-              AI가 바로 찾아줄게요.
+              같은 취향의 사람들과 연결돼요.
             </p>
           </div>
         </div>
@@ -132,15 +132,15 @@ export default function HomePage() {
             How it works
           </h2>
           <p className="mb-10 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)]">
-            ✦ four steps to your mood ✦
+            ✦ four steps to your image ✦
           </p>
 
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-4">
             {[
-              { num: "I", title: "사진 한 장", desc: "마음에 드는 코디 사진을 올려주세요" },
-              { num: "II", title: "AI 분석", desc: "AI가 소재·실루엣·색감을 분석해요" },
-              { num: "III", title: "무드보드", desc: "비슷한 느낌의 사진으로 3×3 보드를 완성해요" },
-              { num: "IV", title: "브랜드 추천", desc: "이 느낌에 어울리는 아이템과 브랜드를 알려줘요" },
+              { num: "I", title: "프롬프트 선택", desc: "큐레이팅된 프롬프트를 고르거나 직접 작성해요" },
+              { num: "II", title: "나만의 커스텀", desc: "내 취향에 맞게 커스텀하고 이미지 생성" },
+              { num: "III", title: "프롬프트 거래", desc: "나만의 프롬프트를 올리고 수익 창출" },
+              { num: "IV", title: "브랜드 추천", desc: "스타일에 맞는 아이템과 브랜드 추천" },
             ].map((step) => (
               <div key={step.num} className="glass-card rounded-xl p-3 text-center md:rounded-2xl md:p-5">
                 <div className="mb-1.5 flex items-center justify-center gap-1.5 md:mb-2 md:gap-2">
@@ -149,7 +149,7 @@ export default function HomePage() {
                   <span className="text-[8px] text-[var(--angel-lavender)] opacity-40 md:text-[9px]">✦</span>
                 </div>
                 <h3 className="mb-1 text-[11px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:mb-1.5 md:text-[12px] md:tracking-[0.08em]">{step.title}</h3>
-                <p className="text-[10px] leading-[1.6] text-[var(--angel-text-soft)] md:text-[11px] md:leading-[1.7]">{step.desc}</p>
+                <p className="text-[10px] leading-[1.6] text-[var(--angel-text-soft)] md:text-[11px] md:leading-[1.7] [word-break:keep-all]">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -161,6 +161,31 @@ export default function HomePage() {
         <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
       </div>
 
+      {/* ══ Styles ══ */}
+      <section className="snap-section w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
+            Styles
+          </h2>
+          <p className="mb-8 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)]">
+            ✦ 트렌드 스타일을 골라서 바로 생성해보세요 ✦
+          </p>
+
+          <StylePresetGrid />
+
+          <p className="mt-4 text-center text-[11px] leading-[1.8] text-[var(--angel-text-soft)] max-w-sm mx-auto">
+            스타일을 골라 바로 생성하거나,
+            <br />
+            자유롭게 커스텀해서 나만의 이미지를 만들어요.
+          </p>
+        </div>
+      </section>
+
+      {/* ══ Section Divider ══ */}
+      <div className="section-divider bg-gradient-to-b from-[#e4eaf6] to-[#e0e7f4]">
+        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
+      </div>
+
       {/* ══ Brands ══ */}
       <section className="snap-section w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
         <div className="mx-auto max-w-3xl">
@@ -168,7 +193,7 @@ export default function HomePage() {
             Brands
           </h2>
           <p className="mb-8 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)]">
-            ✦ 원하는 느낌에 어울리는 아이템을 만나보세요 ✦
+            ✦ 생성한 이미지에 어울리는 아이템을 만나보세요 ✦
           </p>
 
           <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -193,55 +218,15 @@ export default function HomePage() {
           </div>
 
           <p className="text-center text-[11px] leading-[1.8] text-[var(--angel-text-soft)] max-w-sm mx-auto">
-            마음에 드는 느낌이 있다면
+            이미지를 생성하면 스타일에 맞는
             <br />
-            그대로 입을 수 있도록 도와줄게요.
+            브랜드와 아이템을 추천받을 수 있어요.
           </p>
-        </div>
-      </section>
-
-      {/* ══ Section Divider ══ */}
-      <div className="section-divider bg-gradient-to-b from-[#e4eaf6] to-[#e0e7f4]">
-        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
-      </div>
-
-      {/* ══ Trending Moods ══ */}
-      <section className="snap-section w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#dce4f2]">
-        <div className="mx-auto max-w-3xl">
-          <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
-            Trending moods
-          </h2>
-          <p className="mb-8 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)]">
-            ✦ popular styles now ✦
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-2">
-            {SEED_TAGS.map((tag) => (
-              <Link
-                key={tag}
-                href={`/discover?tag=${encodeURIComponent(tag)}`}
-                className="angel-tag hover:angel-tag-active transition-all duration-300"
-              >
-                #{tag}
-              </Link>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <Link
-              href="/discover"
-              className="inline-flex items-center gap-2 text-[11px] tracking-[0.08em] text-[var(--angel-text-faint)] transition-colors hover:text-[var(--angel-text-soft)]"
-            >
-              <span className="text-[8px] text-[var(--angel-lavender)]">✦</span>
-              모든 무드 보기
-              <span className="text-[8px] text-[var(--angel-lavender)]">✦</span>
-            </Link>
-          </div>
         </div>
       </section>
 
       {/* ══ Bottom decoration ══ */}
-      <div className="pt-6 pb-16 text-center bg-[#dce4f2]">
+      <div className="pt-6 pb-16 text-center bg-[#e4eaf6]">
         <div className="flex items-center justify-center gap-3">
           <span className="text-[10px] text-[var(--angel-lavender)]">✦</span>
           <span className="text-[12px] text-[var(--angel-lavender)]">✧</span>

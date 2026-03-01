@@ -30,7 +30,7 @@ function DiscoverContent() {
           Discover
         </h1>
         <p className="mt-2 text-[12px] text-[var(--angel-text-soft)]">
-          마음에 드는 무드를 찾아보세요
+          다른 사람들의 무드와 스타일을 구경하세요
         </p>
         <div className="mt-4 flex items-center justify-center gap-3">
           <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/30" />

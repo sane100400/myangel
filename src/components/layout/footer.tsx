@@ -15,7 +15,7 @@ export function Footer() {
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </span>
           <p className="text-[9px] tracking-[0.25em] text-[var(--angel-text-faint)] uppercase">
-            your angelic mood curator
+            your angelic image creator
           </p>
         </div>
 
@@ -32,9 +32,9 @@ export function Footer() {
         <div className="flex items-center justify-center gap-4 text-[11px] tracking-[0.08em] text-[var(--angel-text-soft)] mb-5 md:gap-6 md:mb-6">
           <Link href="/" className="transition-colors hover:text-[var(--angel-text)]">Home</Link>
           <span className="text-[8px] text-[var(--angel-lavender)]/30">✟</span>
-          <Link href="/discover" className="transition-colors hover:text-[var(--angel-text)]">Discover</Link>
+          <Link href="/generate" className="transition-colors hover:text-[var(--angel-text)]">Generate</Link>
           <span className="text-[8px] text-[var(--angel-lavender)]/30">✟</span>
-          <Link href="/moodboard" className="transition-colors hover:text-[var(--angel-text)]">Moodboard</Link>
+          <Link href="/discover" className="transition-colors hover:text-[var(--angel-text)]">Discover</Link>
           <span className="text-[8px] text-[var(--angel-lavender)]/30">✟</span>
           <Link href="/boards" className="transition-colors hover:text-[var(--angel-text)]">Mypage</Link>
         </div>

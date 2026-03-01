@@ -105,3 +105,22 @@ export type ItemCategory =
   | "가방"
   | "액세서리"
   | "헤어소품";
+
+// ============================================================
+// Image Generation Types
+// ============================================================
+
+export interface GeneratedImage {
+  id: string;
+  user_id: string | null;
+  prompt: string;
+  style: string | null;
+  image_url: string;
+  is_public: boolean;
+  created_at: string;
+}
+
+export interface GenerateRequest {
+  prompt: string;
+  style?: string;
+}
