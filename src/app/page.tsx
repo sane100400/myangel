@@ -17,40 +17,43 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ══ Hero Section ══ */}
-      <section className="relative flex flex-col items-center justify-center px-5 pt-32 pb-20 text-center md:pt-52 md:pb-40 overflow-hidden star-bg bg-gradient-to-b from-[#d6deee] to-[#dce4f2]">
-        {/* Floating orbs */}
-        <div className="absolute top-12 left-[8%] h-40 w-40 rounded-full bg-[var(--angel-blue)]/8 blur-[80px]" />
-        <div className="absolute bottom-16 right-[10%] h-48 w-48 rounded-full bg-[var(--angel-lavender)]/10 blur-[80px]" />
-        <div className="absolute top-28 right-[25%] h-24 w-24 rounded-full bg-[var(--angel-pink)]/8 blur-[60px]" />
-        <div className="absolute bottom-32 left-[20%] h-32 w-32 rounded-full bg-[var(--angel-blue)]/6 blur-[70px]" />
+      <section className="relative flex flex-col items-center justify-center px-5 pt-28 pb-16 text-center md:pt-52 md:pb-40 overflow-hidden bg-gradient-to-b from-[#d6deee] to-[#dce4f2] star-bg-desktop">
+        {/* Floating orbs — desktop only (GPU heavy) */}
+        <div className="hidden md:block">
+          <div className="absolute top-12 left-[8%] h-40 w-40 rounded-full bg-[var(--angel-blue)]/8 blur-[80px]" />
+          <div className="absolute bottom-16 right-[10%] h-48 w-48 rounded-full bg-[var(--angel-lavender)]/10 blur-[80px]" />
+          <div className="absolute top-28 right-[25%] h-24 w-24 rounded-full bg-[var(--angel-pink)]/8 blur-[60px]" />
+          <div className="absolute bottom-32 left-[20%] h-32 w-32 rounded-full bg-[var(--angel-blue)]/6 blur-[70px]" />
+        </div>
 
-        {/* Large decorative circles */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[580px] md:h-[580px] rounded-full border-[3px] border-[var(--angel-blue)]/40 rotate-slow" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[310px] h-[310px] md:w-[620px] md:h-[620px] rounded-full border-[2.5px] border-[var(--angel-lavender)]/35" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
+        {/* Large decorative circles — desktop only */}
+        <div className="hidden md:block">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[580px] rounded-full border-[3px] border-[var(--angel-blue)]/40 rotate-slow" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[620px] h-[620px] rounded-full border-[2.5px] border-[var(--angel-lavender)]/35" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
+        </div>
 
         {/* Wing logo */}
-        <div className="float-gentle mb-6 relative z-10">
-          <AngelLogo size={80} priority className="md:hidden" />
-          <AngelLogo size={120} priority className="hidden md:block" />
+        <div className="mb-5 relative z-10 md:float-gentle md:mb-6">
+          <AngelLogo size={64} desktopSize={120} priority className="w-[51px] h-[64px] md:w-[96px] md:h-[120px]" />
         </div>
 
         {/* Title */}
-        <h1 className="relative z-10 max-w-lg text-5xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-7xl">
+        <h1 className="relative z-10 max-w-lg text-4xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-7xl">
           My<span className="shimmer-text">Angel</span>
         </h1>
 
-        <p className="relative z-10 mt-8 text-[12px] font-medium tracking-[0.3em] text-[var(--angel-text-soft)] uppercase">
+        <p className="relative z-10 mt-5 text-[10px] font-medium tracking-[0.3em] text-[var(--angel-text-soft)] uppercase md:mt-8 md:text-[12px]">
           ✦ your angelic mood curator ✦
         </p>
 
         {/* Celestial divider */}
-        <div className="relative z-10 mt-4 flex items-center gap-3 text-[var(--angel-text-faint)]">
-          <span className="h-px w-10 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/40" />
+        <div className="relative z-10 mt-3 flex items-center gap-3 text-[var(--angel-text-faint)] md:mt-4">
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/40 md:w-10" />
           <span className="text-[10px] tracking-[0.2em] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
-          <span className="h-px w-10 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/40" />
+          <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/40 md:w-10" />
         </div>
 
-        <p className="relative z-10 mt-6 max-w-sm text-[14px] leading-[1.8] text-[var(--angel-text)]">
+        <p className="relative z-10 mt-5 max-w-sm text-[13px] leading-[1.8] text-[var(--angel-text)] md:mt-6 md:text-[14px]">
           이 느낌, <strong className="text-[var(--angel-blue)]">나도 입고 싶다.</strong>
           <br />
           마음에 드는 사진 한 장이면
@@ -59,7 +62,7 @@ export default function HomePage() {
         </p>
 
         {/* CTA Buttons */}
-        <div className="relative z-10 mt-4 flex flex-col gap-3 sm:flex-row">
+        <div className="relative z-10 mt-5 flex flex-col gap-2.5 sm:flex-row sm:gap-3 w-full max-w-xs sm:max-w-none sm:w-auto">
           <Link href="/moodboard" className="angel-btn angel-btn-primary">
             <span className="text-[10px]">✦</span>
             무드보드 만들기
@@ -131,7 +134,7 @@ export default function HomePage() {
             ✦ four steps to your mood ✦
           </p>
 
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
             {[
               { num: "I", title: "사진 한 장", desc: "마음에 드는 코디 사진을\n올려주세요" },
               { num: "II", title: "AI 분석", desc: "AI가 소재·실루엣·색감을\n분석해요" },

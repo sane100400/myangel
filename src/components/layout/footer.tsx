@@ -10,8 +10,7 @@ export function Footer() {
       <div className="relative mx-auto max-w-5xl px-4 pt-10 pb-6 md:px-5 md:pt-14 md:pb-8">
         {/* Logo */}
         <div className="flex flex-col items-center gap-2 mb-5 md:gap-3 md:mb-6">
-          <AngelLogo size={24} className="md:hidden" />
-          <AngelLogo size={28} className="hidden md:block" />
+          <AngelLogo size={24} desktopSize={28} className="w-[19px] h-[24px] md:w-[22px] md:h-[28px]" />
           <span className="text-sm tracking-[0.12em] text-[var(--angel-text)] font-heading md:text-base">
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </span>

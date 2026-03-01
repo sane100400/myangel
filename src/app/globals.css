@@ -186,15 +186,22 @@
 .lace-bottom::after {
   content: "";
   position: absolute;
-  bottom: -36px;
+  bottom: -20px;
   left: 0;
   right: 0;
-  height: 40px;
+  height: 24px;
   background-image: url("/lace.png");
-  background-size: auto 40px;
+  background-size: auto 24px;
   background-repeat: repeat-x;
   pointer-events: none;
   z-index: 10;
+}
+@media (min-width: 768px) {
+  .lace-bottom::after {
+    bottom: -36px;
+    height: 40px;
+    background-size: auto 40px;
+  }
 }
 
 .lace-top {
@@ -203,16 +210,23 @@
 .lace-top::before {
   content: "";
   position: absolute;
-  top: -36px;
+  top: -20px;
   left: 0;
   right: 0;
-  height: 40px;
+  height: 24px;
   background-image: url("/lace.png");
-  background-size: auto 40px;
+  background-size: auto 24px;
   background-repeat: repeat-x;
   transform: scaleY(-1);
   pointer-events: none;
   z-index: 10;
+}
+@media (min-width: 768px) {
+  .lace-top::before {
+    top: -36px;
+    height: 40px;
+    background-size: auto 40px;
+  }
 }
 
 /* ── Snap Scroll ── */
@@ -428,6 +442,27 @@ html {
     radial-gradient(2px 2px at 90% 70%, rgba(124, 92, 173, 0.3) 50%, transparent 50%);
   pointer-events: none;
   z-index: 0;
+}
+
+/* star-bg desktop only — 모바일에서는 GPU 부하 방지 */
+.star-bg-desktop { position: relative; }
+@media (min-width: 768px) {
+  .star-bg-desktop::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 10% 15%, rgba(91, 155, 213, 0.5) 50%, transparent 50%),
+      radial-gradient(2px 2px at 25% 60%, rgba(124, 92, 173, 0.4) 50%, transparent 50%),
+      radial-gradient(1.5px 1.5px at 40% 30%, rgba(91, 155, 213, 0.45) 50%, transparent 50%),
+      radial-gradient(2px 2px at 55% 80%, rgba(124, 92, 173, 0.35) 50%, transparent 50%),
+      radial-gradient(1.5px 1.5px at 70% 20%, rgba(91, 155, 213, 0.4) 50%, transparent 50%),
+      radial-gradient(2px 2px at 85% 50%, rgba(124, 92, 173, 0.45) 50%, transparent 50%),
+      radial-gradient(1.5px 1.5px at 15% 75%, rgba(91, 155, 213, 0.35) 50%, transparent 50%),
+      radial-gradient(2px 2px at 90% 70%, rgba(124, 92, 173, 0.3) 50%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 /* ═══════════════════════════════════
