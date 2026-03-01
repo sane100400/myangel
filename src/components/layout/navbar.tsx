@@ -122,12 +122,21 @@ export function Navbar() {
           )}
         </div>
 
-        {/* Mobile Toggle */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors active:bg-white/50 md:hidden"
-          aria-label="메뉴"
-        >
+        {/* Mobile: Login + Toggle */}
+        <div className="flex items-center gap-2 md:hidden">
+          {!user && (
+            <Link
+              href="/auth/login"
+              className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-3.5 py-1.5 text-[11px] tracking-[0.06em] text-[var(--angel-text-soft)] transition-all active:bg-white/80"
+            >
+              Login
+            </Link>
+          )}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors active:bg-white/50"
+            aria-label="메뉴"
+          >
           <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="text-[var(--angel-text-soft)]">
             {mobileOpen ? (
               <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
@@ -139,7 +148,8 @@ export function Navbar() {
               </>
             )}
           </svg>
-        </button>
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Menu */}

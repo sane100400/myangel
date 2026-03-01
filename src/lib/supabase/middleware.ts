@@ -26,7 +26,19 @@ export async function updateSession(request: NextRequest) {
   );
 
   // 세션 갱신
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // 로그인 필요 페이지: 미인증 시 로그인으로 리다이렉트
+  const protectedPaths = ["/boards"];
+  const isProtected = protectedPaths.some((p) =>
+    request.nextUrl.pathname === p || request.nextUrl.pathname.startsWith(p + "/")
+  );
+
+  if (isProtected && !user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/auth/login";
+    return NextResponse.redirect(loginUrl);
+  }
 
   return supabaseResponse;
 }
