@@ -81,7 +81,6 @@ export function MoodGallery({ images }: MoodGalleryProps) {
             imageUrl={image.image_url}
             title={image.title}
             tags={image.tags}
-            prompt={image.prompt}
             isPremium={image.is_premium}
           />
         ))}
