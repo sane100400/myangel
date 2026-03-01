@@ -138,44 +138,45 @@ export default function GeneratePage() {
 
       {/* Premium Toggle */}
       <div className="mb-4 flex items-center justify-center">
-        <label className="flex items-center gap-3 cursor-pointer select-none">
-          {/* Crown + label */}
-          <div className="flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <div className="group relative">
+          <button
+            type="button"
+            onClick={() => setPremium((v) => !v)}
+            disabled={isLoading}
+            className={`glass-card flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-medium transition-all ${
+              premium
+                ? "bg-[#ffd700]/12 border border-[#ffd700]/30 text-[#b8860b] shadow-[0_0_12px_rgba(255,215,0,0.15)]"
+                : "border border-[var(--angel-border)] text-[var(--angel-text-soft)]"
+            }`}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
               <path
                 d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z"
                 fill={premium ? "#ffd700" : "none"}
-                stroke={premium ? "#b8860b" : "var(--angel-text-faint)"}
+                stroke={premium ? "#b8860b" : "currentColor"}
                 strokeWidth="1.5"
               />
             </svg>
-            <span className={`text-[12px] font-medium transition-colors ${
-              premium ? "text-[#b8860b]" : "text-[var(--angel-text-soft)]"
-            }`}>
-              프리미엄 2K
-            </span>
-          </div>
-
-          {/* Toggle switch */}
-          <button
-            type="button"
-            role="switch"
-            aria-checked={premium}
-            onClick={() => setPremium((v) => !v)}
-            disabled={isLoading}
-            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 transition-colors duration-200 focus-visible:outline-none disabled:opacity-50 ${
+            프리미엄
+            <span className={`text-[9px] rounded-full px-1.5 py-0.5 transition-colors ${
               premium
-                ? "border-[#ffd700]/60 bg-[#ffd700]"
-                : "border-[var(--angel-border)] bg-[var(--angel-bg-soft)]"
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                premium ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
+                ? "bg-[#ffd700]/25 text-[#b8860b]"
+                : "bg-[var(--angel-bg-soft)] text-[var(--angel-text-faint)]"
+            }`}>
+              {premium ? "ON" : "OFF"}
+            </span>
           </button>
-        </label>
+
+          {/* Tooltip */}
+          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-xl bg-[#1a1a2e]/90 backdrop-blur-sm px-4 py-3 text-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 z-30">
+            <p className="text-[11px] leading-[1.7] text-white/90">
+              고해상도 2K 이미지를 생성해요.
+              <br />
+              더 선명하고 디테일한 결과물!
+            </p>
+            <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rotate-45 bg-[#1a1a2e]/90" />
+          </div>
+        </div>
       </div>
 
       {/* Generate Button */}
