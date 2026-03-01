@@ -1,37 +1,21 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Gowun_Batang, Gothic_A1, Libre_Bodoni } from "next/font/google";
+import { Gothic_A1, Libre_Bodoni } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const serif = Cormorant_Garamond({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  display: "swap",
-  preload: false,
-});
-
-const serifKr = Gowun_Batang({
-  variable: "--font-serif-kr",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "swap",
-  preload: false,
-});
-
 const sans = Gothic_A1({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "700", "800", "900"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
 const logo = Libre_Bodoni({
   variable: "--font-logo",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["600", "700"],
   display: "swap",
 });
 
@@ -49,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${serif.variable} ${serifKr.variable} ${sans.variable} ${logo.variable} font-sans antialiased`}
+        className={`${sans.variable} ${logo.variable} font-sans antialiased`}
       >
         <Navbar />
         <main className="min-h-[calc(100vh-4.5rem)]">{children}</main>

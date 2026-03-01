@@ -11,8 +11,34 @@ interface GenerateResult {
   brands: Brand[];
 }
 
-const EST_STANDARD = 20; // 1K 예상 초
-const EST_PREMIUM = 35;  // 2K 예상 초
+interface RefImage {
+  id: string;
+  preview: string; // object URL for display
+  base64: string;  // pure base64 data (no prefix)
+  mimeType: string;
+}
+
+const EST_STANDARD = 20;
+const EST_PREMIUM = 35;
+
+const MAX_IMAGES = 3;
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
+
+function readFileAsBase64(file: File): Promise<{ base64: string; mimeType: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      // "data:image/png;base64,XXXX" → extract base64 part
+      const base64 = dataUrl.split(",")[1];
+      if (!base64) return reject(new Error("파일을 읽을 수 없습니다."));
+      resolve({ base64, mimeType: file.type });
+    };
+    reader.onerror = () => reject(new Error("파일을 읽을 수 없습니다."));
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function GeneratePage() {
   const [prompt, setPrompt] = useState("");
@@ -21,6 +47,10 @@ export default function GeneratePage() {
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+
+  // Reference images
+  const [refImages, setRefImages] = useState<RefImage[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Progress bar state
   const [elapsed, setElapsed] = useState(0);
@@ -44,12 +74,67 @@ export default function GeneratePage() {
 
   // Cleanup on unmount
   useEffect(() => {
-    return () => stopTimer();
+    return () => {
+      stopTimer();
+      // Revoke object URLs
+      refImages.forEach((img) => URL.revokeObjectURL(img.preview));
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stopTimer]);
 
   // Progress percentage — eases near 95% so it never hits 100 before done
   const progress = Math.min(95, (elapsed / estimatedTime) * 90);
   const remaining = Math.max(0, Math.ceil(estimatedTime - elapsed));
+
+  // ── Reference image handlers ──
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+    const available = MAX_IMAGES - refImages.length;
+    if (available <= 0) return;
+
+    const toProcess = newFiles.slice(0, available);
+
+    for (const file of toProcess) {
+      // Type validation
+      if (!ALLOWED_TYPES.includes(file.type as typeof ALLOWED_TYPES[number])) {
+        setError("PNG, JPEG, WebP 이미지만 업로드할 수 있어요.");
+        continue;
+      }
+      // Size validation
+      if (file.size > MAX_FILE_SIZE) {
+        setError("이미지 크기는 4MB 이하만 가능해요.");
+        continue;
+      }
+
+      try {
+        const { base64, mimeType } = await readFileAsBase64(file);
+        const preview = URL.createObjectURL(file);
+        setRefImages((prev) => [
+          ...prev,
+          { id: `${Date.now()}-${Math.random()}`, preview, base64, mimeType },
+        ]);
+      } catch {
+        setError("이미지를 읽는 중 오류가 발생했어요.");
+      }
+    }
+
+    // Reset file input so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeRefImage = (id: string) => {
+    setRefImages((prev) => {
+      const target = prev.find((img) => img.id === id);
+      if (target) URL.revokeObjectURL(target.preview);
+      return prev.filter((img) => img.id !== id);
+    });
+  };
+
+  // ── Generate ──
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -66,6 +151,10 @@ export default function GeneratePage() {
         body: JSON.stringify({
           prompt: prompt.trim(),
           premium,
+          referenceImages: refImages.map((img) => ({
+            base64: img.base64,
+            mimeType: img.mimeType,
+          })),
         }),
       });
       if (!res.ok) {
@@ -134,6 +223,79 @@ export default function GeneratePage() {
           rows={3}
           className="w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)]"
         />
+      </div>
+
+      {/* Reference Image Upload */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--angel-text-soft)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+          <span className="text-[12px] text-[var(--angel-text-soft)]">
+            레퍼런스 이미지
+          </span>
+          <span className="text-[10px] text-[var(--angel-text-faint)]">
+            ({refImages.length}/{MAX_IMAGES})
+          </span>
+        </div>
+
+        <div className="flex items-start gap-2 flex-wrap">
+          {/* Existing thumbnails */}
+          {refImages.map((img) => (
+            <div key={img.id} className="relative group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={img.preview}
+                alt="레퍼런스"
+                className="h-20 w-20 rounded-lg object-cover border border-[var(--angel-border)]"
+              />
+              <button
+                type="button"
+                onClick={() => removeRefImage(img.id)}
+                disabled={isLoading}
+                className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#1a1a2e]/80 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                aria-label="삭제"
+              >
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+          ))}
+
+          {/* Add button */}
+          {refImages.length < MAX_IMAGES && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[var(--angel-border)] bg-white/50 text-[var(--angel-text-faint)] transition-all hover:border-[var(--angel-blue)]/50 hover:bg-white/80 hover:text-[var(--angel-blue)] disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span className="text-[9px]">추가</span>
+            </button>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
+
+        {refImages.length > 0 && (
+          <p className="mt-1.5 text-[10px] text-[var(--angel-text-faint)]">
+            레퍼런스 이미지의 스타일과 분위기를 참고하여 새 이미지를 생성해요
+          </p>
+        )}
       </div>
 
       {/* Premium Toggle */}
@@ -340,6 +502,8 @@ export default function GeneratePage() {
                   setResult(null);
                   setPrompt("");
                   setIsSaved(false);
+                  refImages.forEach((img) => URL.revokeObjectURL(img.preview));
+                  setRefImages([]);
                 }}
                 className="angel-btn angel-btn-secondary text-[12px]"
               >

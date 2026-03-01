@@ -8,7 +8,7 @@ const PAGE_SIZE = 8;
 
 interface MoodImage {
   id: string;
-  image_url: string;
+  image_url: string; // image ID (not a URL path)
   title?: string | null;
   tags?: string[];
   prompt?: string;
@@ -78,7 +78,6 @@ export function MoodGallery({ images }: MoodGalleryProps) {
           <MoodCard
             key={image.id}
             id={image.id}
-            imageUrl={image.image_url}
             title={image.title}
             tags={image.tags}
             isPremium={image.is_premium}

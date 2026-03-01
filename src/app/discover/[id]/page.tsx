@@ -2,9 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { SEED_MOOD_IMAGES } from "@/lib/seed-data";
+import { SEED_MOOD_IMAGES, getImageUrl } from "@/lib/seed-data";
 
 export default function DiscoverDetailPage() {
   const params = useParams();
@@ -55,13 +54,11 @@ export default function DiscoverDetailPage() {
                 <span className="text-[10px] font-medium text-white">프리미엄</span>
               </div>
             )}
-            <Image
-              src={item.image_url}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={getImageUrl(item.id, "full")}
               alt={item.title || "무드 이미지"}
-              width={800}
-              height={1000}
               className="w-full h-auto rounded-xl"
-              priority
             />
           </div>
         </div>

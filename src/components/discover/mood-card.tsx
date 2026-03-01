@@ -1,17 +1,16 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { getImageUrl } from "@/lib/seed-data";
 
 interface MoodCardProps {
   id: string;
-  imageUrl: string;
   title?: string | null;
   tags?: string[];
   isPremium?: boolean;
 }
 
-export function MoodCard({ id, imageUrl, title, tags, isPremium }: MoodCardProps) {
+export function MoodCard({ id, title, tags, isPremium }: MoodCardProps) {
   return (
     <Link
       href={`/discover/${id}`}
@@ -27,12 +26,11 @@ export function MoodCard({ id, imageUrl, title, tags, isPremium }: MoodCardProps
         </div>
       )}
 
-      <Image
-        src={imageUrl}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={getImageUrl(id, "thumb")}
         alt={title || "무드 이미지"}
-        width={400}
-        height={500}
-        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        loading="lazy"
         className="w-full h-auto object-cover"
         style={{ backgroundColor: "var(--angel-bg-soft, #e8ecf4)" }}
       />

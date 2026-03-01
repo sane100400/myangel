@@ -190,7 +190,7 @@
   left: 0;
   right: 0;
   height: 24px;
-  background-image: url("/lace.png");
+  background-image: url("/lace.webp");
   background-size: auto 24px;
   background-repeat: repeat-x;
   pointer-events: none;
@@ -214,7 +214,7 @@
   left: 0;
   right: 0;
   height: 24px;
-  background-image: url("/lace.png");
+  background-image: url("/lace.webp");
   background-size: auto 24px;
   background-repeat: repeat-x;
   transform: scaleY(-1);
