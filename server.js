@@ -2,7 +2,7 @@ const { createServer } = require("http");
 const { parse } = require("url");
 const next = require("next");
 
-const port = parseInt(process.env.PORT || "80", 10);
+const port = parseInt(process.env.PORT || "3000", 10);
 const app = next({ dev: false });
 const handle = app.getRequestHandler();
 
