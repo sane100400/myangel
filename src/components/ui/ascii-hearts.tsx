@@ -1,78 +1,82 @@
 /**
- * Decorative braille-dot heart ASCII art for the hero section.
- * Based on: https://a-zer0-c.tistory.com/10
- *
- * - White color + soft glow shadow
- * - Monospace font (braille-supporting) for alignment
- * - No rotation — straight placement
- * - Absolutely positioned inside the hero section (not fixed)
+ * 4 dot-art hearts for the hero section background.
+ * Uses ● (BLACK CIRCLE) — renders perfectly in every OS/browser.
+ * White color + glow shadow. No rotation. Monospace for alignment.
  */
 
-const HEART = `\
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⡗⣄⠀⠀⠀⠀⠀⠜⡣⠤⠤⢄⠀⡠⠤⠤⣼⠣⠀⠀⠀⠀⢀⡰⢳
-⠠⡓⠤⠍⠉⠉⠑⠢⡜⠀⠀⠀⠀⠑⠋⠀⠀⠀⠀⢣⠊⠉⣀⠀⡠⠔⣳
-⠀⠹⣖⣂⢈⠉⠃⢀⢧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⠀⠋⢈⠇⢐⠾⠁
-⠀⠀⠈⠁⠊⠉⠈⠁⠈⢷⢄⠀⠀⠀⠀⠀⢀⡠⠊⠀⠉⠈⠉⠉⠉⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠲⢄⡤⠒⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀`;
+const H1 = `\
+  ●●    ●●
+ ●●●●  ●●●●
+●●●●●●●●●●●●
+●●●●●●●●●●●●
+ ●●●●●●●●●●
+  ●●●●●●●●
+   ●●●●●●
+    ●●●●
+     ●●`;
 
-const FONT =
-  '"DejaVu Sans Mono", "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols 2", monospace';
+const H2 = `\
+ ●●  ●●
+●●●●●●●●
+●●●●●●●●
+ ●●●●●●
+  ●●●●
+   ●●`;
 
-const SHADOW =
-  "0 0 10px rgba(255,255,255,0.8), 0 0 24px rgba(124,92,173,0.25)";
+const H3 = `\
+ ○○  ○○
+○  ○○  ○
+○      ○
+ ○    ○
+  ○  ○
+   ○○`;
 
-interface HeartPos {
+const H4 = `\
+●● ●●
+●●●●●
+ ●●●
+  ●`;
+
+const FONT = 'monospace';
+const SHADOW = "0 0 12px rgba(255,255,255,0.9), 0 0 30px rgba(180,160,220,0.3)";
+
+interface Pos {
+  art: string;
   top: string;
   left?: string;
   right?: string;
   fontSize: number;
-  show: "all" | "md" | "lg";
-  delay: string;
 }
 
-const POSITIONS: HeartPos[] = [
-  // ── mobile ──
-  { top: "8%",   left: "1%",  fontSize: 12, show: "all", delay: "0s" },
-  { top: "60%",  right: "1%", fontSize: 12, show: "all", delay: "2s" },
-
-  // ── tablet ──
-  { top: "5%",   right: "1%", fontSize: 14, show: "md",  delay: "1s" },
-  { top: "50%",  left: "1%",  fontSize: 14, show: "md",  delay: "3s" },
-
-  // ── desktop ──
-  { top: "10%",  left: "1%",  fontSize: 18, show: "lg",  delay: "0s" },
-  { top: "30%",  right: "1%", fontSize: 20, show: "lg",  delay: "1.5s" },
-  { top: "65%",  left: "2%",  fontSize: 18, show: "lg",  delay: "2.5s" },
-  { top: "80%",  right: "2%", fontSize: 16, show: "lg",  delay: "3.5s" },
+const HEARTS: Pos[] = [
+  { art: H1, top: "8%",  left: "3%",  fontSize: 10 },
+  { art: H3, top: "12%", right: "4%", fontSize: 12 },
+  { art: H2, top: "65%", right: "3%", fontSize: 9 },
+  { art: H4, top: "72%", left: "5%",  fontSize: 14 },
 ];
-
-const showClass: Record<string, string> = {
-  all: "",
-  md: "hidden md:block",
-  lg: "hidden lg:block",
-};
 
 export function AsciiHearts() {
   return (
     <>
-      {POSITIONS.map((p, i) => (
+      {HEARTS.map((h, i) => (
         <pre
           key={i}
           aria-hidden="true"
-          className={`ascii-heart pointer-events-none absolute z-[1] select-none leading-none ${showClass[p.show]}`}
+          className="ascii-heart pointer-events-none absolute z-[1] select-none"
           style={{
-            top: p.top,
-            left: p.left,
-            right: p.right,
+            top: h.top,
+            left: h.left,
+            right: h.right,
             color: "#ffffff",
-            fontSize: p.fontSize,
+            fontSize: h.fontSize,
             fontFamily: FONT,
+            lineHeight: 1.3,
+            letterSpacing: "0.05em",
             textShadow: SHADOW,
-            animationDelay: p.delay,
+            animationDelay: `${i * 1.2}s`,
           }}
         >
-          {HEART}
+          {h.art}
         </pre>
       ))}
     </>
