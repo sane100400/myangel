@@ -1,18 +1,21 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
+
 interface AngelLogoProps {
   size?: number;
   className?: string;
+  priority?: boolean;
 }
 
-export function AngelLogo({ size = 32, className = "" }: AngelLogoProps) {
+export function AngelLogo({ size = 32, className = "", priority = false }: AngelLogoProps) {
   return (
-    <img
+    <Image
       src="/logo.png"
       alt="MyAngel"
       width={Math.round(size * 0.8)}
       height={size}
       className={className}
       style={{ transform: "scaleX(0.85)" }}
+      priority={priority}
     />
   );
 }

@@ -24,7 +24,7 @@ export default function HomePage() {
 
         {/* Wing logo */}
         <div className="float-gentle mb-6 relative z-10">
-          <AngelLogo size={120} />
+          <AngelLogo size={120} priority />
         </div>
 
         {/* Title */}
