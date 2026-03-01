@@ -24,7 +24,7 @@ export function Navbar() {
       <nav className="relative mx-auto flex h-16 max-w-5xl items-center justify-between px-5">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <AngelLogo size={36} className="transition-transform duration-300 group-hover:scale-110" />
+          <AngelLogo size={36} priority className="transition-transform duration-300 group-hover:scale-110" />
           <span
             className="text-lg tracking-[0.1em] text-[var(--angel-text)] font-heading"
           >
