@@ -13,8 +13,7 @@ export function ItemCard({ brandName, brandNameJa, storeUrl, description, styles
     <div className="glass-card overflow-hidden rounded-2xl p-5">
       <div className="mb-2">
         <h4
-          className="text-[14px] font-medium text-[var(--angel-text)] tracking-[0.04em]"
-          style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+          className="font-heading-light text-[14px] font-medium text-[var(--angel-text)] tracking-[0.04em]"
         >
           {brandName}
         </h4>

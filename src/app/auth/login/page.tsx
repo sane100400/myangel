@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { AngelLogo } from "@/components/ui/angel-logo";
-import { GothicCross } from "@/components/ui/gothic-cross";
 
 export default function LoginPage() {
   const handleGoogleLogin = async () => {
@@ -26,38 +25,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-[60vh] items-center justify-center px-5 star-bg">
-      {/* Background */}
-      <div className="absolute inset-0 gradient-mesh" />
-
-      <div className="relative glass-card w-full max-w-sm rounded-3xl p-8">
-        {/* Cross top */}
-        <div className="cross-deco text-center mb-4 flex justify-center"><GothicCross size={22} /></div>
-
+    <div className="flex min-h-[70vh] items-center justify-center px-5 pt-10">
+      <div className="w-full max-w-sm rounded-2xl border border-[#d0d8e8] bg-white/80 backdrop-blur-sm p-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+        {/* Logo */}
         <div className="text-center mb-8">
-          <AngelLogo size={56} className="mx-auto mb-4 float-gentle" />
-          <h1
-            className="text-2xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
-            style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
-          >
-            My<span className="shimmer-text">Angel</span>
+          <AngelLogo size={48} className="mx-auto mb-4" />
+          <h1 className="font-heading text-2xl tracking-[0.08em] text-[var(--angel-text)]">
+            My<span className="text-[var(--angel-blue)]">Angel</span>
           </h1>
-          <p className="mt-2 text-[12px] text-[var(--angel-text-soft)]">
+          <p className="mt-2 text-[13px] text-[var(--angel-text-soft)]">
             로그인하면 무드보드를 저장할 수 있어요
           </p>
-
-          {/* Celestial divider */}
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/30" />
-            <span className="text-[8px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/30" />
-          </div>
         </div>
 
+        {/* Login Buttons */}
         <div className="space-y-3">
           <button
             onClick={handleGoogleLogin}
-            className="flex w-full items-center justify-center gap-3 rounded-full bg-white/60 backdrop-blur-sm border border-white/40 py-3 text-[12px] tracking-[0.06em] text-[var(--angel-text)] transition-all hover:bg-white/80 hover:shadow-[0_0_16px_rgba(126,184,216,0.1)]"
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white border border-[#d0d8e8] py-3 text-[13px] text-[var(--angel-text)] transition-all hover:bg-[#f8f9fc] hover:shadow-sm"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -70,7 +55,7 @@ export default function LoginPage() {
 
           <button
             onClick={handleKakaoLogin}
-            className="flex w-full items-center justify-center gap-3 rounded-full bg-[#FEE500]/80 backdrop-blur-sm border border-[#FEE500]/40 py-3 text-[12px] tracking-[0.06em] text-[#3C1E1E] transition-all hover:bg-[#FEE500] hover:shadow-[0_0_16px_rgba(254,229,0,0.15)]"
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#FEE500] border border-[#FEE500] py-3 text-[13px] text-[#3C1E1E] transition-all hover:bg-[#FFEB3B] hover:shadow-sm"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -82,8 +67,10 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Cross bottom */}
-        <div className="cross-deco text-center mt-6 flex justify-center"><GothicCross size={22} /></div>
+        {/* Footer */}
+        <p className="mt-6 text-center text-[11px] text-[var(--angel-text-soft)]">
+          계속 진행하면 이용약관에 동의하는 것으로 간주합니다
+        </p>
       </div>
     </div>
   );

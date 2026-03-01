@@ -5,43 +5,53 @@ import { GothicCross } from "@/components/ui/gothic-cross";
 export function Footer() {
   return (
     <footer className="relative lace-top">
-      {/* Glass background */}
-      <div className="absolute inset-0 bg-[#f0f4fb]/85 backdrop-blur-md" />
+      {/* Slightly darker bg than header to differentiate */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#e8ecf6] to-[#e2e7f2]" />
 
-      <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-6 px-5 py-12 text-[11px] text-[var(--angel-text-soft)] md:flex-row md:justify-between">
-        {/* Brand */}
-        <div className="flex flex-col items-center gap-2">
+      <div className="relative mx-auto max-w-5xl px-5 pt-14 pb-8">
+        {/* Top: Logo centered with decorative line */}
+        <div className="flex flex-col items-center gap-3 mb-6">
           <AngelLogo size={28} />
-          <span
-            className="text-base tracking-[0.1em] text-[var(--angel-text)]"
-            style={{ fontFamily: "var(--font-logo), 'Libre Bodoni', serif", fontWeight: 700 }}
-          >
+          <span className="text-base tracking-[0.12em] text-[var(--angel-text)] font-heading">
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </span>
-          <p className="text-[10px] tracking-[0.1em] text-[var(--angel-text-faint)]">
-            ✦ your angelic mood curator ✦
+          <p className="text-[9px] tracking-[0.25em] text-[var(--angel-text-faint)] uppercase">
+            your angelic mood curator
           </p>
         </div>
 
-        {/* Nav */}
-        <div className="flex items-center gap-6 tracking-[0.08em]">
+        {/* Decorative divider */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <span className="h-px w-16 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/30" />
+          <GothicCross size={14} color="var(--angel-lavender)" />
+          <span className="text-[8px] text-[var(--angel-lavender)]/40 twinkle">✦</span>
+          <GothicCross size={14} color="var(--angel-lavender)" />
+          <span className="h-px w-16 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/30" />
+        </div>
+
+        {/* Navigation */}
+        <div className="flex items-center justify-center gap-6 text-[11px] tracking-[0.08em] text-[var(--angel-text-soft)] mb-6">
           <Link href="/discover" className="transition-colors hover:text-[var(--angel-text)]">
             Discover
           </Link>
-          <GothicCross size={16} color="var(--angel-lavender)" />
+          <span className="text-[8px] text-[var(--angel-lavender)]/30">✟</span>
           <Link href="/moodboard" className="transition-colors hover:text-[var(--angel-text)]">
             Moodboard
           </Link>
-          <GothicCross size={16} color="var(--angel-lavender)" />
+          <span className="text-[8px] text-[var(--angel-lavender)]/30">✟</span>
           <Link href="/boards" className="transition-colors hover:text-[var(--angel-text)]">
-            My Board
+            Mypage
           </Link>
         </div>
 
-        {/* Copyright */}
-        <p className="text-[10px] tracking-wider text-[var(--angel-text-faint)]">
-          &copy; 2026 MyAngel
-        </p>
+        {/* Bottom: copyright with tiny ornament */}
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-[7px] text-[var(--angel-lavender)]/30">✦</span>
+          <p className="text-[9px] tracking-[0.12em] text-[var(--angel-text-faint)]">
+            &copy; 2026 MyAngel
+          </p>
+          <span className="text-[7px] text-[var(--angel-lavender)]/30">✦</span>
+        </div>
       </div>
     </footer>
   );

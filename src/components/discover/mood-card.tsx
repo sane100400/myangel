@@ -11,7 +11,7 @@ interface MoodCardProps {
 
 export function MoodCard({ imageUrl, title, tags }: MoodCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl break-inside-avoid mb-4 glass-card">
+    <div className="group relative overflow-hidden rounded-xl break-inside-avoid mb-3 glass-card">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imageUrl}

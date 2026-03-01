@@ -29,8 +29,7 @@ export function BoardCard({ board }: BoardCardProps) {
 
         <div className="p-4">
           <h3
-            className="text-[13px] font-medium text-[var(--angel-text)] tracking-[0.04em]"
-            style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+            className="font-heading-light text-[13px] font-medium text-[var(--angel-text)] tracking-[0.04em]"
           >
             {board.title}
           </h3>

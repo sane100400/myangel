@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { GothicCross } from "@/components/ui/gothic-cross";
 import { TrendingTags } from "@/components/discover/trending-tags";
 import { MoodGallery } from "@/components/discover/mood-gallery";
 import { SEED_MOOD_IMAGES, SEED_TAGS } from "@/lib/seed-data";
@@ -22,13 +21,11 @@ function DiscoverContent() {
   }, [selectedTag]);
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
+    <div className="mx-auto max-w-5xl px-5 pt-24 pb-10">
       {/* Header */}
       <div className="mb-10 text-center">
-        <div className="cross-deco mb-3 flex justify-center"><GothicCross size={22} /></div>
         <h1
-          className="text-3xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
-          style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+          className="font-heading text-3xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
         >
           Discover
         </h1>
@@ -43,7 +40,7 @@ function DiscoverContent() {
       </div>
 
       {/* Trending Tags */}
-      <div className="mb-8">
+      <div className="mb-8 mx-auto max-w-2xl">
         <TrendingTags
           tags={SEED_TAGS}
           selectedTag={selectedTag}

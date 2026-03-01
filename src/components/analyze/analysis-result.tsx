@@ -21,8 +21,7 @@ export function AnalysisResult({ elements }: AnalysisResultProps) {
       <div className="flex items-center gap-2">
         <span className="text-[9px] text-[var(--angel-lavender)]">✦</span>
         <h3
-          className="text-lg font-medium tracking-[0.08em] text-[var(--angel-text)]"
-          style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+          className="font-heading text-lg font-medium tracking-[0.08em] text-[var(--angel-text)]"
         >
           Visual Analysis
         </h3>

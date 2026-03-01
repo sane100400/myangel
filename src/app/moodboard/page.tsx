@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { GothicCross } from "@/components/ui/gothic-cross";
 import { MoodboardGrid } from "@/components/moodboard/moodboard-grid";
 import { BrandCard } from "@/components/moodboard/brand-card";
 import { AnalysisResult } from "@/components/analyze/analysis-result";
@@ -36,6 +35,7 @@ function MoodboardContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<AnalysisData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [prompt, setPrompt] = useState("");
 
   const handleFileUpload = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -59,7 +59,10 @@ function MoodboardContent() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image_url: centerImage }),
+        body: JSON.stringify({
+          image_url: centerImage,
+          prompt: prompt.trim() || undefined,
+        }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -89,59 +92,86 @@ function MoodboardContent() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-10">
+    <div className="mx-auto max-w-5xl px-5 pt-24 pb-10">
       {/* Header */}
-      <div className="mb-10 text-center">
-        <div className="cross-deco mb-3 flex justify-center"><GothicCross size={22} /></div>
+      <div className="mb-8 text-center">
         <h1
-          className="text-3xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
-          style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+          className="font-heading text-3xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
         >
           Moodboard
         </h1>
-        <p className="mt-2 text-[12px] text-[var(--angel-text-soft)]">
-          중심에 이미지를 놓으면 AI가 비슷한 무드로 보드를 완성해줘요
+        <p className="mt-2 text-[13px] text-[var(--angel-text-soft)]">
+          코디 사진 한 장이면 AI가 비슷한 무드로 보드를 완성해줘요
         </p>
-
-        {/* Celestial divider */}
-        <div className="mt-4 flex items-center justify-center gap-3">
+        <div className="mt-3 flex items-center justify-center gap-3">
           <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/30" />
           <span className="text-[9px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
           <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/30" />
         </div>
       </div>
 
-      {/* URL Input */}
-      <div className="mb-8 flex gap-2 max-w-md mx-auto">
-        <input
-          type="text"
-          placeholder="이미지 URL을 붙여넣기..."
-          value={imageUrl.startsWith("data:") ? "" : imageUrl}
-          onChange={(e) => {
-            setImageUrl(e.target.value);
-            if (e.target.value.startsWith("http")) {
-              setCenterImage(e.target.value);
-            }
-          }}
-          onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+      {/* Upload Area */}
+      <div className="mx-auto max-w-2xl mb-10">
+        {/* Image Input Row */}
+        <div className="mb-3 flex gap-2">
+          <input
+            type="text"
+            placeholder="이미지 URL을 붙여넣기..."
+            value={imageUrl.startsWith("data:") ? "" : imageUrl}
+            onChange={(e) => {
+              setImageUrl(e.target.value);
+              if (e.target.value.startsWith("http")) {
+                setCenterImage(e.target.value);
+              }
+            }}
+            onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+            disabled={isLoading}
+            className="flex-1 rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-2.5 text-[13px] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)]"
+          />
+          <button
+            onClick={handleCenterClick}
+            className="shrink-0 rounded-xl border border-[var(--angel-border)] bg-white/70 px-4 py-2.5 text-[12px] text-[var(--angel-text-soft)] transition-all hover:bg-white hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
+          >
+            파일 업로드
+          </button>
+        </div>
+
+        {/* Prompt Input */}
+        <textarea
+          placeholder="원하는 무드를 설명해주세요 (선택) &#10;예: 봄에 어울리는 파스텔톤 로리타 느낌, 귀여우면서 청순한..."
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
           disabled={isLoading}
-          className="flex-1 rounded-full bg-white/50 backdrop-blur-sm border border-[var(--angel-border)] px-5 py-2.5 text-[12px] text-[var(--angel-text)] placeholder-[var(--angel-text-faint)] outline-none transition-all focus:bg-white/70 focus:border-[var(--angel-blue)]/40 focus:shadow-[0_0_16px_rgba(126,184,216,0.1)]"
+          rows={2}
+          className="w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[13px] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)]"
         />
+
+        {/* Analyze Button */}
         <button
           onClick={handleAnalyze}
           disabled={!centerImage || isLoading}
-          className="angel-btn angel-btn-primary shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="mt-3 w-full angel-btn angel-btn-primary py-3 text-[13px] disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {isLoading ? "분석 중..." : "무드보드 생성"}
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="twinkle text-[10px]">✦</span>
+              AI가 무드를 분석하고 있어요...
+              <span className="twinkle text-[10px]" style={{ animationDelay: "0.5s" }}>✦</span>
+            </span>
+          ) : (
+            "무드보드 생성"
+          )}
         </button>
       </div>
 
       {/* 3x3 Grid */}
       <div
         className="mb-10"
-        onDragOver={(e) => e.preventDefault()}
+        onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("ring-2", "ring-[var(--angel-blue)]/30", "rounded-2xl"); }}
+        onDragLeave={(e) => { e.currentTarget.classList.remove("ring-2", "ring-[var(--angel-blue)]/30", "rounded-2xl"); }}
         onDrop={(e) => {
           e.preventDefault();
+          e.currentTarget.classList.remove("ring-2", "ring-[var(--angel-blue)]/30", "rounded-2xl");
           const file = e.dataTransfer.files[0];
           if (file) handleFileUpload(file);
         }}
@@ -153,14 +183,9 @@ function MoodboardContent() {
         />
       </div>
 
-      {/* Loading */}
+      {/* Loading Skeleton */}
       {isLoading && (
         <div className="space-y-6 max-w-2xl mx-auto">
-          <div className="text-center text-[12px] text-[var(--angel-lavender)] animate-pulse flex items-center justify-center gap-2">
-            <span className="twinkle text-[10px]">✦</span>
-            AI가 무드를 분석하고 있어요...
-            <span className="twinkle text-[10px]" style={{ animationDelay: "0.5s" }}>✦</span>
-          </div>
           <div className="space-y-3">
             <Skeleton className="h-5 w-32 mx-auto rounded-full" />
             <div className="flex justify-center gap-2">
@@ -174,7 +199,7 @@ function MoodboardContent() {
 
       {/* Error */}
       {error && (
-        <div className="mt-4 glass-card rounded-2xl p-4 text-[12px] text-[var(--destructive)] max-w-md mx-auto text-center border-[var(--destructive)]/20">
+        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50/80 p-4 text-[13px] text-red-600 max-w-md mx-auto text-center">
           {error}
         </div>
       )}
@@ -227,15 +252,13 @@ function MoodboardContent() {
               <div className="mb-8 celestial-divider">
                 <span className="text-[10px] tracking-[0.3em] text-[var(--angel-lavender)]">BRANDS</span>
               </div>
-              <div className="cross-deco text-center mb-2 flex justify-center"><GothicCross size={22} /></div>
               <h3
-                className="mb-2 text-center text-xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
-                style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+                className="font-heading mb-2 text-center text-xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
               >
                 Recommended Brands
               </h3>
-              <p className="mb-8 text-center text-[11px] text-[var(--angel-text-faint)]">
-                이 무드에 맞는 브랜드의 공식 스토어
+              <p className="mb-8 text-center text-[12px] text-[var(--angel-text-soft)]">
+                이 무드에 어울리는 아이템을 만날 수 있는 브랜드예요
               </p>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {data.brands.map((brand) => (

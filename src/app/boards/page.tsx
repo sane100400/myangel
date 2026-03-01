@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { GothicCross } from "@/components/ui/gothic-cross";
 import {
   Dialog,
   DialogContent,
@@ -40,15 +39,13 @@ export default function BoardsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
+    <div className="mx-auto max-w-6xl px-5 pt-24 pb-10">
       {/* Header */}
       <div className="mb-10 text-center">
-        <div className="cross-deco mb-3 flex justify-center"><GothicCross size={22} /></div>
         <h1
-          className="text-3xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
-          style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+          className="font-heading text-3xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
         >
-          My Board
+          Mypage
         </h1>
         <p className="mt-2 text-[12px] text-[var(--angel-text-soft)]">
           마음에 드는 무드와 브랜드를 보드에 저장하세요
@@ -71,8 +68,7 @@ export default function BoardsPage() {
           <DialogContent className="glass-card border-white/30">
             <DialogHeader>
               <DialogTitle
-                className="text-lg font-medium tracking-[0.08em] text-[var(--angel-text)]"
-                style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+                className="font-heading-light text-lg font-medium tracking-[0.08em] text-[var(--angel-text)]"
               >
                 새 보드 만들기
               </DialogTitle>
@@ -117,7 +113,9 @@ export default function BoardsPage() {
           <p className="mt-1 text-[10px] text-[var(--angel-text-faint)]">
             새 보드를 만들고 무드와 브랜드를 저장해보세요.
           </p>
-          <div className="cross-deco mt-6 flex justify-center"><GothicCross size={22} /></div>
+          <div className="mt-6 flex justify-center">
+            <span className="text-[10px] text-[var(--angel-lavender)]">✦ ✧ ✦</span>
+          </div>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

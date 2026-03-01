@@ -9,7 +9,7 @@ import { GothicCross } from "@/components/ui/gothic-cross";
 const NAV_ITEMS = [
   { href: "/discover", label: "Discover" },
   { href: "/moodboard", label: "Moodboard" },
-  { href: "/boards", label: "My Board" },
+  { href: "/boards", label: "Mypage" },
 ];
 
 export function Navbar() {
@@ -21,13 +21,12 @@ export function Navbar() {
       {/* Glassmorphism background */}
       <div className="absolute inset-0 bg-[#f0f4fb]/85 backdrop-blur-xl" />
 
-      <nav className="relative mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
+      <nav className="relative mx-auto flex h-16 max-w-5xl items-center justify-between px-5">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           <AngelLogo size={36} className="transition-transform duration-300 group-hover:scale-110" />
           <span
-            className="text-lg tracking-[0.1em] text-[var(--angel-text)]"
-            style={{ fontFamily: "var(--font-logo), 'Libre Bodoni', serif", fontWeight: 700 }}
+            className="text-lg tracking-[0.1em] text-[var(--angel-text)] font-heading"
           >
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </span>
@@ -35,30 +34,32 @@ export function Navbar() {
 
         {/* Desktop Nav */}
         <div className="hidden items-center gap-1 md:flex">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`relative px-4 py-1.5 text-[12px] tracking-[0.08em] transition-all duration-300 ${
-                pathname === item.href
-                  ? "text-[var(--angel-text)]"
-                  : "text-[var(--angel-text-soft)] hover:text-[var(--angel-text)]"
-              }`}
-            >
-              {item.label}
-              {pathname === item.href && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] rounded-full bg-gradient-to-r from-[var(--angel-blue)] to-[var(--angel-lavender)]" />
-              )}
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`nav-link flex flex-col items-center gap-0.5 px-4 py-1 text-[12px] tracking-[0.08em] ${
+                  isActive
+                    ? "nav-link-active text-[var(--angel-text)]"
+                    : "text-[var(--angel-text-soft)]"
+                }`}
+              >
+                <span className={`text-[10px] text-[var(--angel-lavender)] transition-opacity duration-200 ${isActive ? "opacity-100" : "opacity-0"}`}>
+                  ✦
+                </span>
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
 
-        {/* Auth + decorative */}
-        <div className="hidden items-center gap-3 md:flex">
-          <span className="text-[8px] text-[var(--angel-lavender)] opacity-50">✦</span>
+        {/* Auth */}
+        <div className="hidden items-center md:flex">
           <Link
             href="/auth/login"
-            className="angel-btn-secondary rounded-full px-5 py-1.5 text-[11px] tracking-[0.08em]"
+            className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-5 py-1.5 text-[11px] tracking-[0.08em] text-[var(--angel-text)] transition-all hover:bg-white/80 hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
           >
             Login
           </Link>

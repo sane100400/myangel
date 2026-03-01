@@ -5,7 +5,7 @@ import type { AnalysisElements } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
-    const { image_url } = await request.json();
+    const { image_url, prompt } = await request.json();
 
     if (!image_url) {
       return NextResponse.json(
@@ -13,6 +13,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const userText = prompt
+      ? `이 코디 사진을 분석해주세요. 사용자의 추가 요청: "${prompt}"`
+      : "이 코디 사진을 분석해주세요.";
 
     // OpenAI GPT-4o Vision API 호출
     const response = await openai.chat.completions.create({
@@ -31,7 +35,7 @@ export async function POST(request: NextRequest) {
             },
             {
               type: "text",
-              text: "이 무드 이미지를 분석해주세요.",
+              text: userText,
             },
           ],
         },

@@ -31,8 +31,7 @@ export function BoardDetail({ board, items, isOwner }: BoardDetailProps) {
         <div>
           <div className="cross-deco mb-2 flex justify-center"><GothicCross size={22} /></div>
           <h1
-            className="text-2xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
-            style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+            className="font-heading text-2xl font-medium tracking-[0.08em] text-[var(--angel-text)]"
           >
             {board.title}
           </h1>

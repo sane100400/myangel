@@ -50,8 +50,7 @@ export function ImageInput({ onSubmit, isLoading, initialUrl }: ImageInputProps)
       <div className="flex items-center gap-2">
         <span className="text-[9px] text-[var(--angel-lavender)]">✦</span>
         <h2
-          className="text-lg font-medium tracking-[0.08em] text-[var(--angel-text)]"
-          style={{ fontFamily: "var(--font-serif-kr), var(--font-serif), 'Gowun Batang', 'Cormorant Garamond', serif" }}
+          className="font-heading text-lg font-medium tracking-[0.08em] text-[var(--angel-text)]"
         >
           무드 이미지 입력
         </h2>

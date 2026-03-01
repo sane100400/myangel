@@ -122,6 +122,20 @@
 }
 
 /* ═══════════════════════════════════
+   Typography — 통일된 폰트 시스템
+   heading: Libre Bodoni (영문 제목, 로고)
+   body: Gothic A1 (본문, UI)
+   ═══════════════════════════════════ */
+.font-heading {
+  font-family: var(--font-logo), 'Libre Bodoni', serif;
+  font-weight: 700;
+}
+.font-heading-light {
+  font-family: var(--font-logo), 'Libre Bodoni', serif;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════
    ✦ Cards — solid white, clean
    ═══════════════════════════════════ */
 .glass-card {
@@ -201,8 +215,8 @@
   z-index: 10;
 }
 
-/* ── Snap Scroll Sections ── */
-.scroll-smooth {
+/* ── Snap Scroll ── */
+html {
   scroll-snap-type: y proximity;
 }
 .snap-section {
@@ -423,6 +437,46 @@
   border: 2.5px solid rgba(91, 155, 213, 0.5);
   border-radius: 50%;
   box-shadow: 0 0 20px rgba(91, 155, 213, 0.15), inset 0 0 20px rgba(91, 155, 213, 0.08);
+}
+
+/* ═══════════════════════════════════
+   Brand Pill (homepage)
+   ═══════════════════════════════════ */
+.brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.brand-pill-arrow {
+  opacity: 0;
+  width: 0;
+  transition: all 0.3s ease;
+}
+.brand-pill:hover {
+  border-color: var(--angel-blue);
+  color: var(--angel-blue);
+  background: var(--angel-blue-pale);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(91, 155, 213, 0.2);
+}
+.brand-pill:hover .brand-pill-arrow {
+  opacity: 1;
+  width: 10px;
+}
+
+/* ═══════════════════════════════════
+   Nav Link hover (stronger)
+   ═══════════════════════════════════ */
+.nav-link {
+  transition: color 0.25s ease;
+}
+.nav-link:hover {
+  color: var(--angel-blue);
+}
+.nav-link-active {
+  font-weight: 600;
 }
 
 /* ═══════════════════════════════════
