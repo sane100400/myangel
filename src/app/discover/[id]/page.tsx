@@ -1,21 +1,82 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { SEED_MOOD_IMAGES, getImageUrl } from "@/lib/seed-data";
+
+interface SharedImageData {
+  id: string;
+  title: string;
+  tags: string[];
+  prompt: string;
+  is_premium: boolean;
+}
 
 export default function DiscoverDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const item = useMemo(
+  const isSharedId = id.startsWith("shared-");
+
+  // Seed 이미지 lookup (즉시)
+  const seedItem = useMemo(
     () => SEED_MOOD_IMAGES.find((img) => img.id === id),
     [id]
   );
 
-  if (!item) {
+  // Shared 이미지 state
+  const [sharedItem, setSharedItem] = useState<SharedImageData | null>(null);
+  const [isLoading, setIsLoading] = useState(isSharedId);
+  const [fetchError, setFetchError] = useState(false);
+
+  useEffect(() => {
+    if (!isSharedId) return;
+    let cancelled = false;
+
+    async function fetchSharedImage() {
+      try {
+        const res = await fetch(`/api/discover/images`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const found = data.images?.find(
+          (img: SharedImageData) => img.id === id
+        );
+        if (!cancelled) {
+          if (found) {
+            setSharedItem(found);
+          } else {
+            setFetchError(true);
+          }
+        }
+      } catch {
+        if (!cancelled) setFetchError(true);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    fetchSharedImage();
+    return () => { cancelled = true; };
+  }, [id, isSharedId]);
+
+  // 로딩 상태
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 md:px-5 md:pt-24">
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
+          <p className="text-[12px] text-[var(--angel-text-soft)]">이미지를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 아이템 결정
+  const item = isSharedId ? sharedItem : seedItem;
+
+  if (!item || fetchError) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4">
         <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
@@ -52,6 +113,11 @@ export default function DiscoverDetailPage() {
                   <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
                 </svg>
                 <span className="text-[10px] font-medium text-white">프리미엄</span>
+              </div>
+            )}
+            {isSharedId && (
+              <div className="absolute top-4 left-4 z-10 flex items-center gap-1 rounded-full bg-[var(--angel-blue)]/80 px-2.5 py-1 shadow-md">
+                <span className="text-[10px] font-medium text-white">AI 생성</span>
               </div>
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -175,6 +241,12 @@ export default function DiscoverDetailPage() {
                 {isPremium ? "프리미엄" : "무료"}
               </span>
             </div>
+            {isSharedId && (
+              <div className="mt-2 flex items-center justify-between text-[11px]">
+                <span className="text-[var(--angel-text-soft)]">출처</span>
+                <span className="text-[var(--angel-blue)]">AI 생성 (커뮤니티 공유)</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

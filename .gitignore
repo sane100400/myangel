@@ -48,3 +48,7 @@ CLAUDE.md
 
 # Image thumbnail cache
 content/cache/
+
+# Shared images (user-generated, stored on server)
+content/shared/
+content/shared-images.json

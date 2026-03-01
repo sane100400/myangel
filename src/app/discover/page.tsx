@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { TrendingTags } from "@/components/discover/trending-tags";
@@ -8,17 +8,49 @@ import { MoodGallery } from "@/components/discover/mood-gallery";
 import { SEED_MOOD_IMAGES, SEED_TAGS } from "@/lib/seed-data";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface DiscoverImage {
+  id: string;
+  image_url: string;
+  title?: string | null;
+  tags?: string[];
+  prompt?: string;
+  is_premium?: boolean;
+}
+
 function DiscoverContent() {
   const searchParams = useSearchParams();
   const initialTag = searchParams.get("tag");
   const [selectedTag, setSelectedTag] = useState<string | null>(initialTag);
+  const [images, setImages] = useState<DiscoverImage[]>(SEED_MOOD_IMAGES);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchImages() {
+      try {
+        const res = await fetch("/api/discover/images");
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!cancelled && Array.isArray(data.images)) {
+          setImages(data.images);
+        }
+      } catch {
+        // Fallback: seed 이미지 사용
+        if (!cancelled) setImages(SEED_MOOD_IMAGES);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+    fetchImages();
+    return () => { cancelled = true; };
+  }, []);
 
   const filteredImages = useMemo(() => {
-    if (!selectedTag) return SEED_MOOD_IMAGES;
-    return SEED_MOOD_IMAGES.filter((img) =>
+    if (!selectedTag) return images;
+    return images.filter((img) =>
       img.tags?.some((t) => t === selectedTag)
     );
-  }, [selectedTag]);
+  }, [selectedTag, images]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 pt-10 pb-10 md:px-5 md:pt-24">
@@ -49,7 +81,15 @@ function DiscoverContent() {
       </div>
 
       {/* Gallery */}
-      <MoodGallery images={filteredImages} />
+      {isLoading ? (
+        <div className="columns-2 gap-3 sm:columns-3 lg:columns-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="mb-3 h-48 rounded-xl" />
+          ))}
+        </div>
+      ) : (
+        <MoodGallery images={filteredImages} />
+      )}
     </div>
   );
 }

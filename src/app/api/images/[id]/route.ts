@@ -4,10 +4,14 @@ import fs from "fs/promises";
 import sharp from "sharp";
 import { SEED_MOOD_IMAGES } from "@/lib/seed-data";
 
-// Whitelist of valid image IDs
-const VALID_IDS = new Set(SEED_MOOD_IMAGES.map((img) => img.id));
+// Whitelist of valid seed image IDs
+const SEED_IDS = new Set(SEED_MOOD_IMAGES.map((img) => img.id));
+
+// Shared image ID format: shared-{uuid}
+const SHARED_ID_RE = /^shared-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const IMAGES_DIR = path.join(process.cwd(), "content", "images");
+const SHARED_DIR = path.join(process.cwd(), "content", "shared");
 const CACHE_DIR = path.join(process.cwd(), "content", "cache");
 
 const THUMB_WIDTH = 400;
@@ -42,8 +46,11 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  // 1. Whitelist validation — prevent path traversal
-  if (!VALID_IDS.has(id)) {
+  // 1. ID validation — seed whitelist OR shared-{uuid} format
+  const isSeed = SEED_IDS.has(id);
+  const isShared = SHARED_ID_RE.test(id);
+
+  if (!isSeed && !isShared) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -58,7 +65,10 @@ export async function GET(
     return NextResponse.json({ error: "Invalid quality parameter" }, { status: 400 });
   }
 
-  const originalPath = path.join(IMAGES_DIR, `${id}.webp`);
+  // Resolve image path based on type
+  const originalPath = isSeed
+    ? path.join(IMAGES_DIR, `${id}.webp`)
+    : path.join(SHARED_DIR, `${id}.webp`);
 
   try {
     // Check original exists
@@ -88,11 +98,15 @@ export async function GET(
         fs.writeFile(thumbPath, buffer).catch(() => {});
       }
 
-      cacheControl = "public, max-age=604800, immutable"; // 7 days
+      cacheControl = isShared
+        ? "public, max-age=86400" // shared: 1 day
+        : "public, max-age=604800, immutable"; // seed: 7 days
     } else {
       // Full quality: serve original
       buffer = await fs.readFile(originalPath);
-      cacheControl = "public, max-age=2592000, immutable"; // 30 days
+      cacheControl = isShared
+        ? "public, max-age=86400" // shared: 1 day
+        : "public, max-age=2592000, immutable"; // seed: 30 days
     }
 
     return new NextResponse(new Uint8Array(buffer), {

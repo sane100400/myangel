@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { BrandCard } from "@/components/moodboard/brand-card";
 import { saveImage } from "@/lib/saved-images";
+import { SEED_TAGS } from "@/lib/seed-data";
+import { toast } from "sonner";
 import type { Brand } from "@/lib/brands";
 
 interface GenerateResult {
@@ -47,6 +49,8 @@ export default function GeneratePage() {
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [isShared, setIsShared] = useState(false);
 
   // Reference images
   const [refImages, setRefImages] = useState<RefImage[]>([]);
@@ -188,6 +192,38 @@ export default function GeneratePage() {
       style_tags: result.style_tags,
     });
     setIsSaved(true);
+  };
+
+  const handleShare = async () => {
+    if (!result?.image || isSharing || isShared) return;
+    setIsSharing(true);
+    try {
+      // 스타일 태그를 SEED_TAGS 화이트리스트와 매칭
+      const matchedTags = result.style_tags.filter((t) =>
+        SEED_TAGS.includes(t)
+      );
+      const res = await fetch("/api/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image: result.image,
+          title: prompt.trim().slice(0, 50) || "AI 생성 이미지",
+          tags: matchedTags.slice(0, 5),
+          prompt: prompt.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "공유에 실패했어요.");
+        return;
+      }
+      setIsShared(true);
+      toast.success("Discover에 공유되었어요!");
+    } catch {
+      toast.error("공유 중 오류가 발생했어요.");
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -498,10 +534,43 @@ export default function GeneratePage() {
                 )}
               </button>
               <button
+                onClick={handleShare}
+                disabled={isSharing || isShared}
+                className={`angel-btn text-[12px] ${
+                  isShared ? "angel-btn-primary" : "angel-btn-secondary"
+                }`}
+              >
+                {isShared ? (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    공유됨
+                  </>
+                ) : isSharing ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="twinkle text-[10px]">✦</span>
+                    공유 중...
+                  </span>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="18" cy="5" r="3" />
+                      <circle cx="6" cy="12" r="3" />
+                      <circle cx="18" cy="19" r="3" />
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                    </svg>
+                    Discover에 공유
+                  </>
+                )}
+              </button>
+              <button
                 onClick={() => {
                   setResult(null);
                   setPrompt("");
                   setIsSaved(false);
+                  setIsShared(false);
                   refImages.forEach((img) => URL.revokeObjectURL(img.preview));
                   setRefImages([]);
                 }}
