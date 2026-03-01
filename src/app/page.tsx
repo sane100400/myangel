@@ -16,12 +16,12 @@ const BRANDS_PREVIEW = [
 
 export default function HomePage() {
   return (
-    <div className="relative flex flex-col">
-      {/* ── ASCII heart background decorations ── */}
-      <AsciiHearts />
-
+    <div className="flex flex-col">
       {/* ══ Hero Section ══ */}
       <section className="relative flex flex-col items-center justify-center px-5 pt-28 pb-16 text-center md:pt-52 md:pb-40 overflow-hidden bg-gradient-to-b from-[#d6deee] to-[#dce4f2] star-bg-desktop">
+        {/* ── ASCII heart decorations (hero only) ── */}
+        <AsciiHearts />
+
         {/* Floating orbs — desktop only (GPU heavy) */}
         <div className="hidden md:block">
           <div className="absolute top-12 left-[8%] h-40 w-40 rounded-full bg-[var(--angel-blue)]/8 blur-[80px]" />
