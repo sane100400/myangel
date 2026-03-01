@@ -74,13 +74,14 @@ export function MoodGallery({ images }: MoodGalleryProps) {
   return (
     <div>
       <div className="columns-2 gap-3 sm:columns-3 lg:columns-4">
-        {visibleImages.map((image) => (
+        {visibleImages.map((image, index) => (
           <MoodCard
             key={image.id}
             id={image.id}
             title={image.title}
             tags={image.tags}
             isPremium={image.is_premium}
+            index={index}
           />
         ))}
       </div>

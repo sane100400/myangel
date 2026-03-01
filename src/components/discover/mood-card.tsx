@@ -8,9 +8,11 @@ interface MoodCardProps {
   title?: string | null;
   tags?: string[];
   isPremium?: boolean;
+  index?: number;
 }
 
-export function MoodCard({ id, title, tags, isPremium }: MoodCardProps) {
+export function MoodCard({ id, title, tags, isPremium, index = 0 }: MoodCardProps) {
+  const isEager = index < 2;
   return (
     <Link
       href={`/discover/${id}`}
@@ -29,8 +31,12 @@ export function MoodCard({ id, title, tags, isPremium }: MoodCardProps) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={getImageUrl(id, "thumb")}
+        srcSet={`${getImageUrl(id, "thumb_sm")} 200w, ${getImageUrl(id, "thumb")} 400w`}
+        sizes="(max-width: 640px) 50vw, 25vw"
         alt={title || "무드 이미지"}
-        loading="lazy"
+        loading={isEager ? "eager" : "lazy"}
+        decoding="async"
+        {...(isEager ? { fetchPriority: "high" as const } : {})}
         className="w-full h-auto object-cover"
         style={{ backgroundColor: "var(--angel-bg-soft, #e8ecf4)" }}
       />

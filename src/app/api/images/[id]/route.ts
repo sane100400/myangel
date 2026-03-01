@@ -16,6 +16,8 @@ const CACHE_DIR = path.join(process.cwd(), "content", "cache");
 
 const THUMB_WIDTH = 400;
 const THUMB_QUALITY = 70;
+const THUMB_SM_WIDTH = 200;
+const THUMB_SM_QUALITY = 60;
 
 // Allowed hosts for referer check
 const ALLOWED_HOSTS = [
@@ -61,7 +63,7 @@ export async function GET(
 
   // 3. Determine quality mode
   const q = request.nextUrl.searchParams.get("q") || "full";
-  if (q !== "thumb" && q !== "full") {
+  if (q !== "thumb" && q !== "thumb_sm" && q !== "full") {
     return NextResponse.json({ error: "Invalid quality parameter" }, { status: 400 });
   }
 
@@ -81,9 +83,13 @@ export async function GET(
     let buffer: Buffer;
     let cacheControl: string;
 
-    if (q === "thumb") {
+    if (q === "thumb" || q === "thumb_sm") {
       // Thumbnail: check cache first
-      const thumbPath = path.join(CACHE_DIR, `thumb-${id}.webp`);
+      const isSmall = q === "thumb_sm";
+      const thumbFilename = isSmall ? `thumb-sm-${id}.webp` : `thumb-${id}.webp`;
+      const thumbPath = path.join(CACHE_DIR, thumbFilename);
+      const width = isSmall ? THUMB_SM_WIDTH : THUMB_WIDTH;
+      const quality = isSmall ? THUMB_SM_QUALITY : THUMB_QUALITY;
 
       try {
         buffer = await fs.readFile(thumbPath);
@@ -91,8 +97,8 @@ export async function GET(
         // Generate thumbnail
         await fs.mkdir(CACHE_DIR, { recursive: true });
         buffer = await sharp(originalPath)
-          .resize(THUMB_WIDTH, null, { withoutEnlargement: true })
-          .webp({ quality: THUMB_QUALITY })
+          .resize(width, null, { withoutEnlargement: true })
+          .webp({ quality })
           .toBuffer();
         // Write cache (fire-and-forget)
         fs.writeFile(thumbPath, buffer).catch(() => {});

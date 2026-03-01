@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { SEED_MOOD_IMAGES, getImageUrl } from "@/lib/seed-data";
 import { createClient } from "@/lib/supabase/client";
@@ -110,6 +110,14 @@ export default function DiscoverDetailPage() {
     );
   }
 
+  // 썸네일 → 풀 이미지 전환
+  const [fullLoaded, setFullLoaded] = useState(false);
+  const fullImgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    setFullLoaded(false);
+  }, [id]);
+
   const isPremium = "is_premium" in item && item.is_premium;
   const isOwner =
     isSharedId &&
@@ -209,12 +217,28 @@ export default function DiscoverDetailPage() {
                 <span className="text-[10px] font-medium text-white">AI 생성</span>
               </div>
             )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={getImageUrl(item.id, "full")}
-              alt={item.title || "무드 이미지"}
-              className="w-full h-auto rounded-xl"
-            />
+            <div className="relative">
+              {/* 썸네일 blur placeholder */}
+              {!fullLoaded && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={getImageUrl(item.id, "thumb_sm")}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-full h-auto rounded-xl filter blur-[8px] scale-[1.02]"
+                />
+              )}
+              {/* 풀 이미지 */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                ref={fullImgRef}
+                src={getImageUrl(item.id, "full")}
+                alt={item.title || "무드 이미지"}
+                decoding="async"
+                onLoad={() => setFullLoaded(true)}
+                className={`w-full h-auto rounded-xl ${fullLoaded ? "" : "absolute inset-0 opacity-0"}`}
+              />
+            </div>
           </div>
         </div>
 

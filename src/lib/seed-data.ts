@@ -1,7 +1,7 @@
 // 시드 데이터 — Gemini AI로 생성한 서브컬쳐 아이템 이미지
 // 이미지는 content/images/에 저장, API(/api/images/:id)로 서빙
 
-export function getImageUrl(id: string, q: "thumb" | "full" = "full"): string {
+export function getImageUrl(id: string, q: "thumb" | "thumb_sm" | "full" = "full"): string {
   return `/api/images/${id}?q=${q}`;
 }
 

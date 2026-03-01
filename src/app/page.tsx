@@ -34,11 +34,10 @@ export default function HomePage() {
           <div className="absolute bottom-32 left-[20%] h-32 w-32 rounded-full bg-[var(--angel-blue)]/6 blur-[70px]" />
         </div>
 
-        {/* Large decorative circles — responsive sizes */}
+        {/* Large decorative circles — mobile: 크게 (짤려도 OK), desktop: 기존 */}
         <div className="pointer-events-none">
-          {/* Mobile: smaller circles */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75vw] h-[75vw] max-w-[320px] max-h-[320px] rounded-full border-[2px] border-[var(--angel-blue)]/20 rotate-slow md:w-[min(580px,70vw)] md:h-[min(580px,70vw)] md:max-w-none md:max-h-none md:border-[3px] md:border-[var(--angel-blue)]/30" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85vw] h-[85vw] max-w-[360px] max-h-[360px] rounded-full border-[1.5px] border-[var(--angel-lavender)]/15 md:w-[min(620px,75vw)] md:h-[min(620px,75vw)] md:max-w-none md:max-h-none md:border-[2px] md:border-[var(--angel-lavender)]/25" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vw] rounded-full border-[2px] border-[var(--angel-blue)]/20 rotate-slow md:w-[min(580px,70vw)] md:h-[min(580px,70vw)] md:border-[3px] md:border-[var(--angel-blue)]/30" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[135vw] h-[135vw] rounded-full border-[1.5px] border-[var(--angel-lavender)]/15 md:w-[min(620px,75vw)] md:h-[min(620px,75vw)] md:border-[2px] md:border-[var(--angel-lavender)]/25" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
         </div>
 
         {/* Wing logo */}
