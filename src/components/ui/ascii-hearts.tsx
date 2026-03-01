@@ -1,7 +1,8 @@
 /**
- * Decorative ASCII-art hearts scattered across the page background.
+ * Decorative ASCII-art hearts — fixed overlay on the viewport.
  * Uses braille-dot characters for the heart shapes.
- * Fully responsive: fewer / smaller hearts on mobile.
+ * pointer-events: none so all clicks pass through.
+ * Responsive: fewer hearts on mobile, more on desktop.
  */
 
 const TINY = `\
@@ -44,20 +45,19 @@ interface HeartDef {
 }
 
 const HEARTS: HeartDef[] = [
-  // ── mobile-visible (tiny, edges) ──
-  { art: TINY, top: "6%",  left: "2%",  rotate: -12, opacity: 0.06, color: "var(--angel-blue-light)", show: "all", delay: "0s" },
-  { art: TINY, top: "55%", right: "3%", rotate: 18,  opacity: 0.05, color: "var(--angel-lavender-light)", show: "all", delay: "1.5s" },
-  { art: TINY, top: "85%", left: "4%",  rotate: -8,  opacity: 0.055, color: "var(--angel-pink-light)", show: "all", delay: "3s" },
+  // ── mobile + all ──
+  { art: TINY, top: "10%",  left: "3%",   rotate: -12, opacity: 0.18, color: "var(--angel-blue)",     show: "all", delay: "0s" },
+  { art: TINY, top: "75%",  right: "4%",  rotate: 15,  opacity: 0.15, color: "var(--angel-lavender)", show: "all", delay: "2s" },
 
-  // ── tablet+ (sm / md hearts) ──
-  { art: SM, top: "18%", right: "2%", rotate: 10,  opacity: 0.045, color: "var(--angel-lavender-light)", show: "md", delay: "0.5s" },
-  { art: SM, top: "72%", left: "1%",  rotate: -15, opacity: 0.04,  color: "var(--angel-blue-light)", show: "md", delay: "2s" },
-  { art: MD, top: "42%", right: "1%", rotate: 6,   opacity: 0.035, color: "var(--angel-pink-light)", show: "md", delay: "1s" },
+  // ── tablet+ ──
+  { art: SM,   top: "30%",  right: "3%",  rotate: 10,  opacity: 0.13, color: "var(--angel-pink)",     show: "md",  delay: "0.8s" },
+  { art: SM,   top: "60%",  left: "2%",   rotate: -10, opacity: 0.14, color: "var(--angel-lavender)", show: "md",  delay: "1.5s" },
+  { art: TINY, top: "90%",  left: "8%",   rotate: 20,  opacity: 0.16, color: "var(--angel-blue)",     show: "md",  delay: "3s" },
 
-  // ── desktop only (lg hearts + extras) ──
-  { art: LG, top: "12%", left: "0%",  rotate: -5,  opacity: 0.03,  color: "var(--angel-blue-light)", show: "lg", delay: "0s" },
-  { art: MD, top: "60%", right: "0%", rotate: 8,   opacity: 0.03,  color: "var(--angel-lavender-light)", show: "lg", delay: "2.5s" },
-  { art: SM, top: "92%", right: "5%", rotate: -10, opacity: 0.04,  color: "var(--angel-pink-light)", show: "lg", delay: "3.5s" },
+  // ── desktop ──
+  { art: MD,   top: "15%",  right: "2%",  rotate: 8,   opacity: 0.10, color: "var(--angel-pink)",     show: "lg",  delay: "0.5s" },
+  { art: LG,   top: "45%",  left: "1%",   rotate: -6,  opacity: 0.08, color: "var(--angel-blue)",     show: "lg",  delay: "1.2s" },
+  { art: MD,   top: "82%",  right: "1%",  rotate: 12,  opacity: 0.09, color: "var(--angel-lavender)", show: "lg",  delay: "2.8s" },
 ];
 
 const showClass: Record<string, string> = {
@@ -70,7 +70,7 @@ export function AsciiHearts() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden"
+      className="pointer-events-none fixed inset-0 z-[2] select-none overflow-hidden"
     >
       {HEARTS.map((h, i) => (
         <pre
