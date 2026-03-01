@@ -136,34 +136,46 @@ export default function GeneratePage() {
         />
       </div>
 
-      {/* Quality Toggle */}
+      {/* Premium Toggle */}
       <div className="mb-4 flex items-center justify-center">
-        <button
-          type="button"
-          onClick={() => setPremium((v) => !v)}
-          disabled={isLoading}
-          className={`flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-medium transition-all border ${
-            premium
-              ? "bg-[#ffd700]/15 border-[#ffd700]/50 text-[#b8860b]"
-              : "bg-white/50 border-[var(--angel-border)] text-[var(--angel-text-soft)]"
-          }`}
-        >
-          {/* Crown icon */}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z"
-              fill={premium ? "#ffd700" : "none"}
-              stroke={premium ? "#b8860b" : "currentColor"}
-              strokeWidth="1.5"
-            />
-          </svg>
-          {premium ? "프리미엄 2K 고해상도" : "일반 1K"}
-          {premium && (
-            <span className="ml-1 rounded-full bg-[#ffd700]/30 px-1.5 py-0.5 text-[9px] text-[#b8860b]">
-              2K
+        <label className="flex items-center gap-3 cursor-pointer select-none">
+          {/* Crown + label */}
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z"
+                fill={premium ? "#ffd700" : "none"}
+                stroke={premium ? "#b8860b" : "var(--angel-text-faint)"}
+                strokeWidth="1.5"
+              />
+            </svg>
+            <span className={`text-[12px] font-medium transition-colors ${
+              premium ? "text-[#b8860b]" : "text-[var(--angel-text-soft)]"
+            }`}>
+              프리미엄 2K
             </span>
-          )}
-        </button>
+          </div>
+
+          {/* Toggle switch */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={premium}
+            onClick={() => setPremium((v) => !v)}
+            disabled={isLoading}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 transition-colors duration-200 focus-visible:outline-none disabled:opacity-50 ${
+              premium
+                ? "border-[#ffd700]/60 bg-[#ffd700]"
+                : "border-[var(--angel-border)] bg-[var(--angel-bg-soft)]"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                premium ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </label>
       </div>
 
       {/* Generate Button */}
