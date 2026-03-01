@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Gemini 이미지 생성 호출
     const response = await genai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.0-flash-exp-image-generation",
       contents: fullPrompt,
       config: {
         responseModalities: ["IMAGE", "TEXT"],
