@@ -13,7 +13,7 @@ export function AngelLogo({ size = 32, className = "", priority = false }: Angel
       alt="MyAngel"
       height={size}
       className={className}
-      style={{ height: size, width: "auto" }}
+      style={{ height: size, width: "auto", transform: "scaleX(0.82)" }}
       {...(priority ? { fetchPriority: "high" } : {})}
     />
   );
