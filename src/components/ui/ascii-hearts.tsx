@@ -92,12 +92,12 @@ const DESKTOP_ZONE_DEFS = [
   { Comp: StripedHeart, sizeRange: [60, 100],  topRange: [60, 80], leftRange: [5, 25]  },
 ];
 
-// Mobile zones (적당한 크기, 영역 안에서 잘 보이도록)
+// Mobile zones (영역 안쪽에 확실히 보이도록)
 const MOBILE_ZONE_DEFS = [
-  { Comp: DotHeart,     sizeRange: [70, 90],  topRange: [8, 20],  leftRange: [3, 15]  },
-  { Comp: OutlineHeart, sizeRange: [60, 80],  topRange: [8, 20],  rightRange: [3, 15] },
-  { Comp: CrossHeart,   sizeRange: [55, 75],  topRange: [60, 72], rightRange: [5, 18] },
-  { Comp: StripedHeart, sizeRange: [50, 70],  topRange: [62, 74], leftRange: [5, 18]  },
+  { Comp: DotHeart,     sizeRange: [65, 80],  topRange: [10, 22], leftRange: [8, 22]  },
+  { Comp: OutlineHeart, sizeRange: [55, 70],  topRange: [12, 24], rightRange: [8, 22] },
+  { Comp: CrossHeart,   sizeRange: [50, 65],  topRange: [55, 65], rightRange: [10, 25] },
+  { Comp: StripedHeart, sizeRange: [45, 60],  topRange: [58, 68], leftRange: [10, 25]  },
 ];
 
 interface ZoneDef {
