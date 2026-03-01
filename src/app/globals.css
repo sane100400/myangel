@@ -1,26 +1,439 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ═══════════════════════════════════════
+   天使界隈 Design System
+   ═══════════════════════════════════════ */
+:root {
+  --radius: 0.75rem;
+
+  /* ── 새 컬러 팔레트 ──
+   * 배경: 거의 흰색 (블루 틴트)
+   * 액센트: 채도 높은 스카이블루 + 라벤더
+   * 텍스트: 진한 네이비 → 대비 극대화
+   */
+  --background: #dce4f2;
+  --foreground: #1e2d42;
+  --card: #ffffff;
+  --card-foreground: #1e2d42;
+  --popover: #ffffff;
+  --popover-foreground: #1e2d42;
+
+  --primary: #5b9bd5;
+  --primary-foreground: #ffffff;
+  --secondary: #eef3fc;
+  --secondary-foreground: #3d5a80;
+
+  --muted: #eef3fc;
+  --muted-foreground: #5a7394;
+
+  --accent: #e0d4f5;
+  --accent-foreground: #4a3a6a;
+
+  --destructive: #e07a84;
+
+  --border: #d4deee;
+  --input: #eaf0f9;
+  --ring: #5b9bd5;
+
+  --chart-1: #5b9bd5;
+  --chart-2: #9b7bc4;
+  --chart-3: #6abfa0;
+  --chart-4: #90caf9;
+  --chart-5: #c8b8e8;
+
+  --sidebar: #dce4f2;
+  --sidebar-foreground: #1e2d42;
+  --sidebar-primary: #5b9bd5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e0d4f5;
+  --sidebar-accent-foreground: #4a3a6a;
+  --sidebar-border: #d4deee;
+  --sidebar-ring: #5b9bd5;
+
+  /* Angel tokens */
+  --angel-blue: #5b9bd5;
+  --angel-blue-light: #90caf9;
+  --angel-blue-pale: #e3f2fd;
+  --angel-lavender: #7c5cad;
+  --angel-lavender-light: #a88cd0;
+  --angel-lavender-pale: #e0d4f5;
+  --angel-pink: #c48aae;
+  --angel-pink-light: #e8cce0;
+  --angel-pink-pale: #f8eef4;
+  --angel-text: #1e2d42;
+  --angel-text-soft: #3d5a80;
+  --angel-text-faint: #6b85a5;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ═══════════════════════════════════
+   ✦ Cards — solid white, clean
+   ═══════════════════════════════════ */
+.glass-card {
+  background: #ffffff;
+  border: 1px solid #d4deee;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+.glass-card:hover {
+  border-color: var(--angel-blue);
+  box-shadow: 0 4px 20px rgba(91, 155, 213, 0.12);
+}
+
+.angel-card {
+  background: #ffffff;
+  border: 1px solid #d4deee;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+.angel-card:hover {
+  border-color: var(--angel-blue);
+  box-shadow: 0 4px 16px rgba(91, 155, 213, 0.1);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════
+   ✟ Cross Decoration — 잘 보이게
+   ═══════════════════════════════════ */
+.cross-deco {
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  color: var(--angel-lavender);
+  letter-spacing: 0.4em;
+}
+
+/* ═══════════════════════════════════
+   ✦ Lace Border — 선명한 레이스 패턴
+   navbar 하단, footer 상단
+   ═══════════════════════════════════ */
+
+/*
+ * 레이스: lace.png 사용
+ */
+.lace-bottom {
+  position: relative;
+}
+.lace-bottom::after {
+  content: "";
+  position: absolute;
+  bottom: -36px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background-image: url("/lace.png");
+  background-size: auto 40px;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.lace-top {
+  position: relative;
+}
+.lace-top::before {
+  content: "";
+  position: absolute;
+  top: -36px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background-image: url("/lace.png");
+  background-size: auto 40px;
+  background-repeat: repeat-x;
+  transform: scaleY(-1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Snap Scroll Sections ── */
+.scroll-smooth {
+  scroll-snap-type: y proximity;
+}
+.snap-section {
+  scroll-snap-align: start;
+}
+
+/* ── Section Divider — 깔끔한 라인+별 ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 24px;
+}
+.section-divider::before,
+.section-divider::after {
+  content: "";
+  flex: 1;
+  max-width: 280px;
+  height: 2px;
+}
+.section-divider::before {
+  background: linear-gradient(to right, transparent, var(--angel-lavender-light), transparent);
+}
+.section-divider::after {
+  background: linear-gradient(to left, transparent, var(--angel-lavender-light), transparent);
+}
+
+/* ── Frill Frame 카드 프릴 테두리 ── */
+.frill-frame {
+  position: relative;
+}
+.frill-frame::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='0' r='6' fill='%23b89cd8'/%3E%3Ccircle cx='0' cy='10' r='6' fill='%23b89cd8'/%3E%3Ccircle cx='20' cy='10' r='6' fill='%23b89cd8'/%3E%3Ccircle cx='10' cy='20' r='6' fill='%23b89cd8'/%3E%3Ccircle cx='10' cy='0' r='2.5' fill='%23f4f6fc'/%3E%3Ccircle cx='0' cy='10' r='2.5' fill='%23f4f6fc'/%3E%3Ccircle cx='20' cy='10' r='2.5' fill='%23f4f6fc'/%3E%3Ccircle cx='10' cy='20' r='2.5' fill='%23f4f6fc'/%3E%3C/svg%3E");
+  background-size: 20px 20px;
+  background-repeat: repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════
+   ✦ Celestial Divider — 심플 라인
+   ═══════════════════════════════════ */
+.celestial-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+.celestial-divider::before,
+.celestial-divider::after {
+  content: "";
+  height: 1px;
+  width: 60px;
+  background: var(--angel-blue-light);
+}
+
+.ribbon-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.ribbon-divider::before,
+.ribbon-divider::after {
+  content: "";
+  height: 1px;
+  width: 60px;
+  background: var(--angel-blue-light);
+}
+
+/* ═══════════════════════════════════
+   Buttons — 그라데이션 X, 단색 사용
+   ═══════════════════════════════════ */
+.angel-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 9999px;
+  padding: 10px 26px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.angel-btn-primary {
+  background: var(--angel-blue);
+  color: #ffffff;
+  border: 1px solid var(--angel-blue);
+  box-shadow: 0 2px 8px rgba(91, 155, 213, 0.3);
+}
+.angel-btn-primary:hover {
+  background: #4a8bc5;
+  border-color: #4a8bc5;
+  box-shadow: 0 4px 16px rgba(91, 155, 213, 0.4);
+  transform: translateY(-2px) scale(1.03);
+}
+.angel-btn-secondary {
+  background: #ffffff;
+  color: var(--angel-text);
+  border: 1.5px solid #d4deee;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.angel-btn-secondary:hover {
+  border-color: var(--angel-blue);
+  color: var(--angel-blue);
+  box-shadow: 0 4px 12px rgba(91, 155, 213, 0.15);
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* ═══════════════════════════════════
+   Tags — 단색, 깔끔
+   ═══════════════════════════════════ */
+.angel-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  background: #ffffff;
+  border: 1px solid #d4deee;
+  color: var(--angel-text-soft);
+  transition: all 0.3s ease;
+}
+.angel-tag:hover {
+  border-color: var(--angel-blue-light);
+  color: var(--angel-text);
+  background: var(--angel-blue-pale);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(91, 155, 213, 0.15);
+}
+.angel-tag-active {
+  background: var(--angel-blue);
+  color: #ffffff;
+  border-color: var(--angel-blue);
+}
+
+/* ═══════════════════════════════════
+   Animations
+   ═══════════════════════════════════ */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+.twinkle { animation: twinkle 2.5s ease-in-out infinite; }
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-14px) scale(1.03); }
+}
+.float-gentle { animation: float-gentle 3s ease-in-out infinite; }
+
+/* shimmer — 로고 텍스트 전용 (유일한 그라데이션) */
+.shimmer-text {
+  background: linear-gradient(90deg, #3d7fbf 0%, #6b4a9e 50%, #3d7fbf 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(91, 155, 213, 0.15); }
+  50% { box-shadow: 0 0 16px rgba(91, 155, 213, 0.25); }
+}
+.pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+@keyframes rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.rotate-slow { animation: rotate-slow 20s linear infinite; }
+
+/* ═══════════════════════════════════
+   Hero 전용 — 유일한 그라데이션 배경
+   ═══════════════════════════════════ */
+.gradient-mesh {
+  background: linear-gradient(180deg, #d6deee 0%, #dce4f2 100%);
+}
+
+.star-bg { position: relative; }
+.star-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 10% 15%, rgba(91, 155, 213, 0.5) 50%, transparent 50%),
+    radial-gradient(2px 2px at 25% 60%, rgba(124, 92, 173, 0.4) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 40% 30%, rgba(91, 155, 213, 0.45) 50%, transparent 50%),
+    radial-gradient(2px 2px at 55% 80%, rgba(124, 92, 173, 0.35) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 70% 20%, rgba(91, 155, 213, 0.4) 50%, transparent 50%),
+    radial-gradient(2px 2px at 85% 50%, rgba(124, 92, 173, 0.45) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 15% 75%, rgba(91, 155, 213, 0.35) 50%, transparent 50%),
+    radial-gradient(2px 2px at 90% 70%, rgba(124, 92, 173, 0.3) 50%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════
+   Halo Ring
+   ═══════════════════════════════════ */
+.halo-ring {
+  border: 2.5px solid rgba(91, 155, 213, 0.5);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(91, 155, 213, 0.15), inset 0 0 20px rgba(91, 155, 213, 0.08);
+}
+
+/* ═══════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d4deee; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--angel-blue-light); }
+
+::selection {
+  background: rgba(91, 155, 213, 0.25);
+  color: #2d3748;
 }
