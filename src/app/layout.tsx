@@ -8,14 +8,14 @@ import "./globals.css";
 const sans = Gothic_A1({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  display: "swap",
+  weight: ["400", "700"],
+  display: "optional",
 });
 
 const logo = Libre_Bodoni({
   variable: "--font-logo",
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["700"],
   display: "swap",
 });
 
