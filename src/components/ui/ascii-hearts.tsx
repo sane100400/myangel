@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 
 /**
  * 4 visually distinct SVG hearts for the hero section.
@@ -91,18 +91,24 @@ const ZONE_DEFS = [
   { Comp: StripedHeart, sizeRange: [60, 100],  topRange: [60, 80], leftRange: [5, 25]  },
 ];
 
+function generate() {
+  return ZONE_DEFS.map((z) => ({
+    ...z,
+    size: Math.round(rand(z.sizeRange[0], z.sizeRange[1])),
+    top: `${rand(z.topRange[0], z.topRange[1]).toFixed(1)}%`,
+    left: z.leftRange ? `${rand(z.leftRange[0], z.leftRange[1]).toFixed(1)}%` : undefined,
+    right: z.rightRange ? `${rand(z.rightRange[0], z.rightRange[1]).toFixed(1)}%` : undefined,
+  }));
+}
+
 export function AsciiHearts() {
-  const hearts = useMemo(
-    () =>
-      ZONE_DEFS.map((z) => ({
-        ...z,
-        size: Math.round(rand(z.sizeRange[0], z.sizeRange[1])),
-        top: `${rand(z.topRange[0], z.topRange[1]).toFixed(1)}%`,
-        left: z.leftRange ? `${rand(z.leftRange[0], z.leftRange[1]).toFixed(1)}%` : undefined,
-        right: z.rightRange ? `${rand(z.rightRange[0], z.rightRange[1]).toFixed(1)}%` : undefined,
-      })),
-    [],
-  );
+  const [hearts, setHearts] = useState<ReturnType<typeof generate> | null>(null);
+
+  useEffect(() => {
+    setHearts(generate());
+  }, []);
+
+  if (!hearts) return null;
 
   return (
     <>
