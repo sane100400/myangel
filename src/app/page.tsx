@@ -26,10 +26,10 @@ export default function HomePage() {
           <div className="absolute bottom-32 left-[20%] h-32 w-32 rounded-full bg-[var(--angel-blue)]/6 blur-[70px]" />
         </div>
 
-        {/* Large decorative circles — desktop only */}
-        <div className="hidden md:block">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[580px] rounded-full border-[3px] border-[var(--angel-blue)]/40 rotate-slow" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[620px] h-[620px] rounded-full border-[2.5px] border-[var(--angel-lavender)]/35" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
+        {/* Large decorative circles — desktop only, vw-based to prevent overflow */}
+        <div className="hidden md:block pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(580px,70vw)] h-[min(580px,70vw)] rounded-full border-[3px] border-[var(--angel-blue)]/30 rotate-slow" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(620px,75vw)] h-[min(620px,75vw)] rounded-full border-[2px] border-[var(--angel-lavender)]/25" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
         </div>
 
         {/* Wing logo */}
