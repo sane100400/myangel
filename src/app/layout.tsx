@@ -1,16 +1,9 @@
 import type { Metadata } from "next";
-import { Gothic_A1, Libre_Bodoni } from "next/font/google";
+import { Libre_Bodoni } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-
-const sans = Gothic_A1({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "optional",
-});
 
 const logo = Libre_Bodoni({
   variable: "--font-logo",
@@ -33,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${sans.variable} ${logo.variable} font-sans antialiased`}
+        className={`${logo.variable} font-sans antialiased`}
       >
         <Navbar />
         <main className="min-h-[calc(100vh-4.5rem)]">{children}</main>
