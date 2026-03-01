@@ -134,21 +134,21 @@ export default function HomePage() {
             ✦ four steps to your mood ✦
           </p>
 
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-4">
             {[
-              { num: "I", title: "사진 한 장", desc: "마음에 드는 코디 사진을\n올려주세요" },
-              { num: "II", title: "AI 분석", desc: "AI가 소재·실루엣·색감을\n분석해요" },
-              { num: "III", title: "무드보드", desc: "비슷한 느낌의 사진으로\n3×3 보드를 완성해요" },
-              { num: "IV", title: "아이템 & 브랜드", desc: "이 느낌에 어울리는\n아이템과 브랜드를 알려줘요" },
+              { num: "I", title: "사진 한 장", desc: "마음에 드는 코디 사진을 올려주세요" },
+              { num: "II", title: "AI 분석", desc: "AI가 소재·실루엣·색감을 분석해요" },
+              { num: "III", title: "무드보드", desc: "비슷한 느낌의 사진으로 3×3 보드를 완성해요" },
+              { num: "IV", title: "브랜드 추천", desc: "이 느낌에 어울리는 아이템과 브랜드를 알려줘요" },
             ].map((step) => (
-              <div key={step.num} className="glass-card rounded-2xl p-5 text-center group">
-                <div className="mb-2 flex items-center justify-center gap-2">
-                  <span className="text-[9px] text-[var(--angel-lavender)] opacity-40">✦</span>
-                  <span className="text-lg text-[var(--angel-blue)] font-heading">{step.num}</span>
-                  <span className="text-[9px] text-[var(--angel-lavender)] opacity-40">✦</span>
+              <div key={step.num} className="glass-card rounded-xl p-3 text-center md:rounded-2xl md:p-5">
+                <div className="mb-1.5 flex items-center justify-center gap-1.5 md:mb-2 md:gap-2">
+                  <span className="text-[8px] text-[var(--angel-lavender)] opacity-40 md:text-[9px]">✦</span>
+                  <span className="text-base text-[var(--angel-blue)] font-heading md:text-lg">{step.num}</span>
+                  <span className="text-[8px] text-[var(--angel-lavender)] opacity-40 md:text-[9px]">✦</span>
                 </div>
-                <h3 className="mb-1.5 text-[12px] font-medium tracking-[0.08em] text-[var(--angel-text)]">{step.title}</h3>
-                <p className="text-[11px] leading-[1.7] text-[var(--angel-text-soft)] whitespace-pre-line">{step.desc}</p>
+                <h3 className="mb-1 text-[11px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:mb-1.5 md:text-[12px] md:tracking-[0.08em]">{step.title}</h3>
+                <p className="text-[10px] leading-[1.6] text-[var(--angel-text-soft)] md:text-[11px] md:leading-[1.7]">{step.desc}</p>
               </div>
             ))}
           </div>
