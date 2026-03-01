@@ -55,10 +55,10 @@ function DotHeart({
 }
 
 const HEARTS = [
-  { size: 140, dotR: 2.0, gap: 6.5, top: "18%", left: "2%" },
-  { size: 110, dotR: 1.8, gap: 6,   top: "25%", right: "3%" },
-  { size: 100, dotR: 1.6, gap: 5.5, top: "65%", right: "2%" },
-  { size: 80,  dotR: 1.5, gap: 5,   top: "72%", left: "4%" },
+  { size: 140, dotR: 2.0, gap: 6.5, top: "18%", left: "12%" },
+  { size: 110, dotR: 1.8, gap: 6,   top: "25%", right: "14%" },
+  { size: 100, dotR: 1.6, gap: 5.5, top: "65%", right: "12%" },
+  { size: 80,  dotR: 1.5, gap: 5,   top: "72%", left: "15%" },
 ];
 
 export function AsciiHearts() {
