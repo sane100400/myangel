@@ -84,15 +84,32 @@ const rand = (min: number, max: number) => Math.random() * (max - min) + min;
  * Each heart has a zone (top/left ranges in %) and size range.
  * Position is randomized within the zone on every page load.
  */
-const ZONE_DEFS = [
+// Desktop zones (큰 하트, 넓은 영역)
+const DESKTOP_ZONE_DEFS = [
   { Comp: DotHeart,     sizeRange: [120, 160], topRange: [12, 30], leftRange: [5, 25]  },
   { Comp: OutlineHeart, sizeRange: [90, 130],  topRange: [10, 28], rightRange: [5, 25] },
   { Comp: CrossHeart,   sizeRange: [80, 120],  topRange: [55, 75], rightRange: [5, 25] },
   { Comp: StripedHeart, sizeRange: [60, 100],  topRange: [60, 80], leftRange: [5, 25]  },
 ];
 
-function generate() {
-  return ZONE_DEFS.map((z) => ({
+// Mobile zones (작은 하트, 가장자리에 배치해서 콘텐츠 겹침 방지)
+const MOBILE_ZONE_DEFS = [
+  { Comp: DotHeart,     sizeRange: [40, 55], topRange: [5, 15],  leftRange: [2, 10]  },
+  { Comp: OutlineHeart, sizeRange: [35, 50], topRange: [5, 15],  rightRange: [2, 10] },
+  { Comp: CrossHeart,   sizeRange: [30, 45], topRange: [75, 88], rightRange: [3, 12] },
+  { Comp: StripedHeart, sizeRange: [28, 40], topRange: [78, 90], leftRange: [3, 12]  },
+];
+
+interface ZoneDef {
+  Comp: React.ComponentType<HProps>;
+  sizeRange: number[];
+  topRange: number[];
+  leftRange?: number[];
+  rightRange?: number[];
+}
+
+function generate(zones: ZoneDef[]) {
+  return zones.map((z) => ({
     ...z,
     size: Math.round(rand(z.sizeRange[0], z.sizeRange[1])),
     top: `${rand(z.topRange[0], z.topRange[1]).toFixed(1)}%`,
@@ -102,23 +119,43 @@ function generate() {
 }
 
 export function AsciiHearts() {
-  const [hearts, setHearts] = useState<ReturnType<typeof generate> | null>(null);
+  const [desktopHearts, setDesktopHearts] = useState<ReturnType<typeof generate> | null>(null);
+  const [mobileHearts, setMobileHearts] = useState<ReturnType<typeof generate> | null>(null);
 
   useEffect(() => {
-    setHearts(generate());
+    setDesktopHearts(generate(DESKTOP_ZONE_DEFS));
+    setMobileHearts(generate(MOBILE_ZONE_DEFS));
   }, []);
 
-  if (!hearts) return null;
+  if (!desktopHearts || !mobileHearts) return null;
 
   return (
     <>
-      {hearts.map((h, i) => {
+      {/* Desktop hearts */}
+      {desktopHearts.map((h, i) => {
         const Comp = h.Comp;
         return (
           <Comp
-            key={i}
+            key={`d-${i}`}
             size={h.size}
-            className="ascii-heart pointer-events-none absolute z-[1] select-none"
+            className="ascii-heart pointer-events-none absolute z-[1] select-none hidden md:block"
+            style={{
+              top: h.top,
+              left: h.left,
+              right: h.right,
+              animationDelay: `${i * 1.5}s`,
+            }}
+          />
+        );
+      })}
+      {/* Mobile hearts — smaller, edge-positioned */}
+      {mobileHearts.map((h, i) => {
+        const Comp = h.Comp;
+        return (
+          <Comp
+            key={`m-${i}`}
+            size={h.size}
+            className="ascii-heart pointer-events-none absolute z-[1] select-none opacity-60 md:hidden"
             style={{
               top: h.top,
               left: h.left,

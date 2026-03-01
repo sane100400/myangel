@@ -22,7 +22,11 @@ export default function HomePage() {
         {/* ── ASCII heart decorations (hero only) ── */}
         <AsciiHearts />
 
-        {/* Floating orbs — desktop only (GPU heavy) */}
+        {/* Floating orbs — mobile: smaller/fewer, desktop: full set */}
+        <div className="md:hidden">
+          <div className="absolute top-8 left-[5%] h-20 w-20 rounded-full bg-[var(--angel-blue)]/6 blur-[40px]" />
+          <div className="absolute bottom-12 right-[8%] h-24 w-24 rounded-full bg-[var(--angel-lavender)]/8 blur-[40px]" />
+        </div>
         <div className="hidden md:block">
           <div className="absolute top-12 left-[8%] h-40 w-40 rounded-full bg-[var(--angel-blue)]/8 blur-[80px]" />
           <div className="absolute bottom-16 right-[10%] h-48 w-48 rounded-full bg-[var(--angel-lavender)]/10 blur-[80px]" />
@@ -30,10 +34,11 @@ export default function HomePage() {
           <div className="absolute bottom-32 left-[20%] h-32 w-32 rounded-full bg-[var(--angel-blue)]/6 blur-[70px]" />
         </div>
 
-        {/* Large decorative circles — desktop only, vw-based to prevent overflow */}
-        <div className="hidden md:block pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(580px,70vw)] h-[min(580px,70vw)] rounded-full border-[3px] border-[var(--angel-blue)]/30 rotate-slow" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(620px,75vw)] h-[min(620px,75vw)] rounded-full border-[2px] border-[var(--angel-lavender)]/25" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
+        {/* Large decorative circles — responsive sizes */}
+        <div className="pointer-events-none">
+          {/* Mobile: smaller circles */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75vw] h-[75vw] max-w-[320px] max-h-[320px] rounded-full border-[2px] border-[var(--angel-blue)]/20 rotate-slow md:w-[min(580px,70vw)] md:h-[min(580px,70vw)] md:max-w-none md:max-h-none md:border-[3px] md:border-[var(--angel-blue)]/30" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85vw] h-[85vw] max-w-[360px] max-h-[360px] rounded-full border-[1.5px] border-[var(--angel-lavender)]/15 md:w-[min(620px,75vw)] md:h-[min(620px,75vw)] md:max-w-none md:max-h-none md:border-[2px] md:border-[var(--angel-lavender)]/25" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
         </div>
 
         {/* Wing logo */}

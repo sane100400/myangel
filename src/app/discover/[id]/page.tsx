@@ -4,6 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { SEED_MOOD_IMAGES, getImageUrl } from "@/lib/seed-data";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 interface SharedImageData {
   id: string;
@@ -11,6 +13,7 @@ interface SharedImageData {
   tags: string[];
   prompt: string;
   is_premium: boolean;
+  user_id?: string | null;
 }
 
 export default function DiscoverDetailPage() {
@@ -30,6 +33,25 @@ export default function DiscoverDetailPage() {
   const [sharedItem, setSharedItem] = useState<SharedImageData | null>(null);
   const [isLoading, setIsLoading] = useState(isSharedId);
   const [fetchError, setFetchError] = useState(false);
+
+  // 현재 유저
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // 제목 수정 state
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+
+  // 삭제 state
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // 현재 유저 로드
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id ?? null);
+    });
+  }, []);
 
   useEffect(() => {
     if (!isSharedId) return;
@@ -89,6 +111,73 @@ export default function DiscoverDetailPage() {
   }
 
   const isPremium = "is_premium" in item && item.is_premium;
+  const isOwner =
+    isSharedId &&
+    currentUserId !== null &&
+    "user_id" in item &&
+    item.user_id !== null &&
+    item.user_id === currentUserId;
+
+  // 제목 수정 핸들러
+  const handleStartEdit = () => {
+    setEditTitle(item.title);
+    setIsEditingTitle(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingTitle(false);
+    setEditTitle("");
+  };
+
+  const handleSaveTitle = async () => {
+    if (!editTitle.trim() || isSavingTitle) return;
+    setIsSavingTitle(true);
+    try {
+      const res = await fetch(`/api/share/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: editTitle.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "제목 수정에 실패했어요.");
+        return;
+      }
+      // 로컬 상태 업데이트
+      if (sharedItem) {
+        setSharedItem({ ...sharedItem, title: data.title });
+      }
+      setIsEditingTitle(false);
+      toast.success("제목이 수정되었어요!");
+    } catch {
+      toast.error("제목 수정 중 오류가 발생했어요.");
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
+
+  // 삭제 핸들러
+  const handleDelete = async () => {
+    if (isDeleting) return;
+    const confirmed = window.confirm("이 이미지를 삭제하시겠어요? 이 작업은 되돌릴 수 없어요.");
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/share/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "삭제에 실패했어요.");
+        return;
+      }
+      toast.success("이미지가 삭제되었어요.");
+      router.push("/discover");
+    } catch {
+      toast.error("삭제 중 오류가 발생했어요.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 md:px-5 md:pt-24">
@@ -131,10 +220,54 @@ export default function DiscoverDetailPage() {
 
         {/* Info */}
         <div className="md:w-1/2 flex flex-col">
-          {/* Title */}
-          <h1 className="font-heading text-2xl font-medium tracking-[0.06em] text-[var(--angel-text)] md:text-3xl">
-            {item.title}
-          </h1>
+          {/* Title with edit */}
+          {isEditingTitle ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                maxLength={100}
+                className="flex-1 rounded-lg border border-[var(--angel-blue)]/40 bg-white/70 px-3 py-2 text-lg font-heading font-medium text-[var(--angel-text)] outline-none focus:border-[var(--angel-blue)]"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveTitle();
+                  if (e.key === "Escape") handleCancelEdit();
+                }}
+              />
+              <button
+                onClick={handleSaveTitle}
+                disabled={isSavingTitle || !editTitle.trim()}
+                className="shrink-0 rounded-lg bg-[var(--angel-blue)] px-3 py-2 text-[12px] text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+              >
+                {isSavingTitle ? "..." : "저장"}
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="shrink-0 rounded-lg border border-[var(--angel-border)] bg-white/50 px-3 py-2 text-[12px] text-[var(--angel-text-soft)] transition-colors hover:bg-white/80"
+              >
+                취소
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h1 className="font-heading text-2xl font-medium tracking-[0.06em] text-[var(--angel-text)] md:text-3xl">
+                {item.title}
+              </h1>
+              {isOwner && (
+                <button
+                  onClick={handleStartEdit}
+                  className="shrink-0 rounded-lg p-1.5 text-[var(--angel-text-faint)] transition-colors hover:bg-white/60 hover:text-[var(--angel-blue)]"
+                  title="제목 수정"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Tags */}
           {item.tags && item.tags.length > 0 && (
@@ -248,6 +381,23 @@ export default function DiscoverDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Owner: Delete button */}
+          {isOwner && (
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="mt-4 w-full rounded-xl border border-red-200 bg-red-50/80 py-2.5 text-[12px] text-red-500 transition-colors hover:bg-red-100 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+              {isDeleting ? "삭제 중..." : "이 이미지 삭제하기"}
+            </button>
+          )}
         </div>
       </div>
     </div>

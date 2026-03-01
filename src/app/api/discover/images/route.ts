@@ -27,6 +27,7 @@ export async function GET() {
         tags: img.tags,
         prompt: img.prompt,
         is_premium: img.is_premium,
+        user_id: img.user_id ?? null,
       }));
   } catch {
     // JSON 읽기 실패 시 무시 — seed만 반환

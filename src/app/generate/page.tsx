@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { BrandCard } from "@/components/moodboard/brand-card";
 import { saveImage } from "@/lib/saved-images";
 import { SEED_TAGS } from "@/lib/seed-data";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
 import type { Brand } from "@/lib/brands";
 
 interface GenerateResult {
@@ -75,6 +77,7 @@ async function validateAndReadFile(
 }
 
 export default function GeneratePage() {
+  const router = useRouter();
   const [prompt, setPrompt] = useState("");
   const [premium, setPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -259,6 +262,16 @@ export default function GeneratePage() {
 
   const handleShare = async () => {
     if (!result?.image || isSharing || isShared) return;
+
+    // 로그인 확인
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Discover에 공유하려면 로그인이 필요해요.");
+      router.push("/auth/login");
+      return;
+    }
+
     setIsSharing(true);
     try {
       // 스타일 태그를 SEED_TAGS 화이트리스트와 매칭
@@ -277,6 +290,12 @@ export default function GeneratePage() {
       });
       const data = await res.json();
       if (!res.ok) {
+        // 서버 401 이중 방어
+        if (res.status === 401) {
+          toast.error("로그인이 필요해요.");
+          router.push("/auth/login");
+          return;
+        }
         toast.error(data.error || "공유에 실패했어요.");
         return;
       }

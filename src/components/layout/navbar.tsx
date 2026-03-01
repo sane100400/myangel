@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { AngelLogo } from "@/components/ui/angel-logo";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
@@ -14,7 +16,41 @@ const NAV_ITEMS = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    // 초기 유저 로드
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    // auth 상태 변경 구독
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setLoggingOut(false);
+    router.refresh();
+  };
+
+  // 아바타 URL (Google/Kakao 프로필 이미지)
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  const displayEmail = user?.email ? (user.email.length > 18 ? user.email.slice(0, 15) + "..." : user.email) : "";
 
   return (
     <header className="sticky top-0 z-50 lace-bottom">
@@ -53,14 +89,37 @@ export function Navbar() {
           })}
         </div>
 
-        {/* Auth */}
-        <div className="hidden items-center md:flex">
-          <Link
-            href="/auth/login"
-            className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-5 py-1.5 text-[11px] tracking-[0.08em] text-[var(--angel-text)] transition-all hover:bg-white/80 hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
-          >
-            Login
-          </Link>
+        {/* Auth — Desktop */}
+        <div className="hidden items-center gap-2 md:flex">
+          {user ? (
+            <>
+              {avatarUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  className="h-7 w-7 rounded-full border border-[var(--angel-border)] object-cover"
+                />
+              )}
+              <span className="text-[11px] text-[var(--angel-text-soft)] max-w-[120px] truncate">
+                {displayEmail}
+              </span>
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-4 py-1.5 text-[11px] tracking-[0.08em] text-[var(--angel-text-soft)] transition-all hover:bg-white/80 hover:border-red-300 hover:text-red-500 disabled:opacity-50"
+              >
+                {loggingOut ? "..." : "Logout"}
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-5 py-1.5 text-[11px] tracking-[0.08em] text-[var(--angel-text)] transition-all hover:bg-white/80 hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
+            >
+              Login
+            </Link>
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -105,13 +164,38 @@ export function Navbar() {
             );
           })}
           <div className="mt-2 pt-3 border-t border-white/20">
-            <Link
-              href="/auth/login"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center py-2.5 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 text-[13px] tracking-[0.06em] text-[var(--angel-text-soft)]"
-            >
-              Login
-            </Link>
+            {user ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 min-w-0">
+                  {avatarUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                      className="h-7 w-7 rounded-full border border-[var(--angel-border)] object-cover shrink-0"
+                    />
+                  )}
+                  <span className="text-[12px] text-[var(--angel-text-soft)] truncate">
+                    {displayEmail}
+                  </span>
+                </div>
+                <button
+                  onClick={() => { setMobileOpen(false); handleLogout(); }}
+                  disabled={loggingOut}
+                  className="shrink-0 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 px-4 py-2 text-[12px] text-red-400 transition-colors hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/auth/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center py-2.5 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 text-[13px] tracking-[0.06em] text-[var(--angel-text-soft)]"
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       )}

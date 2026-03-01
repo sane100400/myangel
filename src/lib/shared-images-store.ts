@@ -12,6 +12,7 @@ const MAX_PER_IP_PER_DAY = 10;
 
 const STORE_PATH = path.join(process.cwd(), "content", "shared-images.json");
 const SHARED_DIR = path.join(process.cwd(), "content", "shared");
+const CACHE_DIR = path.join(process.cwd(), "content", "cache");
 
 // ── 타입 ──
 export interface SharedImageEntry {
@@ -23,6 +24,7 @@ export interface SharedImageEntry {
   created_at: string;
   ip_hash: string;
   file_size: number;
+  user_id: string | null; // null = 레거시 (수정/삭제 불가)
 }
 
 interface Store {
@@ -57,7 +59,14 @@ export function hashIP(ip: string): string {
 export async function readStore(): Promise<Store> {
   try {
     const raw = await fs.readFile(STORE_PATH, "utf-8");
-    return JSON.parse(raw) as Store;
+    const store = JSON.parse(raw) as Store;
+    // 레거시 하위호환: user_id 없는 항목에 null 보충
+    for (const img of store.images) {
+      if (img.user_id === undefined) {
+        img.user_id = null;
+      }
+    }
+    return store;
   } catch {
     return { images: [] };
   }
@@ -113,6 +122,49 @@ export async function addImage(entry: SharedImageEntry): Promise<void> {
 export async function getImage(id: string): Promise<SharedImageEntry | null> {
   const store = await readStore();
   return store.images.find((img) => img.id === id) || null;
+}
+
+// ── 제목 수정 (소유권 검증) ──
+export async function updateImageTitle(
+  id: string,
+  userId: string,
+  newTitle: string
+): Promise<{ success: boolean; error?: string }> {
+  const store = await readStore();
+  const img = store.images.find((i) => i.id === id);
+
+  if (!img) return { success: false, error: "이미지를 찾을 수 없습니다." };
+  if (!img.user_id) return { success: false, error: "레거시 이미지는 수정할 수 없습니다." };
+  if (img.user_id !== userId) return { success: false, error: "권한이 없습니다." };
+
+  img.title = newTitle;
+  await writeStore(store);
+  return { success: true };
+}
+
+// ── 이미지 삭제 (소유권 검증 + 파일 삭제) ──
+export async function deleteImage(
+  id: string,
+  userId: string
+): Promise<{ success: boolean; error?: string }> {
+  const store = await readStore();
+  const idx = store.images.findIndex((i) => i.id === id);
+
+  if (idx === -1) return { success: false, error: "이미지를 찾을 수 없습니다." };
+
+  const img = store.images[idx];
+  if (!img.user_id) return { success: false, error: "레거시 이미지는 삭제할 수 없습니다." };
+  if (img.user_id !== userId) return { success: false, error: "권한이 없습니다." };
+
+  // JSON에서 제거
+  store.images.splice(idx, 1);
+  await writeStore(store);
+
+  // 파일 삭제 (WebP + 썸네일)
+  fs.unlink(path.join(SHARED_DIR, `${id}.webp`)).catch(() => {});
+  fs.unlink(path.join(CACHE_DIR, `thumb-${id}.webp`)).catch(() => {});
+
+  return { success: true };
 }
 
 // ── 상수 export ──

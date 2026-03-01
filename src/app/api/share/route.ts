@@ -14,6 +14,7 @@ import {
   SHARED_DIR,
   type SharedImageEntry,
 } from "@/lib/shared-images-store";
+import { createClient } from "@/lib/supabase/server";
 
 // ── 설정 ──
 const MAX_BASE64_SIZE = 8 * 1024 * 1024; // 8MB (base64 문자열 길이)
@@ -41,7 +42,17 @@ function sanitizeText(text: string, maxLen: number): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // ── 0. IP 추출 ──
+    // ── 0. 인증 확인 ──
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "로그인이 필요합니다." },
+        { status: 401 }
+      );
+    }
+
+    // ── 0-1. IP 추출 ──
     const forwarded = request.headers.get("x-forwarded-for");
     const ip = forwarded?.split(",")[0]?.trim() || "unknown";
     const ipHash = hashIP(ip);
@@ -235,6 +246,7 @@ export async function POST(request: NextRequest) {
       created_at: new Date().toISOString(),
       ip_hash: ipHash,
       file_size: webpBuffer.length,
+      user_id: user.id,
     };
 
     await addImage(entry);
