@@ -130,12 +130,10 @@ export const SEED_MOOD_IMAGES = [
 ];
 
 // 메인페이지와 Discover 페이지에서 공유하는 태그 목록
-// STYLE_PRESETS 라벨과 동일하게 유지
+// STYLE_PRESETS 라벨과 동일 — 스타일 태그만 노출
 export const SEED_TAGS = [
   "지뢰계", "천사계", "양산형", "로리타", "고스로리",
   "페어리코어", "Y2K", "위시코어", "캐릭터", "감성",
-  "레이스", "리본", "다크로맨틱", "파스텔", "인테리어",
-  "인형", "액세서리", "핑크",
 ];
 
 // 이미지 생성 스타일 프리셋
@@ -147,7 +145,7 @@ export const STYLE_PRESETS = [
   { id: "goth", label: "고스로리", emoji: "🦇", prompt_hint: "고딕 로리타 스타일, 블랙, 다크 로맨틱, 빈티지 고딕", hashtags: ["#고딕", "#다크", "#빈티지", "#로맨틱"] },
   { id: "fairy", label: "페어리코어", emoji: "🧚", prompt_hint: "페어리코어 스타일, 파스텔, 몽환적, 요정 같은 감성", hashtags: ["#파스텔", "#몽환", "#요정", "#드림코어"] },
   { id: "y2k", label: "Y2K", emoji: "💿", prompt_hint: "Y2K 패션 스타일, 2000년대 레트로, 메탈릭, 글로시", hashtags: ["#레트로", "#메탈릭", "#글로시", "#2000s"] },
-  { id: "wishcore", label: "위시코어", emoji: "🪞", prompt_hint: "위시코어 스타일, 아기자기하고 소녀적인, 빈티지 로맨틱, 리본과 진주", hashtags: ["#빈티지로맨틱", "#아기자기", "#소녀감성", "#리본진주"] },
+  { id: "wishcore", label: "위시코어", emoji: "⭐", prompt_hint: "위시코어 스타일, NCT WISH 감성, Y2K 베이스에 별과 날개 장식, 글리터, 엔젤코어, 키치한 데일리룩", hashtags: ["#도트패턴", "#Y2K글리터", "#엔젤코어", "#키치데일리"] },
   { id: "character", label: "캐릭터", emoji: "✨", prompt_hint: "애니메이션 캐릭터 일러스트 스타일", hashtags: ["#애니", "#일러스트", "#캐릭터디자인", "#판타지"] },
   { id: "aesthetic", label: "감성", emoji: "🌸", prompt_hint: "감성적인 에스테틱 이미지 스타일", hashtags: ["#에스테틱", "#무드", "#감성사진", "#아트"] },
 ] as const;
@@ -159,5 +157,5 @@ export const SEED_PROMPTS = [
   { id: "p-3", prompt: "핑크 리본 가득한 양산형 코디의 귀여운 소녀 일러스트", style: "양산형", tags: ["양산형", "리본", "핑크"] },
   { id: "p-4", prompt: "고딕 로리타 드레스를 입은 인형 같은 소녀, 달빛 아래 성 배경", style: "고스로리", tags: ["고스로리", "로리타", "다크로맨틱"] },
   { id: "p-5", prompt: "몽환적인 숲속의 페어리코어 감성 소녀, 반짝이는 날개", style: "페어리코어", tags: ["페어리코어", "드림코어", "파스텔"] },
-  { id: "p-6", prompt: "빈티지 거울 앞 레이스 리본과 진주 액세서리, 소녀적인 위시코어 감성", style: "위시코어", tags: ["위시코어", "액세서리", "리본"] },
+  { id: "p-6", prompt: "별과 날개 장식의 글리터 탑과 Y2K 미니스커트, 위시코어 데일리룩", style: "위시코어", tags: ["위시코어", "Y2K", "엔젤코어"] },
 ];
