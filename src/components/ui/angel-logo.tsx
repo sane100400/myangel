@@ -1,20 +1,19 @@
 interface AngelLogoProps {
+  /** Height in px. Width is auto-calculated from aspect ratio. */
   size?: number;
-  desktopSize?: number;
   className?: string;
   priority?: boolean;
 }
 
-export function AngelLogo({ size = 32, desktopSize, className = "", priority = false }: AngelLogoProps) {
+export function AngelLogo({ size = 32, className = "", priority = false }: AngelLogoProps) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/logo.webp"
       alt="MyAngel"
-      width={desktopSize ?? size}
-      height={desktopSize ?? size}
+      height={size}
       className={className}
-      style={{ transform: "scaleX(0.85)" }}
+      style={{ height: size, width: "auto" }}
       {...(priority ? { fetchPriority: "high" } : {})}
     />
   );

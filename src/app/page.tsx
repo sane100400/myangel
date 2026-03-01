@@ -34,7 +34,7 @@ export default function HomePage() {
 
         {/* Wing logo */}
         <div className="mb-5 relative z-10 md:float-gentle md:mb-6">
-          <AngelLogo size={64} desktopSize={120} priority className="w-[51px] h-[64px] md:w-[96px] md:h-[120px]" />
+          <AngelLogo size={80} priority />
         </div>
 
         {/* Title */}
