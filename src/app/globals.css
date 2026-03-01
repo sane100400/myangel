@@ -229,15 +229,7 @@
   }
 }
 
-/* ── Snap Scroll — desktop only (모바일에서 스크롤 끝까지 안되는 문제 방지) ── */
-@media (min-width: 768px) {
-  html {
-    scroll-snap-type: y proximity;
-  }
-  .snap-section {
-    scroll-snap-align: start;
-  }
-}
+/* snap scroll removed — 스크롤 불편 해소 */
 
 /* ── Section Divider — 깔끔한 라인+별 ── */
 .section-divider {

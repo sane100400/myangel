@@ -65,14 +65,11 @@ export default function HomePage() {
           어울리는 아이템과 브랜드를 바로 알려줄게요.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="relative z-10 mt-5 flex flex-col gap-2.5 sm:flex-row sm:gap-3 w-full max-w-xs sm:max-w-none sm:w-auto">
-          <Link href="/moodboard" className="angel-btn angel-btn-primary">
+        {/* CTA Button */}
+        <div className="relative z-10 mt-5">
+          <Link href="/discover" className="angel-btn angel-btn-primary">
             <span className="text-[10px]">✦</span>
-            무드보드 만들기
-          </Link>
-          <Link href="/discover" className="angel-btn angel-btn-secondary">
-            무드 탐색
+            바로 시작하기
           </Link>
         </div>
       </section>
