@@ -45,6 +45,13 @@ export default function DiscoverDetailPage() {
   // 삭제 state
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // 썸네일 → 풀 이미지 전환
+  const [fullLoaded, setFullLoaded] = useState(false);
+  const fullImgRef = useRef<HTMLImageElement>(null);
+
+  // 이미지 비율 감지: "landscape" | "portrait" | "square"
+  const [aspect, setAspect] = useState<"landscape" | "portrait" | "square" | null>(null);
+
   // 현재 유저 로드
   useEffect(() => {
     const supabase = createClient();
@@ -83,6 +90,19 @@ export default function DiscoverDetailPage() {
     return () => { cancelled = true; };
   }, [id, isSharedId]);
 
+  // id 변경 시 이미지 상태 리셋
+  useEffect(() => {
+    setFullLoaded(false);
+    setAspect(null);
+  }, [id]);
+
+  const detectAspect = (w: number, h: number) => {
+    const ratio = w / h;
+    if (ratio > 1.2) setAspect("landscape");
+    else if (ratio < 0.8) setAspect("portrait");
+    else setAspect("square");
+  };
+
   // 로딩 상태
   if (isLoading) {
     return (
@@ -109,25 +129,6 @@ export default function DiscoverDetailPage() {
       </div>
     );
   }
-
-  // 썸네일 → 풀 이미지 전환
-  const [fullLoaded, setFullLoaded] = useState(false);
-  const fullImgRef = useRef<HTMLImageElement>(null);
-
-  // 이미지 비율 감지: "landscape" | "portrait" | "square"
-  const [aspect, setAspect] = useState<"landscape" | "portrait" | "square" | null>(null);
-
-  useEffect(() => {
-    setFullLoaded(false);
-    setAspect(null);
-  }, [id]);
-
-  const detectAspect = (w: number, h: number) => {
-    const ratio = w / h;
-    if (ratio > 1.2) setAspect("landscape");
-    else if (ratio < 0.8) setAspect("portrait");
-    else setAspect("square");
-  };
 
   const isPremium = "is_premium" in item && item.is_premium;
   const isOwner =
@@ -211,9 +212,9 @@ export default function DiscoverDetailPage() {
         뒤로가기
       </button>
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+      <div className="flex flex-col md:flex-row md:items-start gap-6 md:gap-10">
         {/* Image — 비율에 따라 너비 조절 */}
-        <div className={`shrink-0 md:self-start ${
+        <div className={`shrink-0 md:sticky md:top-24 ${
           aspect === "landscape"
             ? "md:w-[55%]"                           /* 가로형: 넓게 */
             : aspect === "portrait"
