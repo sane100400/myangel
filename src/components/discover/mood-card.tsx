@@ -16,7 +16,7 @@ export function MoodCard({ id, title, tags, isPremium, index = 0 }: MoodCardProp
   return (
     <Link
       href={`/discover/${id}`}
-      className="group relative overflow-hidden rounded-xl break-inside-avoid mb-3 glass-card block"
+      className="group relative overflow-hidden rounded-xl glass-card block aspect-[3/4]"
     >
       {/* Premium crown badge */}
       {isPremium && (
@@ -37,7 +37,7 @@ export function MoodCard({ id, title, tags, isPremium, index = 0 }: MoodCardProp
         loading={isEager ? "eager" : "lazy"}
         decoding="async"
         {...(isEager ? { fetchPriority: "high" as const } : {})}
-        className="w-full h-auto object-cover"
+        className="w-full h-full object-cover absolute inset-0"
         style={{ backgroundColor: "var(--angel-bg-soft, #e8ecf4)" }}
       />
 

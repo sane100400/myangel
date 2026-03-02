@@ -73,7 +73,7 @@ export function MoodGallery({ images }: MoodGalleryProps) {
 
   return (
     <div>
-      <div className="columns-2 gap-3 sm:columns-3 lg:columns-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {visibleImages.map((image, index) => (
           <MoodCard
             key={image.id}
@@ -90,7 +90,7 @@ export function MoodGallery({ images }: MoodGalleryProps) {
       {hasMore ? (
         <div ref={sentinelRef} className="mt-6">
           {isLoadingMore && (
-            <div className="columns-2 gap-3 sm:columns-3 lg:columns-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="mb-3 h-48 rounded-xl" />
               ))}
