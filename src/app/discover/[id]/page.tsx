@@ -114,9 +114,20 @@ export default function DiscoverDetailPage() {
   const [fullLoaded, setFullLoaded] = useState(false);
   const fullImgRef = useRef<HTMLImageElement>(null);
 
+  // 이미지 비율 감지: "landscape" | "portrait" | "square"
+  const [aspect, setAspect] = useState<"landscape" | "portrait" | "square" | null>(null);
+
   useEffect(() => {
     setFullLoaded(false);
+    setAspect(null);
   }, [id]);
+
+  const detectAspect = (w: number, h: number) => {
+    const ratio = w / h;
+    if (ratio > 1.2) setAspect("landscape");
+    else if (ratio < 0.8) setAspect("portrait");
+    else setAspect("square");
+  };
 
   const isPremium = "is_premium" in item && item.is_premium;
   const isOwner =
@@ -188,7 +199,9 @@ export default function DiscoverDetailPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 md:px-5 md:pt-24">
+    <div className={`mx-auto px-4 pt-10 pb-16 md:px-5 md:pt-24 ${
+      aspect === "landscape" ? "max-w-5xl" : "max-w-4xl"
+    }`}>
       {/* Back */}
       <button
         onClick={() => router.back()}
@@ -200,9 +213,19 @@ export default function DiscoverDetailPage() {
         뒤로가기
       </button>
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+      <div className={`flex flex-col gap-6 ${
+        aspect === "landscape"
+          ? ""                                       /* 가로형: 항상 세로 스택 */
+          : "md:flex-row md:gap-10"                  /* 세로/정방형: 데스크톱에서 가로 배치 */
+      }`}>
         {/* Image */}
-        <div className="md:w-1/2 shrink-0">
+        <div className={`shrink-0 ${
+          aspect === "landscape"
+            ? "w-full"                               /* 가로형: 풀 너비 */
+            : aspect === "portrait"
+              ? "md:w-[45%]"                         /* 세로형: 45% */
+              : "md:w-1/2"                           /* 정방형/미감지: 50% */
+        }`}>
           <div className="glass-card rounded-2xl p-2 relative">
             {isPremium && (
               <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-[#ffd700]/90 px-2.5 py-1 shadow-md">
@@ -225,7 +248,15 @@ export default function DiscoverDetailPage() {
                   src={getImageUrl(item.id, "thumb_sm")}
                   alt=""
                   aria-hidden="true"
-                  className="w-full h-auto rounded-xl filter blur-[8px] scale-[1.02]"
+                  onLoad={(e) => {
+                    if (!aspect) {
+                      const img = e.currentTarget;
+                      detectAspect(img.naturalWidth, img.naturalHeight);
+                    }
+                  }}
+                  className={`w-full h-auto rounded-xl filter blur-[8px] scale-[1.02] ${
+                    aspect === "portrait" ? "max-h-[70vh] object-contain md:max-h-none" : ""
+                  }`}
                 />
               )}
               {/* 풀 이미지 */}
@@ -235,15 +266,27 @@ export default function DiscoverDetailPage() {
                 src={getImageUrl(item.id, "full")}
                 alt={item.title || "무드 이미지"}
                 decoding="async"
-                onLoad={() => setFullLoaded(true)}
-                className={`w-full h-auto rounded-xl ${fullLoaded ? "" : "absolute inset-0 opacity-0"}`}
+                onLoad={(e) => {
+                  setFullLoaded(true);
+                  const img = e.currentTarget;
+                  detectAspect(img.naturalWidth, img.naturalHeight);
+                }}
+                className={`w-full h-auto rounded-xl ${fullLoaded ? "" : "absolute inset-0 opacity-0"} ${
+                  aspect === "portrait" ? "max-h-[70vh] object-contain md:max-h-none" : ""
+                }`}
               />
             </div>
           </div>
         </div>
 
         {/* Info */}
-        <div className="md:w-1/2 flex flex-col">
+        <div className={`flex flex-col ${
+          aspect === "landscape"
+            ? "w-full"                               /* 가로형: 풀 너비 */
+            : aspect === "portrait"
+              ? "md:w-[55%]"                         /* 세로형: 55% */
+              : "md:w-1/2"                           /* 정방형/미감지: 50% */
+        }`}>
           {/* Title with edit */}
           {isEditingTitle ? (
             <div className="flex items-center gap-2">
