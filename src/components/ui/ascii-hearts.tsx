@@ -92,10 +92,10 @@ const DESKTOP_ZONE_DEFS = [
   { Comp: StripedHeart, sizeRange: [60, 100],  topRange: [60, 80], leftRange: [5, 25]  },
 ];
 
-// Mobile zones — 2개만, 좌상단/우하단에 크고 확실하게
+// Mobile zones — 2개, 상단 양쪽 코너 (콘텐츠 위 여백)
 const MOBILE_ZONE_DEFS = [
-  { Comp: DotHeart,     sizeRange: [80, 100], topRange: [5, 12],  leftRange: [5, 15]  },
-  { Comp: OutlineHeart, sizeRange: [70, 90],  topRange: [45, 55], rightRange: [5, 15] },
+  { Comp: DotHeart,     sizeRange: [75, 95],  topRange: [3, 10],  leftRange: [3, 12]  },
+  { Comp: OutlineHeart, sizeRange: [65, 85],  topRange: [3, 10],  rightRange: [3, 12] },
 ];
 
 interface ZoneDef {
