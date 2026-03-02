@@ -212,9 +212,9 @@ export default function DiscoverDetailPage() {
         뒤로가기
       </button>
 
-      <div className="flex flex-col md:flex-row md:items-start gap-6 md:gap-10">
+      <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
         {/* Image — 비율에 따라 너비 조절 */}
-        <div className={`shrink-0 md:sticky md:top-24 ${
+        <div className={`shrink-0 ${
           aspect === "landscape"
             ? "md:w-[55%]"                           /* 가로형: 넓게 */
             : aspect === "portrait"
