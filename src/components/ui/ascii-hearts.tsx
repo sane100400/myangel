@@ -10,8 +10,8 @@ import { useState, useEffect } from "react";
 const HEART =
   "M50 88 C50 88 2 58 2 30 C2 10 16 0 34 0 C43 0 50 6 50 14 C50 6 57 0 66 0 C84 0 98 10 98 30 C98 58 50 88 50 88Z";
 
-const HEART_COLOR = "#b8c4da";
-const HEART_SHADOW = "drop-shadow(0 0 8px rgba(184,196,218,0.5))";
+const HEART_COLOR = "white";
+const HEART_SHADOW = "drop-shadow(0 0 6px rgba(255,255,255,0.7))";
 
 /* ── 1. Dot-filled (브레일 도트) ── */
 function DotHeart({ size, style, className }: HProps) {
