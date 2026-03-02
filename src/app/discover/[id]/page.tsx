@@ -199,9 +199,7 @@ export default function DiscoverDetailPage() {
   };
 
   return (
-    <div className={`mx-auto px-4 pt-10 pb-16 md:px-5 md:pt-24 ${
-      aspect === "landscape" ? "max-w-5xl" : "max-w-4xl"
-    }`}>
+    <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 md:px-5 md:pt-24">
       {/* Back */}
       <button
         onClick={() => router.back()}
@@ -213,18 +211,14 @@ export default function DiscoverDetailPage() {
         뒤로가기
       </button>
 
-      <div className={`flex flex-col gap-6 ${
-        aspect === "landscape"
-          ? ""                                       /* 가로형: 항상 세로 스택 */
-          : "md:flex-row md:gap-10"                  /* 세로/정방형: 데스크톱에서 가로 배치 */
-      }`}>
-        {/* Image */}
-        <div className={`shrink-0 ${
+      <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+        {/* Image — 비율에 따라 너비 조절 */}
+        <div className={`shrink-0 md:self-start ${
           aspect === "landscape"
-            ? "w-full"                               /* 가로형: 풀 너비 */
+            ? "md:w-[55%]"                           /* 가로형: 넓게 */
             : aspect === "portrait"
-              ? "md:w-[45%]"                         /* 세로형: 45% */
-              : "md:w-1/2"                           /* 정방형/미감지: 50% */
+              ? "md:w-[38%]"                         /* 세로형: 좁게 */
+              : "md:w-[45%]"                         /* 정방형/미감지: 중간 */
         }`}>
           <div className="glass-card rounded-2xl p-2 relative">
             {isPremium && (
@@ -254,9 +248,7 @@ export default function DiscoverDetailPage() {
                       detectAspect(img.naturalWidth, img.naturalHeight);
                     }
                   }}
-                  className={`w-full h-auto rounded-xl filter blur-[8px] scale-[1.02] ${
-                    aspect === "portrait" ? "max-h-[70vh] object-contain md:max-h-none" : ""
-                  }`}
+                  className="w-full h-auto rounded-xl filter blur-[8px] scale-[1.02]"
                 />
               )}
               {/* 풀 이미지 */}
@@ -271,22 +263,14 @@ export default function DiscoverDetailPage() {
                   const img = e.currentTarget;
                   detectAspect(img.naturalWidth, img.naturalHeight);
                 }}
-                className={`w-full h-auto rounded-xl ${fullLoaded ? "" : "absolute inset-0 opacity-0"} ${
-                  aspect === "portrait" ? "max-h-[70vh] object-contain md:max-h-none" : ""
-                }`}
+                className={`w-full h-auto rounded-xl ${fullLoaded ? "" : "absolute inset-0 opacity-0"}`}
               />
             </div>
           </div>
         </div>
 
         {/* Info */}
-        <div className={`flex flex-col ${
-          aspect === "landscape"
-            ? "w-full"                               /* 가로형: 풀 너비 */
-            : aspect === "portrait"
-              ? "md:w-[55%]"                         /* 세로형: 55% */
-              : "md:w-1/2"                           /* 정방형/미감지: 50% */
-        }`}>
+        <div className="flex flex-col flex-1 min-w-0">
           {/* Title with edit */}
           {isEditingTitle ? (
             <div className="flex items-center gap-2">
