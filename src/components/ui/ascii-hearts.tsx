@@ -92,12 +92,10 @@ const DESKTOP_ZONE_DEFS = [
   { Comp: StripedHeart, sizeRange: [60, 100],  topRange: [60, 80], leftRange: [5, 25]  },
 ];
 
-// Mobile zones (영역 안쪽에 확실히 보이도록)
+// Mobile zones — 2개만, 좌상단/우하단에 크고 확실하게
 const MOBILE_ZONE_DEFS = [
-  { Comp: DotHeart,     sizeRange: [65, 80],  topRange: [10, 22], leftRange: [8, 22]  },
-  { Comp: OutlineHeart, sizeRange: [55, 70],  topRange: [12, 24], rightRange: [8, 22] },
-  { Comp: CrossHeart,   sizeRange: [50, 65],  topRange: [55, 65], rightRange: [10, 25] },
-  { Comp: StripedHeart, sizeRange: [45, 60],  topRange: [58, 68], leftRange: [10, 25]  },
+  { Comp: DotHeart,     sizeRange: [80, 100], topRange: [5, 12],  leftRange: [5, 15]  },
+  { Comp: OutlineHeart, sizeRange: [70, 90],  topRange: [45, 55], rightRange: [5, 15] },
 ];
 
 interface ZoneDef {
@@ -155,7 +153,7 @@ export function AsciiHearts() {
           <Comp
             key={`m-${i}`}
             size={h.size}
-            className="ascii-heart pointer-events-none absolute z-[1] select-none opacity-60 md:hidden"
+            className="ascii-heart pointer-events-none absolute z-[1] select-none opacity-80 md:hidden"
             style={{
               top: h.top,
               left: h.left,
