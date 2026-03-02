@@ -10,6 +10,9 @@ import { useState, useEffect } from "react";
 const HEART =
   "M50 88 C50 88 2 58 2 30 C2 10 16 0 34 0 C43 0 50 6 50 14 C50 6 57 0 66 0 C84 0 98 10 98 30 C98 58 50 88 50 88Z";
 
+const HEART_COLOR = "#b8c4da";
+const HEART_SHADOW = "drop-shadow(0 0 8px rgba(184,196,218,0.5))";
+
 /* ── 1. Dot-filled (브레일 도트) ── */
 function DotHeart({ size, style, className }: HProps) {
   return (
@@ -17,11 +20,10 @@ function DotHeart({ size, style, className }: HProps) {
       className={className} style={style} aria-hidden="true">
       <defs>
         <pattern id="pat-dot" width="7" height="7" patternUnits="userSpaceOnUse">
-          <circle cx="3.5" cy="3.5" r="1.8" fill="white" />
+          <circle cx="3.5" cy="3.5" r="1.8" fill={HEART_COLOR} />
         </pattern>
       </defs>
-      <path d={HEART} fill="url(#pat-dot)"
-        filter="drop-shadow(0 0 6px rgba(255,255,255,0.7))" />
+      <path d={HEART} fill="url(#pat-dot)" filter={HEART_SHADOW} />
     </svg>
   );
 }
@@ -31,9 +33,8 @@ function OutlineHeart({ size, style, className }: HProps) {
   return (
     <svg viewBox="0 0 100 90" width={size} height={size * 0.9}
       className={className} style={style} aria-hidden="true">
-      <path d={HEART} fill="none" stroke="white" strokeWidth="3"
-        strokeDasharray="4 3"
-        filter="drop-shadow(0 0 6px rgba(255,255,255,0.7))" />
+      <path d={HEART} fill="none" stroke={HEART_COLOR} strokeWidth="3"
+        strokeDasharray="4 3" filter={HEART_SHADOW} />
     </svg>
   );
 }
@@ -45,11 +46,10 @@ function StripedHeart({ size, style, className }: HProps) {
       className={className} style={style} aria-hidden="true">
       <defs>
         <pattern id="pat-stripe" width="100" height="5" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="2" x2="100" y2="2" stroke="white" strokeWidth="1.5" />
+          <line x1="0" y1="2" x2="100" y2="2" stroke={HEART_COLOR} strokeWidth="1.5" />
         </pattern>
       </defs>
-      <path d={HEART} fill="url(#pat-stripe)"
-        filter="drop-shadow(0 0 6px rgba(255,255,255,0.7))" />
+      <path d={HEART} fill="url(#pat-stripe)" filter={HEART_SHADOW} />
     </svg>
   );
 }
@@ -61,12 +61,11 @@ function CrossHeart({ size, style, className }: HProps) {
       className={className} style={style} aria-hidden="true">
       <defs>
         <pattern id="pat-cross" width="8" height="8" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="4" x2="8" y2="4" stroke="white" strokeWidth="0.8" />
-          <line x1="4" y1="0" x2="4" y2="8" stroke="white" strokeWidth="0.8" />
+          <line x1="0" y1="4" x2="8" y2="4" stroke={HEART_COLOR} strokeWidth="0.8" />
+          <line x1="4" y1="0" x2="4" y2="8" stroke={HEART_COLOR} strokeWidth="0.8" />
         </pattern>
       </defs>
-      <path d={HEART} fill="url(#pat-cross)"
-        filter="drop-shadow(0 0 6px rgba(255,255,255,0.7))" />
+      <path d={HEART} fill="url(#pat-cross)" filter={HEART_SHADOW} />
     </svg>
   );
 }
