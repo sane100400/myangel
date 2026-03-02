@@ -91,9 +91,9 @@ const DESKTOP_ZONE_DEFS = [
   { Comp: StripedHeart, sizeRange: [60, 100],  topRange: [60, 80], leftRange: [5, 25]  },
 ];
 
-// Mobile zones — 2개, 상단 양쪽 코너 (콘텐츠 위 여백)
+// Mobile zones — 2개, 상단 양쪽 (패턴 안쓰는 OutlineHeart만 — 모바일 렌더링 안정)
 const MOBILE_ZONE_DEFS = [
-  { Comp: DotHeart,     sizeRange: [75, 95],  topRange: [3, 10],  leftRange: [3, 12]  },
+  { Comp: OutlineHeart, sizeRange: [75, 95],  topRange: [3, 10],  leftRange: [3, 12]  },
   { Comp: OutlineHeart, sizeRange: [65, 85],  topRange: [3, 10],  rightRange: [3, 12] },
 ];
 
