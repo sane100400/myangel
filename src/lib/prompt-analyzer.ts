@@ -35,7 +35,7 @@ const SYSTEM_PROMPT = `당신은 이미지 생성을 위한 장면 분해 엔진
 
 export async function analyzePrompt(input: string): Promise<SceneObject[]> {
   const response = await genai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     contents: [
       {
         role: "user",
