@@ -23,6 +23,7 @@ export async function detectWeakSpans(
     config: {
       responseMimeType: "application/json",
       temperature: 0.7,
+      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 

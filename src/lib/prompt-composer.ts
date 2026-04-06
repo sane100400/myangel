@@ -52,27 +52,17 @@ export async function rewriteNatural(
         role: "user",
         parts: [
           {
-            text: `당신은 한국어 문장 교정 전문가입니다.
-
-아래 "수정된 문장"은 원본에서 일부 단어를 더 구체적인 표현으로 교체한 결과입니다.
-문맥이 어색하거나 문법이 부자연스러운 부분을 매끄럽게 다듬어주세요.
-
-규칙:
-1. 구체화된 표현(수정된 단어)은 절대 삭제하거나 다시 추상화하지 마세요. 모든 디테일을 유지하세요.
-2. 조사, 어미, 어순만 자연스럽게 조정하세요.
-3. 원본의 의도와 톤을 유지하세요.
-4. 결과는 한국어 문장 하나만 반환하세요. 설명이나 따옴표 없이 문장만.
+            text: `수정된 문장의 문맥을 자연스럽게 다듬어줘. 구체화된 표현은 모두 유지하고 조사/어순만 조정해. 문장만 반환해.
 
 원본: "${original}"
-수정된 문장: "${modified}"
-
-자연스럽게 다듬은 문장:`,
+수정: "${modified}"`,
           },
         ],
       },
     ],
     config: {
       temperature: 0.3,
+      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
@@ -116,6 +106,7 @@ export async function composePrompt(
     config: {
       responseMimeType: "application/json",
       temperature: 0.5,
+      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
