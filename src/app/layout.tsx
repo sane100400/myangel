@@ -13,9 +13,9 @@ const logo = Libre_Bodoni({
 });
 
 export const metadata: Metadata = {
-  title: "MyAngel — AI 이미지 생성 & 프롬프트 마켓",
+  title: "MyAngel — 인터랙티브 프롬프트 최적화 AI 이미지 스튜디오",
   description:
-    "트렌드에 맞는 프롬프트 큐레이팅으로 나만의 이미지를 만들고, 취향 담긴 프롬프트를 사고팔아요.",
+    "간단한 입력을 오브젝트 단위로 분해하고, 추상적 표현을 강화하여 최적화된 프롬프트로 AI 이미지를 생성하세요.",
 };
 
 export default function RootLayout({

@@ -9,7 +9,7 @@ import type { User } from "@supabase/supabase-js";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
-  { href: "/generate", label: "Generate" },
+  { href: "/generate", label: "Studio" },
   { href: "/discover", label: "Discover" },
   { href: "/boards", label: "Mypage" },
 ];

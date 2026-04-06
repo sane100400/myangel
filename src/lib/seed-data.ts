@@ -164,20 +164,6 @@ export const SEED_TAGS = [
   "페어리코어", "Y2K", "위시코어", "캐릭터", "감성",
 ];
 
-// 이미지 생성 스타일 프리셋
-export const STYLE_PRESETS = [
-  { id: "jirai", label: "지뢰계", emoji: "🖤", prompt_hint: "지뢰계 (jirai-kei) 스타일, 블랙 & 핑크, 레이스, 리본, 다크 로맨틱", hashtags: ["#다크로맨틱", "#레이스", "#리본", "#블랙핑크"] },
-  { id: "angel", label: "천사계", emoji: "🤍", prompt_hint: "천사계 (tenshi-kai) 스타일, 화이트 & 파스텔 블루, 레이스, 날개, 순수한 분위기", hashtags: ["#파스텔", "#레이스", "#날개", "#순수"] },
-  { id: "ryousan", label: "양산형", emoji: "🎀", prompt_hint: "양산형 (ryousangata) 스타일, 핑크, 리본, 프릴, 달콤한 소녀 감성", hashtags: ["#핑크", "#리본", "#프릴", "#스위트"] },
-  { id: "lolita", label: "로리타", emoji: "👗", prompt_hint: "로리타 패션 스타일, 프릴, 레이스, 정교한 드레스", hashtags: ["#프릴", "#레이스", "#드레스", "#클래식"] },
-  { id: "goth", label: "고스로리", emoji: "🦇", prompt_hint: "고딕 로리타 스타일, 블랙, 다크 로맨틱, 빈티지 고딕", hashtags: ["#고딕", "#다크", "#빈티지", "#로맨틱"] },
-  { id: "fairy", label: "페어리코어", emoji: "🧚", prompt_hint: "페어리코어 스타일, 파스텔, 몽환적, 요정 같은 감성", hashtags: ["#파스텔", "#몽환", "#요정", "#드림코어"] },
-  { id: "y2k", label: "Y2K", emoji: "💿", prompt_hint: "Y2K 패션 스타일, 2000년대 레트로, 메탈릭, 글로시", hashtags: ["#레트로", "#메탈릭", "#글로시", "#2000s"] },
-  { id: "wishcore", label: "위시코어", emoji: "⭐", prompt_hint: "위시코어 스타일, NCT WISH 감성, Y2K 베이스에 별과 날개 장식, 글리터, 엔젤코어, 키치한 데일리룩", hashtags: ["#도트패턴", "#Y2K글리터", "#엔젤코어", "#키치데일리"] },
-  { id: "character", label: "캐릭터", emoji: "✨", prompt_hint: "애니메이션 캐릭터 일러스트 스타일", hashtags: ["#애니", "#일러스트", "#캐릭터디자인", "#판타지"] },
-  { id: "aesthetic", label: "감성", emoji: "🌸", prompt_hint: "감성적인 에스테틱 이미지 스타일", hashtags: ["#에스테틱", "#무드", "#감성사진", "#아트"] },
-] as const;
-
 // 프롬프트 예시 데이터 (Discover 페이지에서 사용)
 export const SEED_PROMPTS = [
   { id: "p-1", prompt: "천사 날개를 단 파스텔 블루 드레스 소녀, 구름 위에서 앉아있는 모습", style: "천사계", tags: ["천사계", "파스텔", "일러스트"] },
