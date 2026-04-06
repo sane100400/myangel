@@ -67,11 +67,24 @@ export function InlineEnhancer({
       setActiveSpan(null);
       setBubblePos(null);
 
-      // Auto-analyze only on first meaningful input (no previous analysis)
-      // After that, user uses "다시 분석" button
-      if (!analyzedText && newVal.trim().length >= 2) {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 1500);
+      // Clear stale spans when text changes significantly
+      if (analyzedText && newVal !== analyzedText) {
+        const noOverlap = !newVal.includes(analyzedText) && !analyzedText.includes(newVal);
+        if (noOverlap) {
+          setSpans([]);
+          setAnalyzedText("");
+          setReplacedWords({});
+          setOriginalInput("");
+        }
+      }
+
+      // Auto-analyze when no valid analysis exists
+      if (newVal.trim().length >= 2) {
+        const needsAnalysis = !analyzedText || !newVal.includes(analyzedText) && !analyzedText.includes(newVal);
+        if (needsAnalysis) {
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 1500);
+        }
       }
     },
     [onChange, triggerAnalysis, analyzedText]
