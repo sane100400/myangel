@@ -67,13 +67,12 @@ export function InlineEnhancer({
       setActiveSpan(null);
       setBubblePos(null);
 
-      // Reset analyzed state when text changes
-      if (newVal !== analyzedText) {
-        // Don't clear spans immediately — keep showing until new analysis
+      // Auto-analyze only on first meaningful input (no previous analysis)
+      // After that, user uses "다시 분석" button
+      if (!analyzedText && newVal.trim().length >= 2) {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 1500);
       }
-
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 1500);
     },
     [onChange, triggerAnalysis, analyzedText]
   );
@@ -121,34 +120,33 @@ export function InlineEnhancer({
     []
   );
 
-  // Rewrite sentence naturally after word replacement
-  const rewriteSentence = useCallback(
-    async (original: string, modified: string) => {
-      setIsRewriting(true);
-      try {
-        const res = await fetch("/api/rewrite-prompt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ original, modified }),
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        if (data.rewritten && data.rewritten !== modified) {
-          onChange(data.rewritten);
-          // Re-analyze the rewritten text
-          if (debounceRef.current) clearTimeout(debounceRef.current);
-          debounceRef.current = setTimeout(() => triggerAnalysis(data.rewritten), 1500);
-        }
-      } catch {
-        // Keep the raw replacement if rewrite fails
-      } finally {
-        setIsRewriting(false);
+  // Manual rewrite — only called when user clicks "문장 다듬기"
+  const handleRewrite = useCallback(async () => {
+    if (!originalInput || isRewriting) return;
+    setIsRewriting(true);
+    try {
+      const res = await fetch("/api/rewrite-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ original: originalInput, modified: value }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.rewritten && data.rewritten !== value) {
+        onChange(data.rewritten);
+        setSpans([]);
+        setAnalyzedText("");
+        setOriginalInput("");
+        setReplacedWords({});
       }
-    },
-    [onChange, triggerAnalysis]
-  );
+    } catch {
+      // Keep raw replacement
+    } finally {
+      setIsRewriting(false);
+    }
+  }, [originalInput, value, onChange, isRewriting]);
 
-  // Select alternative — replace in text, then auto-rewrite
+  // Select alternative — local text replacement only, no API call
   const handleSelect = useCallback(
     (suggestion: EnhancementSuggestion) => {
       if (!activeSpan) return;
@@ -162,7 +160,6 @@ export function InlineEnhancer({
       }
 
       // Save original input on first replacement
-      const origInput = originalInput || value;
       if (!originalInput) setOriginalInput(value);
 
       const before = value.slice(0, idx);
@@ -176,17 +173,28 @@ export function InlineEnhancer({
         [currentText]: suggestion.text,
       }));
 
-      // Clear spans and bubble
-      setSpans([]);
-      setAnalyzedText("");
+      // Update spans locally (adjust positions, mark this one as replaced)
+      const diff = suggestion.text.length - currentText.length;
+      setSpans((prev) =>
+        prev.map((s) => {
+          if (s.text === currentText) {
+            return { ...s, text: suggestion.text, start: idx, end: idx + suggestion.text.length };
+          }
+          if (s.start > idx) {
+            return { ...s, start: s.start + diff, end: s.end + diff };
+          }
+          return s;
+        })
+      );
+      setAnalyzedText(newValue);
+
       setActiveSpan(null);
       setBubblePos(null);
-
-      // Auto-rewrite for natural flow, then re-analyze
-      rewriteSentence(origInput, newValue);
     },
-    [activeSpan, value, onChange, originalInput, rewriteSentence]
+    [activeSpan, value, onChange, originalInput]
   );
+
+  const hasReplacements = Object.keys(replacedWords).length > 0;
 
   // Valid spans that match current text
   const validSpans = spans.filter(
@@ -316,6 +324,22 @@ export function InlineEnhancer({
         </div>
       )}
 
+      {/* Rewrite button — shown after replacements */}
+      {hasReplacements && !isRewriting && (
+        <div className="mt-3">
+          <button
+            onClick={handleRewrite}
+            className="w-full rounded-xl border border-[var(--angel-blue)]/30 bg-[var(--angel-blue)]/6 py-2.5 text-[12px] font-medium text-[var(--angel-blue)] transition-all hover:bg-[var(--angel-blue)]/12 hover:border-[var(--angel-blue)]/50"
+          >
+            <span className="text-[10px]">✦</span>
+            {" "}문장 다듬기
+          </button>
+          <p className="mt-1 text-center text-[10px] text-[var(--angel-text-faint)]">
+            선택한 표현을 반영하여 문장을 자연스럽게 다듬어요
+          </p>
+        </div>
+      )}
+
       {/* Status bar */}
       <div className="mt-2 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
@@ -331,14 +355,14 @@ export function InlineEnhancer({
               단어를 분석하고 있어요...
             </span>
           )}
-          {!isAnalyzing && validSpans.length > 0 && (
+          {!isAnalyzing && !isRewriting && validSpans.length > 0 && (
             <span className="flex items-center gap-1.5 text-[10px] text-[var(--angel-text-soft)]">
               <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
               {validSpans.length}개 단어 강화 가능
             </span>
           )}
         </div>
-        {value.trim().length >= 2 && (
+        {value.trim().length >= 2 && !isRewriting && (
           <button
             onClick={handleManualAnalyze}
             disabled={isAnalyzing || disabled}
