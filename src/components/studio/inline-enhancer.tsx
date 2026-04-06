@@ -5,7 +5,6 @@ import {
   useRef,
   useCallback,
   useEffect,
-  useMemo,
 } from "react";
 import type { WeakSpan, EnhancementSuggestion } from "@/types";
 
@@ -22,296 +21,281 @@ export function InlineEnhancer({
   disabled = false,
   placeholder = "원하는 이미지를 설명해주세요",
 }: InlineEnhancerProps) {
-  const [weakSpans, setWeakSpans] = useState<WeakSpan[]>([]);
+  const [spans, setSpans] = useState<WeakSpan[]>([]);
   const [activeSpan, setActiveSpan] = useState<WeakSpan | null>(null);
   const [bubblePos, setBubblePos] = useState<{ top: number; left: number } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzedText, setAnalyzedText] = useState("");
+  const [replacedWords, setReplacedWords] = useState<Record<string, string>>({});
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const highlightRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync scroll between textarea and highlight layer
-  const handleScroll = useCallback(() => {
-    if (textareaRef.current && highlightRef.current) {
-      highlightRef.current.scrollTop = textareaRef.current.scrollTop;
-      highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
+  // Debounced analysis
+  const triggerAnalysis = useCallback(async (text: string) => {
+    if (text.trim().length < 2) {
+      setSpans([]);
+      setAnalyzedText("");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch("/api/enhance-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: text }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setSpans(data.weakSpans || []);
+      setAnalyzedText(text);
+    } catch {
+      // Silent fail
+    } finally {
+      setIsAnalyzing(false);
     }
   }, []);
-
-  // Debounced analysis — trigger after user stops typing for 1.5s
-  const triggerAnalysis = useCallback(
-    async (text: string) => {
-      if (text.trim().length < 4) {
-        setWeakSpans([]);
-        setAnalyzedText("");
-        return;
-      }
-
-      setIsAnalyzing(true);
-      try {
-        const res = await fetch("/api/enhance-prompt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: text, objects: [] }),
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        // Only apply if text hasn't changed during analysis
-        setWeakSpans(data.weakSpans || []);
-        setAnalyzedText(text);
-      } catch {
-        // Silently fail — don't disrupt typing
-      } finally {
-        setIsAnalyzing(false);
-      }
-    },
-    []
-  );
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newVal = e.target.value;
       onChange(newVal);
-
-      // Clear active bubble
       setActiveSpan(null);
       setBubblePos(null);
 
-      // Debounce analysis
+      // Reset analyzed state when text changes
+      if (newVal !== analyzedText) {
+        // Don't clear spans immediately — keep showing until new analysis
+      }
+
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 1500);
     },
-    [onChange, triggerAnalysis]
+    [onChange, triggerAnalysis, analyzedText]
   );
 
-  // Manual re-analyze
-  const handleReanalyze = useCallback(() => {
+  const handleManualAnalyze = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     triggerAnalysis(value);
   }, [value, triggerAnalysis]);
 
-  // Cleanup debounce
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
 
-  // Close bubble on click outside
+  // Close bubble on outside click
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        bubbleRef.current &&
-        !bubbleRef.current.contains(e.target as Node)
-      ) {
+    const handleClick = (e: MouseEvent) => {
+      if (bubbleRef.current && !bubbleRef.current.contains(e.target as Node)) {
         setActiveSpan(null);
         setBubblePos(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Handle clicking a highlighted span
-  const handleSpanClick = useCallback(
+  // Handle chip click — show bubble
+  const handleChipClick = useCallback(
     (span: WeakSpan, e: React.MouseEvent) => {
-      e.stopPropagation();
-      const target = e.currentTarget as HTMLElement;
-      const containerRect = highlightRef.current?.parentElement?.getBoundingClientRect();
+      const chip = e.currentTarget as HTMLElement;
+      const containerRect = containerRef.current?.getBoundingClientRect();
       if (!containerRect) return;
 
-      const spanRect = target.getBoundingClientRect();
+      const chipRect = chip.getBoundingClientRect();
       setBubblePos({
-        top: spanRect.bottom - containerRect.top + 6,
-        left: Math.max(0, spanRect.left - containerRect.left - 20),
+        top: chipRect.bottom - containerRect.top + 8,
+        left: Math.max(0, Math.min(
+          chipRect.left - containerRect.left,
+          containerRect.width - 288 // 288 = bubble width (w-72)
+        )),
       });
       setActiveSpan(span);
     },
     []
   );
 
-  // Select an alternative — replace in text
-  const handleSelectAlternative = useCallback(
+  // Select alternative — replace in text
+  const handleSelect = useCallback(
     (suggestion: EnhancementSuggestion) => {
       if (!activeSpan) return;
 
-      const before = value.slice(0, activeSpan.start);
-      const after = value.slice(activeSpan.end);
+      // Find the current text of this span (might have been the original or already in the text)
+      const currentText = activeSpan.text;
+      const idx = value.indexOf(currentText);
+      if (idx === -1) {
+        setActiveSpan(null);
+        setBubblePos(null);
+        return;
+      }
+
+      const before = value.slice(0, idx);
+      const after = value.slice(idx + currentText.length);
       const newValue = before + suggestion.text + after;
       onChange(newValue);
 
-      // Adjust remaining spans
-      const diff = suggestion.text.length - activeSpan.text.length;
-      setWeakSpans((prev) =>
-        prev
-          .filter((s) => s.start !== activeSpan.start)
-          .map((s) =>
-            s.start > activeSpan.start
-              ? { ...s, start: s.start + diff, end: s.end + diff }
-              : s
-          )
+      // Track replacement
+      setReplacedWords((prev) => ({
+        ...prev,
+        [currentText]: suggestion.text,
+      }));
+
+      // Update spans to reflect the replacement
+      const diff = suggestion.text.length - currentText.length;
+      setSpans((prev) =>
+        prev.map((s) => {
+          if (s.text === currentText) {
+            return { ...s, text: suggestion.text, start: idx, end: idx + suggestion.text.length };
+          }
+          if (s.start > idx) {
+            return { ...s, start: s.start + diff, end: s.end + diff };
+          }
+          return s;
+        })
       );
+      setAnalyzedText(newValue);
 
       setActiveSpan(null);
       setBubblePos(null);
+
+      // Re-analyze after replacement
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => triggerAnalysis(newValue), 2000);
     },
-    [activeSpan, value, onChange]
+    [activeSpan, value, onChange, triggerAnalysis]
   );
 
-  // Build highlighted HTML from current text and spans
-  // Only show highlights if the analyzed text matches current text
-  const validSpans = useMemo(() => {
-    if (analyzedText !== value) return [];
-    return [...weakSpans]
-      .filter((s) => s.start >= 0 && s.end <= value.length && value.slice(s.start, s.end) === s.text)
-      .sort((a, b) => a.start - b.start);
-  }, [weakSpans, value, analyzedText]);
-
-  const renderHighlightLayer = () => {
-    if (validSpans.length === 0) {
-      // Still render text (invisible) to match layout, but no highlights
-      return <span className="invisible whitespace-pre-wrap break-words">{value || placeholder} </span>;
-    }
-
-    const parts: React.ReactNode[] = [];
-    let lastEnd = 0;
-
-    for (const span of validSpans) {
-      if (span.start > lastEnd) {
-        parts.push(
-          <span key={`t-${lastEnd}`} className="invisible">
-            {value.slice(lastEnd, span.start)}
-          </span>
-        );
-      }
-
-      parts.push(
-        <span
-          key={`h-${span.start}`}
-          onClick={(e) => handleSpanClick(span, e)}
-          className="relative cursor-pointer rounded-sm bg-amber-200/60 text-transparent transition-colors hover:bg-amber-300/70"
-          title={span.reason}
-        >
-          {span.text}
-          <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-amber-400 text-[7px] text-white font-bold leading-none">
-            !
-          </span>
-        </span>
-      );
-
-      lastEnd = span.end;
-    }
-
-    if (lastEnd < value.length) {
-      parts.push(
-        <span key={`t-${lastEnd}`} className="invisible">
-          {value.slice(lastEnd)}
-        </span>
-      );
-    }
-
-    // Trailing space to match textarea line height
-    parts.push(<span key="trail" className="invisible"> </span>);
-
-    return parts;
-  };
+  // Valid spans that match current text
+  const validSpans = spans.filter(
+    (s) => value.includes(s.text) && s.alternatives && s.alternatives.length > 0
+  );
 
   return (
-    <div className="relative">
-      {/* Container */}
-      <div className="relative rounded-xl border border-[var(--angel-border)] transition-all focus-within:border-[var(--angel-blue)]/50 focus-within:shadow-[0_0_20px_rgba(126,184,216,0.15)]">
-        {/* Highlight layer (behind textarea) */}
-        <div
-          ref={highlightRef}
-          className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl px-4 py-3 text-[14px] leading-[1.8] whitespace-pre-wrap break-words"
-          aria-hidden="true"
-        >
-          {/* Re-enable pointer events only on highlight spans */}
-          <div className="pointer-events-auto">
-            {renderHighlightLayer()}
+    <div ref={containerRef} className="relative">
+      {/* Textarea */}
+      <textarea
+        value={value}
+        onChange={handleChange}
+        disabled={disabled}
+        placeholder={placeholder}
+        rows={4}
+        className="w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)]"
+      />
+
+      {/* Word chips — shown below textarea */}
+      {validSpans.length > 0 && (
+        <div className="mt-3">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] text-[var(--angel-text-faint)]">
+              단어를 클릭하면 더 구체적인 표현을 추천해줘요
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {validSpans.map((span, i) => {
+              const isReplaced = !!replacedWords[span.text] || Object.values(replacedWords).includes(span.text);
+              const isActive = activeSpan?.text === span.text;
+
+              return (
+                <button
+                  key={`${span.text}-${i}`}
+                  onClick={(e) => handleChipClick(span, e)}
+                  className={`relative rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all ${
+                    isActive
+                      ? "bg-[var(--angel-blue)]/15 text-[var(--angel-blue)] border border-[var(--angel-blue)]/30 shadow-sm"
+                      : isReplaced
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50 hover:bg-emerald-100/70"
+                      : "bg-amber-50 text-amber-700 border border-amber-200/50 hover:bg-amber-100/70 hover:border-amber-300/50"
+                  }`}
+                >
+                  {span.text}
+                  {!isReplaced && (
+                    <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400/80 text-[8px] text-white font-bold">
+                      +
+                    </span>
+                  )}
+                  {isReplaced && (
+                    <span className="ml-1 text-[10px] text-emerald-500">
+                      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="inline">
+                        <polyline points="3 8 7 12 13 4" />
+                      </svg>
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
+      )}
 
-        {/* Actual textarea (transparent text over highlight layer) */}
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={handleChange}
-          onScroll={handleScroll}
-          disabled={disabled}
-          placeholder={placeholder}
-          rows={4}
-          className="relative z-10 w-full rounded-xl bg-transparent px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none resize-none caret-[var(--angel-blue)]"
-          style={{
-            // Make text transparent when we have valid highlights, so highlight layer shows through
-            color: validSpans.length > 0 ? "var(--angel-text)" : undefined,
-          }}
-        />
+      {/* Speech bubble */}
+      {activeSpan && bubblePos && (
+        <div
+          ref={bubbleRef}
+          className="absolute z-50 w-72"
+          style={{ top: bubblePos.top, left: bubblePos.left }}
+        >
+          {/* Arrow */}
+          <div className="ml-6 h-2.5 w-2.5 rotate-45 bg-white border-l border-t border-[var(--angel-border)] -mb-1.5 relative z-10" />
 
-        {/* Speech bubble */}
-        {activeSpan && bubblePos && (
-          <div
-            ref={bubbleRef}
-            className="absolute z-50 w-72 animate-in fade-in slide-in-from-top-1 duration-150"
-            style={{ top: bubblePos.top, left: bubblePos.left }}
-          >
-            {/* Arrow */}
-            <div className="ml-8 h-2 w-2 rotate-45 bg-white border-l border-t border-[var(--angel-border)] -mb-1 relative z-10" />
-
-            {/* Bubble body */}
-            <div className="rounded-xl border border-[var(--angel-border)] bg-white shadow-lg overflow-hidden">
-              {/* Header */}
-              <div className="px-3 pt-2.5 pb-1.5 border-b border-[var(--angel-border)]/50">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-[var(--angel-text)]">
+          {/* Bubble body */}
+          <div className="rounded-xl border border-[var(--angel-border)] bg-white shadow-lg overflow-hidden">
+            {/* Header */}
+            <div className="px-3.5 pt-3 pb-2 border-b border-[var(--angel-border)]/50 bg-gradient-to-r from-[var(--angel-blue)]/5 to-transparent">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-medium text-[var(--angel-text)]">
                     &ldquo;{activeSpan.text}&rdquo;
                   </span>
-                  <button
-                    onClick={() => {
-                      setActiveSpan(null);
-                      setBubblePos(null);
-                    }}
-                    className="text-[var(--angel-text-faint)] hover:text-[var(--angel-text-soft)] transition-colors"
-                  >
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                      <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                  </button>
                 </div>
-                <p className="text-[10px] text-amber-600 mt-0.5">
-                  {activeSpan.reason}
-                </p>
+                <button
+                  onClick={() => {
+                    setActiveSpan(null);
+                    setBubblePos(null);
+                  }}
+                  className="text-[var(--angel-text-faint)] hover:text-[var(--angel-text-soft)] transition-colors p-0.5"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
               </div>
+              <p className="text-[10px] text-[var(--angel-text-soft)] mt-0.5 leading-snug">
+                {activeSpan.reason}
+              </p>
+            </div>
 
-              {/* Suggestions */}
-              <div className="p-1.5 space-y-0.5 max-h-60 overflow-y-auto">
-                {activeSpan.alternatives.map((alt) => (
-                  <button
-                    key={alt.id}
-                    onClick={() => handleSelectAlternative(alt)}
-                    className="w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-[var(--angel-blue)]/8 group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] font-medium text-[var(--angel-blue)] group-hover:text-[var(--angel-text)]">
-                        {alt.text}
-                      </span>
-                      <span className="text-[9px] text-[var(--angel-text-faint)] tabular-nums">
-                        {Math.round(alt.confidence * 100)}%
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-[10px] text-[var(--angel-text-soft)] leading-snug">
-                      {alt.reasoning}
-                    </p>
-                  </button>
-                ))}
-              </div>
+            {/* Alternatives */}
+            <div className="p-1.5 max-h-64 overflow-y-auto">
+              <p className="px-2 py-1 text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
+                이렇게 바꿔보세요
+              </p>
+              {activeSpan.alternatives.map((alt) => (
+                <button
+                  key={alt.id}
+                  onClick={() => handleSelect(alt)}
+                  className="w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[var(--angel-blue)]/6 group"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[13px] font-medium text-[var(--angel-blue)] group-hover:text-[var(--angel-text)]">
+                      {alt.text}
+                    </span>
+                    <span className="shrink-0 text-[9px] text-[var(--angel-text-faint)] tabular-nums bg-[var(--angel-bg-soft)] rounded-full px-1.5 py-0.5">
+                      {Math.round(alt.confidence * 100)}%
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-[var(--angel-text-soft)] leading-snug">
+                    {alt.reasoning}
+                  </p>
+                </button>
+              ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Status bar */}
       <div className="mt-2 flex items-center justify-between px-1">
@@ -319,25 +303,19 @@ export function InlineEnhancer({
           {isAnalyzing && (
             <span className="flex items-center gap-1.5 text-[10px] text-[var(--angel-lavender)]">
               <span className="twinkle">✦</span>
-              분석 중...
+              단어를 분석하고 있어요...
             </span>
           )}
           {!isAnalyzing && validSpans.length > 0 && (
-            <span className="flex items-center gap-1.5 text-[10px] text-amber-600">
+            <span className="flex items-center gap-1.5 text-[10px] text-[var(--angel-text-soft)]">
               <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
-              {validSpans.length}개 표현 개선 가능
-            </span>
-          )}
-          {!isAnalyzing && value.trim().length >= 4 && validSpans.length === 0 && analyzedText === value && (
-            <span className="flex items-center gap-1.5 text-[10px] text-emerald-600">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-300" />
-              프롬프트가 구체적이에요
+              {validSpans.length}개 단어 강화 가능
             </span>
           )}
         </div>
-        {value.trim().length >= 4 && (
+        {value.trim().length >= 2 && (
           <button
-            onClick={handleReanalyze}
+            onClick={handleManualAnalyze}
             disabled={isAnalyzing || disabled}
             className="text-[10px] text-[var(--angel-text-faint)] hover:text-[var(--angel-blue)] transition-colors disabled:opacity-40"
           >
