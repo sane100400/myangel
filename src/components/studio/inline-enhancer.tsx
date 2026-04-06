@@ -27,6 +27,8 @@ export function InlineEnhancer({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzedText, setAnalyzedText] = useState("");
   const [replacedWords, setReplacedWords] = useState<Record<string, string>>({});
+  const [isRewriting, setIsRewriting] = useState(false);
+  const [originalInput, setOriginalInput] = useState("");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -119,12 +121,38 @@ export function InlineEnhancer({
     []
   );
 
-  // Select alternative — replace in text
+  // Rewrite sentence naturally after word replacement
+  const rewriteSentence = useCallback(
+    async (original: string, modified: string) => {
+      setIsRewriting(true);
+      try {
+        const res = await fetch("/api/rewrite-prompt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ original, modified }),
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data.rewritten && data.rewritten !== modified) {
+          onChange(data.rewritten);
+          // Re-analyze the rewritten text
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(() => triggerAnalysis(data.rewritten), 1500);
+        }
+      } catch {
+        // Keep the raw replacement if rewrite fails
+      } finally {
+        setIsRewriting(false);
+      }
+    },
+    [onChange, triggerAnalysis]
+  );
+
+  // Select alternative — replace in text, then auto-rewrite
   const handleSelect = useCallback(
     (suggestion: EnhancementSuggestion) => {
       if (!activeSpan) return;
 
-      // Find the current text of this span (might have been the original or already in the text)
       const currentText = activeSpan.text;
       const idx = value.indexOf(currentText);
       if (idx === -1) {
@@ -132,6 +160,10 @@ export function InlineEnhancer({
         setBubblePos(null);
         return;
       }
+
+      // Save original input on first replacement
+      const origInput = originalInput || value;
+      if (!originalInput) setOriginalInput(value);
 
       const before = value.slice(0, idx);
       const after = value.slice(idx + currentText.length);
@@ -144,29 +176,16 @@ export function InlineEnhancer({
         [currentText]: suggestion.text,
       }));
 
-      // Update spans to reflect the replacement
-      const diff = suggestion.text.length - currentText.length;
-      setSpans((prev) =>
-        prev.map((s) => {
-          if (s.text === currentText) {
-            return { ...s, text: suggestion.text, start: idx, end: idx + suggestion.text.length };
-          }
-          if (s.start > idx) {
-            return { ...s, start: s.start + diff, end: s.end + diff };
-          }
-          return s;
-        })
-      );
-      setAnalyzedText(newValue);
-
+      // Clear spans and bubble
+      setSpans([]);
+      setAnalyzedText("");
       setActiveSpan(null);
       setBubblePos(null);
 
-      // Re-analyze after replacement
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => triggerAnalysis(newValue), 2000);
+      // Auto-rewrite for natural flow, then re-analyze
+      rewriteSentence(origInput, newValue);
     },
-    [activeSpan, value, onChange, triggerAnalysis]
+    [activeSpan, value, onChange, originalInput, rewriteSentence]
   );
 
   // Valid spans that match current text
@@ -300,7 +319,13 @@ export function InlineEnhancer({
       {/* Status bar */}
       <div className="mt-2 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          {isAnalyzing && (
+          {isRewriting && (
+            <span className="flex items-center gap-1.5 text-[10px] text-[var(--angel-blue)]">
+              <span className="twinkle">✦</span>
+              문장을 다듬고 있어요...
+            </span>
+          )}
+          {!isRewriting && isAnalyzing && (
             <span className="flex items-center gap-1.5 text-[10px] text-[var(--angel-lavender)]">
               <span className="twinkle">✦</span>
               단어를 분석하고 있어요...
