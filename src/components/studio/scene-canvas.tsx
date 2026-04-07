@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { SceneObject } from "@/types";
+import type { SceneObject, ObjectAttribute } from "@/types";
 import { AttributeSlider } from "./attribute-slider";
+
+const REFRESH_DEBOUNCE = 800; // ms after typing stops
 
 // ── Constants ──
 
@@ -92,14 +94,72 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [expandedSidebar, setExpandedSidebar] = useState<string | null>(null);
 
+  const [refreshingIds, setRefreshingIds] = useState<Set<string>>(new Set());
+
   const canvasRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const rafRef = useRef<number>(0);
+  const refreshTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  // Track descriptions to detect real changes (not initial render)
+  const prevDescriptions = useRef<Record<string, string>>({});
 
   // Split objects into canvas (positional) and sidebar (global)
   const canvasObjects = objects.filter((o) => CANVAS_ROLES.has(o.role));
   const sidebarObjects = objects.filter((o) => !CANVAS_ROLES.has(o.role));
+
+  // ── Auto-refresh attributes when description changes ──
+
+  const refreshObjectAttributes = useCallback(
+    async (obj: SceneObject) => {
+      if (!obj.description.trim()) return;
+
+      setRefreshingIds((prev) => new Set(prev).add(obj.id));
+      try {
+        const res = await fetch("/api/refresh-attributes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            role: obj.role,
+            label: obj.label,
+            description: obj.description,
+          }),
+        });
+        if (!res.ok) return;
+        const { attributes } = (await res.json()) as {
+          attributes: ObjectAttribute[];
+        };
+        if (attributes?.length) {
+          onChange(
+            objects.map((o) =>
+              o.id === obj.id ? { ...o, attributes } : o
+            )
+          );
+        }
+      } catch {
+        // silent fail — keep existing attributes
+      } finally {
+        setRefreshingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(obj.id);
+          return next;
+        });
+      }
+    },
+    [objects, onChange]
+  );
+
+  const scheduleRefresh = useCallback(
+    (obj: SceneObject) => {
+      if (refreshTimers.current[obj.id]) {
+        clearTimeout(refreshTimers.current[obj.id]);
+      }
+      refreshTimers.current[obj.id] = setTimeout(() => {
+        refreshObjectAttributes(obj);
+      }, REFRESH_DEBOUNCE);
+    },
+    [refreshObjectAttributes]
+  );
 
   // ── Initial layout (canvas objects only) ──
 
@@ -229,9 +289,15 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
 
   const handleObjectChange = useCallback(
     (updated: SceneObject) => {
+      const prev = objects.find((o) => o.id === updated.id);
       onChange(objects.map((o) => (o.id === updated.id ? updated : o)));
+
+      // If description changed, schedule attribute refresh
+      if (prev && prev.description !== updated.description && updated.description.trim()) {
+        scheduleRefresh(updated);
+      }
     },
-    [objects, onChange]
+    [objects, onChange, scheduleRefresh]
   );
 
   const handleDelete = useCallback(
@@ -444,11 +510,22 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                 </div>
 
                 {/* Attributes */}
-                {selectedObj.attributes.length > 0 && (
-                  <div className="px-3.5 pb-2">
-                    <label className="text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
-                      속성
-                    </label>
+                <div className="px-3.5 pb-2">
+                  <label className="text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
+                    속성
+                  </label>
+                  {refreshingIds.has(selectedObj.id) ? (
+                    <div className="mt-1.5 space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-3 animate-pulse">
+                          <div className="h-2.5 w-14 rounded bg-[var(--angel-blue)]/10" />
+                          <div className="h-1.5 flex-1 rounded-full bg-[var(--angel-blue)]/8" />
+                          <div className="h-2.5 w-6 rounded bg-[var(--angel-blue)]/10" />
+                        </div>
+                      ))}
+                      <p className="text-[9px] text-[var(--angel-blue)] text-center">속성 갱신 중...</p>
+                    </div>
+                  ) : selectedObj.attributes.length > 0 ? (
                     <div className="mt-1.5 space-y-1.5">
                       {selectedObj.attributes.map((attr) => (
                         <AttributeSlider
@@ -465,8 +542,8 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                         />
                       ))}
                     </div>
-                  </div>
-                )}
+                  ) : null}
+                </div>
 
                 {/* Delete */}
                 <div className="px-3.5 pb-3 pt-1">
@@ -598,11 +675,22 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                     </div>
 
                     {/* Attributes */}
-                    {obj.attributes.length > 0 && (
-                      <div>
-                        <label className="text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
-                          속성
-                        </label>
+                    <div>
+                      <label className="text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
+                        속성
+                      </label>
+                      {refreshingIds.has(obj.id) ? (
+                        <div className="mt-1.5 space-y-2">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-3 animate-pulse">
+                              <div className="h-2.5 w-14 rounded bg-[var(--angel-blue)]/10" />
+                              <div className="h-1.5 flex-1 rounded-full bg-[var(--angel-blue)]/8" />
+                              <div className="h-2.5 w-6 rounded bg-[var(--angel-blue)]/10" />
+                            </div>
+                          ))}
+                          <p className="text-[9px] text-[var(--angel-blue)] text-center">속성 갱신 중...</p>
+                        </div>
+                      ) : obj.attributes.length > 0 ? (
                         <div className="mt-1.5 space-y-1.5">
                           {obj.attributes.map((attr) => (
                             <AttributeSlider
@@ -619,8 +707,8 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                             />
                           ))}
                         </div>
-                      </div>
-                    )}
+                      ) : null}
+                    </div>
 
                     {/* Delete */}
                     <button
