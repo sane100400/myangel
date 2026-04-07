@@ -219,14 +219,44 @@ export function InlineEnhancer({
   return (
     <div ref={containerRef} className="relative">
       {/* Textarea */}
-      <textarea
-        value={value}
-        onChange={handleChange}
-        disabled={disabled}
-        placeholder={placeholder}
-        rows={4}
-        className="w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)]"
-      />
+      <div className="relative">
+        <textarea
+          value={value}
+          onChange={handleChange}
+          disabled={disabled || isAnalyzing}
+          placeholder={placeholder}
+          rows={4}
+          className={`w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)] ${isAnalyzing ? "opacity-60" : ""}`}
+        />
+
+        {/* Analyzing overlay — prominent */}
+        {isAnalyzing && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/70 backdrop-blur-[2px]">
+            <div className="flex items-center gap-2.5 rounded-full bg-[var(--angel-lavender)]/12 border border-[var(--angel-lavender)]/25 px-5 py-2.5 shadow-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-lavender)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              <span className="text-[14px] font-medium text-[var(--angel-lavender)]">
+                프롬프트를 강화하고 있어요...
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Rewriting overlay */}
+        {isRewriting && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/70 backdrop-blur-[2px]">
+            <div className="flex items-center gap-2.5 rounded-full bg-[var(--angel-blue)]/12 border border-[var(--angel-blue)]/25 px-5 py-2.5 shadow-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              <span className="text-[14px] font-medium text-[var(--angel-blue)]">
+                문장을 다듬고 있어요...
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Enhancement panel — shown below textarea */}
       {validSpans.length > 0 && (
@@ -375,18 +405,6 @@ export function InlineEnhancer({
       {/* Status bar */}
       <div className="mt-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          {isRewriting && (
-            <span className="flex items-center gap-2 text-[13px] text-[var(--angel-blue)] font-medium">
-              <span className="twinkle">✦</span>
-              문장을 다듬고 있어요...
-            </span>
-          )}
-          {!isRewriting && isAnalyzing && (
-            <span className="flex items-center gap-2 rounded-full bg-[var(--angel-lavender)]/10 px-3 py-1.5 text-[13px] text-[var(--angel-lavender)] font-medium">
-              <span className="twinkle">✦</span>
-              프롬프트를 분석하고 있어요...
-            </span>
-          )}
           {!isAnalyzing && !isRewriting && validSpans.length === 0 && analyzedText && (
             <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-[13px] text-emerald-600 font-medium">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
@@ -394,7 +412,7 @@ export function InlineEnhancer({
             </span>
           )}
         </div>
-        {value.trim().length >= 2 && !isRewriting && (
+        {value.trim().length >= 2 && !isRewriting && !isAnalyzing && (
           <button
             onClick={handleManualAnalyze}
             disabled={isAnalyzing || disabled}
