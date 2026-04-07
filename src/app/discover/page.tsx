@@ -14,7 +14,6 @@ interface DiscoverImage {
   title?: string | null;
   tags?: string[];
   prompt?: string;
-  is_premium?: boolean;
 }
 
 function DiscoverContent() {

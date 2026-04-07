@@ -242,7 +242,6 @@ export async function POST(request: NextRequest) {
       title: cleanTitle,
       tags: cleanTags,
       prompt: cleanPrompt,
-      is_premium: false,
       created_at: new Date().toISOString(),
       ip_hash: ipHash,
       file_size: webpBuffer.length,

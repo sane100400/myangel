@@ -8,7 +8,6 @@ export async function GET() {
     title: string;
     tags: string[];
     prompt: string;
-    is_premium: boolean;
     user_id?: string | null;
   }[] = [];
 
@@ -23,7 +22,6 @@ export async function GET() {
         title: img.title,
         tags: img.tags,
         prompt: img.prompt,
-        is_premium: img.is_premium,
         user_id: img.user_id ?? null,
       }));
   } catch {

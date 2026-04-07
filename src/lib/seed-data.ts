@@ -12,7 +12,6 @@ export const SEED_MOOD_IMAGES: {
   title: string;
   tags: string[];
   prompt: string;
-  is_premium?: boolean;
 }[] = [];
 
 // 메인페이지와 Discover 페이지에서 공유하는 태그 목록

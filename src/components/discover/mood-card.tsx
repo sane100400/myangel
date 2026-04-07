@@ -7,27 +7,16 @@ interface MoodCardProps {
   id: string;
   title?: string | null;
   tags?: string[];
-  isPremium?: boolean;
   index?: number;
 }
 
-export function MoodCard({ id, title, tags, isPremium, index = 0 }: MoodCardProps) {
+export function MoodCard({ id, title, tags, index = 0 }: MoodCardProps) {
   const isEager = index < 2;
   return (
     <Link
       href={`/discover/${id}`}
       className="group relative overflow-hidden rounded-xl glass-card block aspect-[3/4]"
     >
-      {/* Premium crown badge */}
-      {isPremium && (
-        <div className="absolute top-2 right-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-[#ffd700]/90 shadow-md">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" fill="#fff" />
-            <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" stroke="#b8860b" strokeWidth="1" />
-          </svg>
-        </div>
-      )}
-
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={getImageUrl(id, "thumb")}

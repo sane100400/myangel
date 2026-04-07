@@ -20,7 +20,6 @@ export interface SharedImageEntry {
   title: string;
   tags: string[];
   prompt: string;
-  is_premium: false;
   created_at: string;
   ip_hash: string;
   file_size: number;

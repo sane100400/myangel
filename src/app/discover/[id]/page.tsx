@@ -12,7 +12,6 @@ interface SharedImageData {
   title: string;
   tags: string[];
   prompt: string;
-  is_premium: boolean;
   user_id?: string | null;
 }
 
@@ -121,7 +120,6 @@ export default function DiscoverDetailPage() {
     );
   }
 
-  const isPremium = item.is_premium ?? false;
   const isOwner =
     currentUserId !== null &&
     item.user_id !== null &&
@@ -212,19 +210,9 @@ export default function DiscoverDetailPage() {
               : "md:w-[45%]"                         /* 정방형/미감지: 중간 */
         }`}>
           <div className="glass-card rounded-2xl p-2 relative">
-            {isPremium && (
-              <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-[#ffd700]/90 px-2.5 py-1 shadow-md">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" stroke="#b8860b" strokeWidth="1">
-                  <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
-                </svg>
-                <span className="text-[12px] font-medium text-white">프리미엄</span>
-              </div>
-            )}
-            {true && (
-              <div className="absolute top-4 left-4 z-10 flex items-center gap-1 rounded-full bg-[var(--angel-blue)]/80 px-2.5 py-1 shadow-md">
-                <span className="text-[12px] font-medium text-white">AI 생성</span>
-              </div>
-            )}
+            <div className="absolute top-4 left-4 z-10 flex items-center gap-1 rounded-full bg-[var(--angel-blue)]/80 px-2.5 py-1 shadow-md">
+              <span className="text-[12px] font-medium text-white">AI 생성</span>
+            </div>
             <div className="relative">
               {/* 썸네일 blur placeholder */}
               {!fullLoaded && (
@@ -342,27 +330,12 @@ export default function DiscoverDetailPage() {
               </span>
             </div>
 
-            {"prompt" in item && item.prompt ? (
-              isPremium ? (
-                <div className="glass-card rounded-xl p-4 relative overflow-hidden">
-                  <p className="text-[15px] leading-[1.9] text-[var(--angel-text)] blur-[5px] select-none [word-break:keep-all]">
-                    {item.prompt}
-                  </p>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-[2px]">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffd700" stroke="#b8860b" strokeWidth="1">
-                      <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
-                    </svg>
-                    <p className="mt-2 text-[14px] font-medium text-[#b8860b]">프리미엄 프롬프트</p>
-                    <p className="mt-1 text-[12px] text-[var(--angel-text-soft)]">구매 후 전체 프롬프트를 확인할 수 있어요</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="glass-card rounded-xl p-4">
-                  <p className="text-[15px] leading-[1.9] text-[var(--angel-text)] [word-break:keep-all]">
-                    {item.prompt}
-                  </p>
-                </div>
-              )
+            {item.prompt ? (
+              <div className="glass-card rounded-xl p-4">
+                <p className="text-[15px] leading-[1.9] text-[var(--angel-text)] [word-break:keep-all]">
+                  {item.prompt}
+                </p>
+              </div>
             ) : (
               <p className="text-[14px] text-[var(--angel-text-faint)]">프롬프트 정보가 없어요</p>
             )}
@@ -370,37 +343,28 @@ export default function DiscoverDetailPage() {
 
           {/* Action buttons */}
           <div className="mt-6 space-y-3">
-            {isPremium ? (
-              <button className="w-full angel-btn py-3 text-[15px] font-medium bg-gradient-to-r from-[#ffd700] to-[#f0c030] text-white border-none shadow-[0_0_20px_rgba(255,215,0,0.2)] hover:shadow-[0_0_30px_rgba(255,215,0,0.3)] transition-shadow rounded-xl flex items-center justify-center gap-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" stroke="#b8860b" strokeWidth="0.5">
-                  <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
-                </svg>
-                프리미엄 프롬프트 구매하기
-              </button>
-            ) : (
-              <Link
-                href={`/generate?prompt=${encodeURIComponent(("prompt" in item && item.prompt) || "")}`}
-                className="w-full angel-btn angel-btn-primary py-3 text-[15px] flex items-center justify-center gap-2"
-              >
-                <span className="text-[12px]">✦</span>
-                이 프롬프트로 이미지 생성하기
-              </Link>
-            )}
+            <Link
+              href={`/generate?prompt=${encodeURIComponent(item.prompt || "")}`}
+              className="w-full angel-btn angel-btn-primary py-3 text-[15px] flex items-center justify-center gap-2"
+            >
+              <span className="text-[12px]">✦</span>
+              이 프롬프트로 이미지 생성하기
+            </Link>
 
             <button
               onClick={() => {
-                if ("prompt" in item && item.prompt && !isPremium) {
+                if (item.prompt) {
                   navigator.clipboard.writeText(item.prompt);
                 }
               }}
-              disabled={isPremium}
+              disabled={!item.prompt}
               className="w-full angel-btn angel-btn-secondary py-2.5 text-[14px] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </svg>
-              {isPremium ? "프롬프트 복사 (프리미엄)" : "프롬프트 복사하기"}
+              프롬프트 복사하기
             </button>
           </div>
 
@@ -411,17 +375,9 @@ export default function DiscoverDetailPage() {
               <span className="text-[var(--angel-text)]">{item.tags?.[0] || "-"}</span>
             </div>
             <div className="mt-2 flex items-center justify-between text-[13px]">
-              <span className="text-[var(--angel-text-soft)]">등급</span>
-              <span className={isPremium ? "text-[#b8860b] font-medium" : "text-[var(--angel-text)]"}>
-                {isPremium ? "프리미엄" : "무료"}
-              </span>
+              <span className="text-[var(--angel-text-soft)]">출처</span>
+              <span className="text-[var(--angel-blue)]">AI 생성 (커뮤니티 공유)</span>
             </div>
-            {true && (
-              <div className="mt-2 flex items-center justify-between text-[13px]">
-                <span className="text-[var(--angel-text-soft)]">출처</span>
-                <span className="text-[var(--angel-blue)]">AI 생성 (커뮤니티 공유)</span>
-              </div>
-            )}
           </div>
 
           {/* Owner: Delete button */}

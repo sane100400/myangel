@@ -12,7 +12,6 @@ interface MoodImage {
   title?: string | null;
   tags?: string[];
   prompt?: string;
-  is_premium?: boolean;
 }
 
 interface MoodGalleryProps {
@@ -80,7 +79,6 @@ export function MoodGallery({ images }: MoodGalleryProps) {
             id={image.id}
             title={image.title}
             tags={image.tags}
-            isPremium={image.is_premium}
             index={index}
           />
         ))}
