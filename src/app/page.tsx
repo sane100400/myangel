@@ -216,19 +216,20 @@ export default function HomePage() {
           </p>
 
           <div className="space-y-3 md:space-y-4">
-            {/* Feature 1: Object Editor */}
+            {/* Feature 1: Visual Canvas Studio */}
             <div className="glass-card rounded-2xl px-5 py-4 md:px-6 md:py-5">
               <div className="flex items-center gap-2 mb-2 md:mb-3">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-blue)]/12 text-[14px]">
-                  🎯
+                  🎨
                 </span>
                 <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-[14px]">
-                  장면 분해 &amp; 오브젝트 에디터
+                  비주얼 캔버스 스튜디오
                 </h3>
               </div>
               <p className="text-[13px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[14px]">
-                AI가 입력을 <strong className="text-[var(--angel-text)]">피사체, 배경, 분위기, 조명, 색감</strong> 등의 요소로 자동 분해해요.
-                각 요소를 펼쳐 속성 슬라이더로 세밀하게 조절하면, 그 강도가 최종 프롬프트에 반영돼요.
+                AI가 입력을 <strong className="text-[var(--angel-text)]">피사체, 배경, 분위기, 조명, 색감</strong> 등으로 자동 분해해요.
+                피사체는 <strong className="text-[var(--angel-text)]">캔버스 위에서 드래그로 배치</strong>하고 최대 3개까지 추가할 수 있어요.
+                조명, 분위기 같은 장면 속성은 <strong className="text-[var(--angel-text)]">사이드바</strong>에서 슬라이더로 세밀하게 조절하면 최종 프롬프트에 반영돼요.
               </p>
             </div>
 

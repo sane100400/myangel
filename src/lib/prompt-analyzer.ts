@@ -27,11 +27,15 @@ const SYSTEM_PROMPT = `당신은 이미지 생성을 위한 장면 분해 엔진
 
 규칙:
 1. 최소 3개, 최대 7개의 오브젝트를 추출하세요.
-2. subject(피사체)는 반드시 포함하세요.
-3. 각 오브젝트에 2~4개의 관련 속성을 생성하세요.
-4. 속성의 value는 입력 텍스트의 뉘앙스에 맞게 0-100 사이로 설정하세요.
-5. 입력에 명시되지 않은 요소도 장면 완성을 위해 합리적으로 추론하여 추가하세요.
-6. role별 label 매핑: subject→피사체, background→배경, mood→분위기, lighting→조명, color→색감, texture→질감, composition→구도`;
+2. subject(피사체)는 반드시 1개 이상 포함하세요.
+3. 입력에 여러 피사체가 있으면 각각 별도의 subject 오브젝트로 분리하세요 (최대 3개).
+   예: "고양이와 강아지가 놀고 있는 공원" → subject 2개 (고양이, 강아지) + background 1개 (공원)
+   예: "세 명의 소녀가 카페에 앉아있는 모습" → subject 3개 (소녀1, 소녀2, 소녀3) + background 1개 (카페)
+4. 각 오브젝트에 2~4개의 관련 속성을 생성하세요.
+5. 속성의 value는 입력 텍스트의 뉘앙스에 맞게 0-100 사이로 설정하세요.
+6. 입력에 명시되지 않은 요소도 장면 완성을 위해 합리적으로 추론하여 추가하세요.
+7. role별 label 매핑: subject→피사체, background→배경, mood→분위기, lighting→조명, color→색감, texture→질감, composition→구도
+8. 여러 subject가 있을 경우 label을 구분하세요 (예: "피사체: 고양이", "피사체: 강아지")`;
 
 export async function analyzePrompt(input: string): Promise<SceneObject[]> {
   const response = await genai.models.generateContent({
