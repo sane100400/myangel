@@ -65,10 +65,10 @@ export function ImageDetailModal({ image, onClose, onDelete }: ImageDetailModalP
         {/* Prompt */}
         <div className="mb-4">
           <div className="mb-1.5 flex items-center gap-1.5">
-            <span className="text-[9px] text-[var(--angel-lavender)]">✦</span>
-            <span className="text-[10px] font-medium text-[var(--angel-text-soft)] tracking-wider uppercase">Prompt</span>
+            <span className="text-[11px] text-[var(--angel-lavender)]">✦</span>
+            <span className="text-[12px] font-medium text-[var(--angel-text-soft)] tracking-wider uppercase">Prompt</span>
           </div>
-          <p className="text-[13px] leading-[1.8] text-[var(--angel-text)] [word-break:keep-all]">
+          <p className="text-[15px] leading-[1.8] text-[var(--angel-text)] [word-break:keep-all]">
             {image.prompt}
           </p>
         </div>
@@ -77,13 +77,13 @@ export function ImageDetailModal({ image, onClose, onDelete }: ImageDetailModalP
         {image.style_tags.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-1.5">
             {image.style_tags.map((tag) => (
-              <span key={tag} className="angel-tag angel-tag-active text-[10px]">#{tag}</span>
+              <span key={tag} className="angel-tag angel-tag-active text-[12px]">#{tag}</span>
             ))}
           </div>
         )}
 
         {/* Date */}
-        <p className="mb-5 text-[10px] text-[var(--angel-text-faint)]">
+        <p className="mb-5 text-[12px] text-[var(--angel-text-faint)]">
           {new Date(image.created_at).toLocaleDateString("ko-KR", {
             year: "numeric",
             month: "long",
@@ -93,7 +93,7 @@ export function ImageDetailModal({ image, onClose, onDelete }: ImageDetailModalP
 
         {/* Actions */}
         <div className="flex gap-2">
-          <button onClick={handleDownload} className="angel-btn angel-btn-secondary text-[12px] flex-1">
+          <button onClick={handleDownload} className="angel-btn angel-btn-secondary text-[14px] flex-1">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
@@ -101,7 +101,7 @@ export function ImageDetailModal({ image, onClose, onDelete }: ImageDetailModalP
             </svg>
             다운로드
           </button>
-          <button onClick={handleDelete} className="angel-btn angel-btn-secondary text-[12px] text-red-400 hover:text-red-500 flex-1">
+          <button onClick={handleDelete} className="angel-btn angel-btn-secondary text-[14px] text-red-400 hover:text-red-500 flex-1">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6" />
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />

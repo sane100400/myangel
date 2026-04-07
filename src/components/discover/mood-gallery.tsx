@@ -61,9 +61,9 @@ export function MoodGallery({ images }: MoodGalleryProps) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
-        <p className="text-[12px] text-[var(--angel-text-soft)]">아직 이 태그의 무드 이미지가 없어요.</p>
+        <p className="text-[14px] text-[var(--angel-text-soft)]">아직 이 태그의 무드 이미지가 없어요.</p>
         <div className="mt-4 flex justify-center">
-          <span className="text-[10px] text-[var(--angel-lavender)]">✦ ✧ ✦</span>
+          <span className="text-[12px] text-[var(--angel-lavender)]">✦ ✧ ✦</span>
         </div>
       </div>
     );
@@ -101,10 +101,10 @@ export function MoodGallery({ images }: MoodGalleryProps) {
         <div className="mt-10 flex flex-col items-center gap-2 text-center">
           <div className="flex items-center gap-3">
             <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/30" />
-            <span className="text-[10px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
+            <span className="text-[12px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
             <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/30" />
           </div>
-          <p className="text-[11px] text-[var(--angel-text-soft)]">모든 이미지를 불러왔어요</p>
+          <p className="text-[13px] text-[var(--angel-text-soft)]">모든 이미지를 불러왔어요</p>
         </div>
       )}
     </div>

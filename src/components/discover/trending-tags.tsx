@@ -56,7 +56,7 @@ export function TrendingTags({ tags, selectedTag, onTagClick }: TrendingTagsProp
                   {TAG_DESCRIPTIONS[tag].map((desc) => (
                     <span
                       key={desc}
-                      className="text-[10px] text-[var(--angel-text-soft)]"
+                      className="text-[12px] text-[var(--angel-text-soft)]"
                     >
                       {desc}
                     </span>

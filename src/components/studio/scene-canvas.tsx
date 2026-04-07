@@ -374,10 +374,10 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
     <div>
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-[13px] font-medium text-[var(--angel-text)]">
+        <h3 className="text-[15px] font-medium text-[var(--angel-text)]">
           장면 구성
         </h3>
-        <span className="text-[10px] text-[var(--angel-text-faint)]">
+        <span className="text-[12px] text-[var(--angel-text-faint)]">
           피사체를 드래그로 배치 · 클릭으로 편집
         </span>
       </div>
@@ -399,7 +399,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
             {/* Empty state */}
             {canvasObjects.length === 0 && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-[12px] text-[var(--angel-text-faint)]">
+                <p className="text-[14px] text-[var(--angel-text-faint)]">
                   피사체와 배경이 여기에 표시됩니다
                 </p>
               </div>
@@ -435,12 +435,12 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                     <span className="text-sm">
                       {ROLE_ICONS[obj.role] || "⚙️"}
                     </span>
-                    <span className="text-[11px] font-medium text-[var(--angel-text)] leading-tight">
+                    <span className="text-[13px] font-medium text-[var(--angel-text)] leading-tight">
                       {obj.label}
                     </span>
                   </div>
                   {obj.description && (
-                    <p className="mt-0.5 text-[9px] text-[var(--angel-text-soft)] truncate leading-tight">
+                    <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] truncate leading-tight">
                       {obj.description}
                     </p>
                   )}
@@ -467,10 +467,10 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                       {ROLE_ICONS[selectedObj.role] || "⚙️"}
                     </span>
                     <div>
-                      <span className="text-[12px] font-medium text-[var(--angel-text)]">
+                      <span className="text-[14px] font-medium text-[var(--angel-text)]">
                         {selectedObj.label}
                       </span>
-                      <span className="ml-1.5 text-[9px] text-[var(--angel-text-faint)] uppercase">
+                      <span className="ml-1.5 text-[11px] text-[var(--angel-text-faint)] uppercase">
                         {selectedObj.role}
                       </span>
                     </div>
@@ -492,7 +492,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
 
                 {/* Description */}
                 <div className="px-3.5 pt-2.5 pb-2">
-                  <label className="text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
+                  <label className="text-[11px] text-[var(--angel-text-faint)] uppercase tracking-wider">
                     설명
                   </label>
                   <input
@@ -504,14 +504,14 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                         description: e.target.value,
                       })
                     }
-                    className="mt-1 w-full rounded-lg bg-[var(--angel-blue)]/5 border border-transparent px-2.5 py-1.5 text-[12px] text-[var(--angel-text)] outline-none transition-all focus:border-[var(--angel-blue)]/30 focus:bg-white"
+                    className="mt-1 w-full rounded-lg bg-[var(--angel-blue)]/5 border border-transparent px-2.5 py-1.5 text-[14px] text-[var(--angel-text)] outline-none transition-all focus:border-[var(--angel-blue)]/30 focus:bg-white"
                     placeholder="이 요소를 설명해주세요"
                   />
                 </div>
 
                 {/* Attributes */}
                 <div className="px-3.5 pb-2">
-                  <label className="text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
+                  <label className="text-[11px] text-[var(--angel-text-faint)] uppercase tracking-wider">
                     속성
                   </label>
                   {refreshingIds.has(selectedObj.id) ? (
@@ -523,7 +523,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                           <div className="h-2.5 w-6 rounded bg-[var(--angel-blue)]/10" />
                         </div>
                       ))}
-                      <p className="text-[9px] text-[var(--angel-blue)] text-center">속성 갱신 중...</p>
+                      <p className="text-[11px] text-[var(--angel-blue)] text-center">속성 갱신 중...</p>
                     </div>
                   ) : selectedObj.attributes.length > 0 ? (
                     <div className="mt-1.5 space-y-1.5">
@@ -549,7 +549,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                 <div className="px-3.5 pb-3 pt-1">
                   <button
                     onClick={() => handleDelete(selectedObj.id)}
-                    className="w-full rounded-lg border border-red-200/50 py-1.5 text-[11px] text-red-400 transition-colors hover:bg-red-50/50 hover:text-red-500"
+                    className="w-full rounded-lg border border-red-200/50 py-1.5 text-[13px] text-red-400 transition-colors hover:bg-red-50/50 hover:text-red-500"
                   >
                     요소 삭제
                   </button>
@@ -562,7 +562,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
           <button
             onClick={handleAddSubject}
             disabled={subjectCount >= MAX_SUBJECTS}
-            className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--angel-border)] py-2 text-[12px] text-[var(--angel-text-soft)] transition-all hover:border-[var(--angel-blue)]/50 hover:text-[var(--angel-blue)] hover:bg-white/50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-[var(--angel-border)] disabled:hover:text-[var(--angel-text-soft)] disabled:hover:bg-transparent"
+            className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--angel-border)] py-2 text-[14px] text-[var(--angel-text-soft)] transition-all hover:border-[var(--angel-blue)]/50 hover:text-[var(--angel-blue)] hover:bg-white/50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-[var(--angel-border)] disabled:hover:text-[var(--angel-text-soft)] disabled:hover:bg-transparent"
           >
             <svg
               width="14"
@@ -583,17 +583,17 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
         {/* ── Sidebar: non-positional properties ── */}
         <div className="md:w-[260px] shrink-0 space-y-2">
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-[11px] font-medium text-[var(--angel-text-soft)]">
+            <span className="text-[13px] font-medium text-[var(--angel-text-soft)]">
               장면 속성
             </span>
-            <span className="text-[9px] text-[var(--angel-text-faint)]">
+            <span className="text-[11px] text-[var(--angel-text-faint)]">
               · 조명 · 분위기 · 색감 등
             </span>
           </div>
 
           {sidebarObjects.length === 0 && (
             <div className="rounded-xl border border-dashed border-[var(--angel-border)] py-6 text-center">
-              <p className="text-[11px] text-[var(--angel-text-faint)]">
+              <p className="text-[13px] text-[var(--angel-text-faint)]">
                 분석된 장면 속성이 여기에 표시됩니다
               </p>
             </div>
@@ -625,11 +625,11 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                       {ROLE_ICONS[obj.role] || "⚙️"}
                     </span>
                     <div className="min-w-0">
-                      <span className="text-[12px] font-medium text-[var(--angel-text)] block leading-tight">
+                      <span className="text-[14px] font-medium text-[var(--angel-text)] block leading-tight">
                         {obj.label}
                       </span>
                       {obj.description && !isExpanded && (
-                        <span className="text-[9px] text-[var(--angel-text-faint)] block truncate leading-tight mt-0.5">
+                        <span className="text-[11px] text-[var(--angel-text-faint)] block truncate leading-tight mt-0.5">
                           {obj.description}
                         </span>
                       )}
@@ -657,7 +657,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                   <div className="px-3 pb-3 space-y-2.5 border-t border-[var(--angel-border)]/30">
                     {/* Description input */}
                     <div className="pt-2.5">
-                      <label className="text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
+                      <label className="text-[11px] text-[var(--angel-text-faint)] uppercase tracking-wider">
                         설명
                       </label>
                       <input
@@ -669,14 +669,14 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                             description: e.target.value,
                           })
                         }
-                        className="mt-1 w-full rounded-lg bg-white/80 border border-transparent px-2.5 py-1.5 text-[12px] text-[var(--angel-text)] outline-none transition-all focus:border-[var(--angel-blue)]/30 focus:bg-white"
+                        className="mt-1 w-full rounded-lg bg-white/80 border border-transparent px-2.5 py-1.5 text-[14px] text-[var(--angel-text)] outline-none transition-all focus:border-[var(--angel-blue)]/30 focus:bg-white"
                         placeholder="이 속성을 설명해주세요"
                       />
                     </div>
 
                     {/* Attributes */}
                     <div>
-                      <label className="text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
+                      <label className="text-[11px] text-[var(--angel-text-faint)] uppercase tracking-wider">
                         속성
                       </label>
                       {refreshingIds.has(obj.id) ? (
@@ -688,7 +688,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                               <div className="h-2.5 w-6 rounded bg-[var(--angel-blue)]/10" />
                             </div>
                           ))}
-                          <p className="text-[9px] text-[var(--angel-blue)] text-center">속성 갱신 중...</p>
+                          <p className="text-[11px] text-[var(--angel-blue)] text-center">속성 갱신 중...</p>
                         </div>
                       ) : obj.attributes.length > 0 ? (
                         <div className="mt-1.5 space-y-1.5">
@@ -713,7 +713,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
                     {/* Delete */}
                     <button
                       onClick={() => handleDelete(obj.id)}
-                      className="w-full rounded-lg border border-red-200/50 py-1.5 text-[11px] text-red-400 transition-colors hover:bg-red-50/50 hover:text-red-500"
+                      className="w-full rounded-lg border border-red-200/50 py-1.5 text-[13px] text-red-400 transition-colors hover:bg-red-50/50 hover:text-red-500"
                     >
                       속성 삭제
                     </button>

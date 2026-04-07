@@ -26,19 +26,19 @@ export function PromptComparison({
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-[13px] font-medium text-[var(--angel-text)]">
+        <h3 className="text-[15px] font-medium text-[var(--angel-text)]">
           프롬프트 비교
         </h3>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowEnglish(!showEnglish)}
-            className="text-[10px] text-[var(--angel-blue)] hover:underline"
+            className="text-[12px] text-[var(--angel-blue)] hover:underline"
           >
             {showEnglish ? "한국어로 보기" : "영어 프롬프트 보기"}
           </button>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 text-[10px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] transition-colors"
+            className="flex items-center gap-1 text-[12px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] transition-colors"
           >
             {copied ? (
               <>
@@ -81,11 +81,11 @@ export function PromptComparison({
         <div className="rounded-xl border border-[var(--angel-border)] bg-white/50 p-4">
           <div className="mb-2 flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-[var(--angel-text-faint)]" />
-            <span className="text-[10px] font-medium text-[var(--angel-text-faint)] uppercase tracking-wider">
+            <span className="text-[12px] font-medium text-[var(--angel-text-faint)] uppercase tracking-wider">
               Original
             </span>
           </div>
-          <p className="text-[12px] leading-relaxed text-[var(--angel-text-soft)]">
+          <p className="text-[14px] leading-relaxed text-[var(--angel-text-soft)]">
             {originalPrompt}
           </p>
         </div>
@@ -94,11 +94,11 @@ export function PromptComparison({
         <div className="rounded-xl border border-[var(--angel-blue)]/30 bg-[var(--angel-blue)]/5 p-4">
           <div className="mb-2 flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-[var(--angel-blue)]" />
-            <span className="text-[10px] font-medium text-[var(--angel-blue)] uppercase tracking-wider">
+            <span className="text-[12px] font-medium text-[var(--angel-blue)] uppercase tracking-wider">
               Enhanced
             </span>
           </div>
-          <p className="text-[12px] leading-relaxed text-[var(--angel-text)]">
+          <p className="text-[14px] leading-relaxed text-[var(--angel-text)]">
             {showEnglish ? enhancedPromptEn : enhancedPromptKo}
           </p>
         </div>

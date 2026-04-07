@@ -379,7 +379,7 @@ export default function StudioPage() {
         <h1 className="font-heading text-2xl font-medium tracking-[0.08em] text-[var(--angel-text)] md:text-3xl">
           Studio
         </h1>
-        <p className="mt-1.5 text-[12px] text-[var(--angel-text-soft)] md:mt-2 md:text-[13px]">
+        <p className="mt-1.5 text-[14px] text-[var(--angel-text-soft)] md:mt-2 md:text-[15px]">
           프롬프트를 입력하고, AI가 분석하고 최적화해요
         </p>
       </div>
@@ -408,7 +408,7 @@ export default function StudioPage() {
               }`}
             >
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-medium transition-all md:h-9 md:w-9 md:text-[13px] ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-medium transition-all md:h-9 md:w-9 md:text-[15px] ${
                   s.num < step
                     ? "bg-[var(--angel-blue)] text-white"
                     : s.num === step
@@ -424,7 +424,7 @@ export default function StudioPage() {
                   s.num
                 )}
               </div>
-              <span className={`text-[10px] hidden md:block ${
+              <span className={`text-[12px] hidden md:block ${
                 s.num === step
                   ? "text-[var(--angel-blue)] font-medium"
                   : "text-[var(--angel-text-faint)]"
@@ -454,11 +454,11 @@ export default function StudioPage() {
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <polyline points="21 15 16 10 5 21" />
               </svg>
-              <span className="text-[11px] text-[var(--angel-text-soft)] md:text-[12px]">
+              <span className="text-[13px] text-[var(--angel-text-soft)] md:text-[14px]">
                 레퍼런스 이미지{" "}
-                <span className="text-[10px] text-[var(--angel-text-faint)] hidden md:inline">(붙여넣기 가능)</span>
+                <span className="text-[12px] text-[var(--angel-text-faint)] hidden md:inline">(붙여넣기 가능)</span>
               </span>
-              <span className="text-[10px] text-[var(--angel-text-faint)]">
+              <span className="text-[12px] text-[var(--angel-text-faint)]">
                 ({refImages.length}/{MAX_IMAGES})
               </span>
             </div>
@@ -475,14 +475,14 @@ export default function StudioPage() {
               {refImages.length < MAX_IMAGES && (
                 <button type="button" onClick={() => fileInputRef.current?.click()} className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[var(--angel-border)] bg-white/50 text-[var(--angel-text-faint)] transition-all hover:border-[var(--angel-blue)]/50 hover:bg-white/80 hover:text-[var(--angel-blue)] md:h-20 md:w-20">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                  <span className="text-[9px]">추가</span>
+                  <span className="text-[11px]">추가</span>
                 </button>
               )}
               <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={handleFileSelect} className="hidden" />
             </div>
-            {refError && <p className="mt-1.5 text-[10px] text-red-500">{refError}</p>}
+            {refError && <p className="mt-1.5 text-[12px] text-red-500">{refError}</p>}
             {refImages.length > 0 && (
-              <p className="mt-1.5 text-[10px] text-[var(--angel-text-faint)]">
+              <p className="mt-1.5 text-[12px] text-[var(--angel-text-faint)]">
                 레퍼런스 이미지의 스타일과 분위기를 참고하여 새 이미지를 생성해요
               </p>
             )}
@@ -494,7 +494,7 @@ export default function StudioPage() {
               <button
                 type="button"
                 onClick={() => setPremium((v) => !v)}
-                className={`glass-card flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-medium transition-all ${
+                className={`glass-card flex items-center gap-2 rounded-full px-4 py-2 text-[14px] font-medium transition-all ${
                   premium
                     ? "bg-[#ffd700]/12 border border-[#ffd700]/30 text-[#b8860b] shadow-[0_0_12px_rgba(255,215,0,0.15)]"
                     : "border border-[var(--angel-border)] text-[var(--angel-text-soft)]"
@@ -504,12 +504,12 @@ export default function StudioPage() {
                   <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" fill={premium ? "#ffd700" : "none"} stroke={premium ? "#b8860b" : "currentColor"} strokeWidth="1.5" />
                 </svg>
                 프리미엄
-                <span className={`text-[9px] rounded-full px-1.5 py-0.5 transition-colors ${premium ? "bg-[#ffd700]/25 text-[#b8860b]" : "bg-[var(--angel-bg-soft)] text-[var(--angel-text-faint)]"}`}>
+                <span className={`text-[11px] rounded-full px-1.5 py-0.5 transition-colors ${premium ? "bg-[#ffd700]/25 text-[#b8860b]" : "bg-[var(--angel-bg-soft)] text-[var(--angel-text-faint)]"}`}>
                   {premium ? "ON" : "OFF"}
                 </span>
               </button>
               <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-xl bg-[#1a1a2e]/90 backdrop-blur-sm px-4 py-3 text-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 z-30">
-                <p className="text-[11px] leading-[1.7] text-white/90">고해상도 2K 이미지를 생성해요.<br />더 선명하고 디테일한 결과물!</p>
+                <p className="text-[13px] leading-[1.7] text-white/90">고해상도 2K 이미지를 생성해요.<br />더 선명하고 디테일한 결과물!</p>
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rotate-45 bg-[#1a1a2e]/90" />
               </div>
             </div>
@@ -519,7 +519,7 @@ export default function StudioPage() {
           <button
             onClick={handleGoToStep2}
             disabled={!prompt.trim()}
-            className="w-full angel-btn angel-btn-primary py-3 text-[13px] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full angel-btn angel-btn-primary py-3 text-[15px] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             다음: 장면 분석
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -535,7 +535,7 @@ export default function StudioPage() {
           {isAnalyzing ? (
             <div>
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-[13px] font-medium text-[var(--angel-text)]">장면 구성 요소</h3>
+                <h3 className="text-[15px] font-medium text-[var(--angel-text)]">장면 구성 요소</h3>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 {[1, 2, 3, 4].map((i) => (
@@ -551,19 +551,19 @@ export default function StudioPage() {
               </div>
               <div className="mt-6 flex flex-col items-center gap-2">
                 <span className="twinkle text-[var(--angel-lavender)]">✦</span>
-                <p className="text-[12px] text-[var(--angel-text-soft)]">프롬프트를 분석하고 있어요...</p>
+                <p className="text-[14px] text-[var(--angel-text-soft)]">프롬프트를 분석하고 있어요...</p>
               </div>
             </div>
           ) : (
             <>
               <div className="glass-card rounded-xl px-4 py-3 mb-2">
-                <p className="text-[11px] text-[var(--angel-text-faint)] mb-1">입력한 프롬프트</p>
-                <p className="text-[13px] text-[var(--angel-text)] leading-relaxed">{prompt}</p>
+                <p className="text-[13px] text-[var(--angel-text-faint)] mb-1">입력한 프롬프트</p>
+                <p className="text-[15px] text-[var(--angel-text)] leading-relaxed">{prompt}</p>
               </div>
 
               <SceneCanvas objects={sceneObjects} onChange={setSceneObjects} />
 
-              <p className="text-[10px] text-[var(--angel-text-faint)] text-center">
+              <p className="text-[12px] text-[var(--angel-text-faint)] text-center">
                 피사체를 드래그로 배치하고, 우측 패널에서 조명·분위기 등을 조절할 수 있어요
               </p>
             </>
@@ -572,7 +572,7 @@ export default function StudioPage() {
           {/* Navigation */}
           {!isAnalyzing && (
             <div className="flex gap-3 pt-2">
-              <button onClick={handleBack} className="angel-btn angel-btn-secondary py-2.5 text-[12px]">
+              <button onClick={handleBack} className="angel-btn angel-btn-secondary py-2.5 text-[14px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
@@ -581,7 +581,7 @@ export default function StudioPage() {
               <button
                 onClick={handleGoToStep3}
                 disabled={sceneObjects.length === 0}
-                className="flex-1 angel-btn angel-btn-primary py-2.5 text-[13px] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 angel-btn angel-btn-primary py-2.5 text-[15px] disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 다음: 프롬프트 조합
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -599,7 +599,7 @@ export default function StudioPage() {
           {isComposing ? (
             <div>
               <div className="mb-3">
-                <h3 className="text-[13px] font-medium text-[var(--angel-text)]">프롬프트 비교</h3>
+                <h3 className="text-[15px] font-medium text-[var(--angel-text)]">프롬프트 비교</h3>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="animate-pulse rounded-xl border border-[var(--angel-border)] bg-white/50 p-4">
@@ -627,7 +627,7 @@ export default function StudioPage() {
               </div>
               <div className="mt-6 flex flex-col items-center gap-2">
                 <span className="twinkle text-[var(--angel-lavender)]">✦</span>
-                <p className="text-[12px] text-[var(--angel-text-soft)]">최적화된 프롬프트를 만들고 있어요...</p>
+                <p className="text-[14px] text-[var(--angel-text-soft)]">최적화된 프롬프트를 만들고 있어요...</p>
               </div>
             </div>
           ) : (
@@ -641,7 +641,7 @@ export default function StudioPage() {
           {/* Navigation */}
           {!isComposing && (
             <div className="flex gap-3 pt-2">
-              <button onClick={handleBack} className="angel-btn angel-btn-secondary py-2.5 text-[12px]">
+              <button onClick={handleBack} className="angel-btn angel-btn-secondary py-2.5 text-[14px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
@@ -649,9 +649,9 @@ export default function StudioPage() {
               </button>
               <button
                 onClick={handleGoToStep4}
-                className="flex-1 angel-btn angel-btn-primary py-2.5 text-[13px]"
+                className="flex-1 angel-btn angel-btn-primary py-2.5 text-[15px]"
               >
-                <span className="text-[10px]">✦</span>
+                <span className="text-[12px]">✦</span>
                 이미지 생성하기
               </button>
             </div>
@@ -675,7 +675,7 @@ export default function StudioPage() {
                   style={{ width: `${progress}%`, animation: "shimmer 1.5s infinite" }}
                 />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--angel-text-soft)]">
+              <div className="mt-3 flex items-center justify-between text-[13px] text-[var(--angel-text-soft)]">
                 <span>{Math.floor(elapsed)}초 경과</span>
                 <span>{remaining > 0 ? `약 ${remaining}초 남음` : "거의 완성..."}</span>
               </div>
@@ -686,7 +686,7 @@ export default function StudioPage() {
                     <div className="text-2xl twinkle">✦</div>
                   </div>
                 </div>
-                <p className="text-[12px] text-[var(--angel-text-soft)]">
+                <p className="text-[14px] text-[var(--angel-text-soft)]">
                   {elapsed < 3
                     ? "최적화된 프롬프트로 준비 중..."
                     : elapsed < estimatedTime * 0.5
@@ -698,7 +698,7 @@ export default function StudioPage() {
                 {premium && (
                   <div className="flex items-center gap-1.5 rounded-full bg-[#ffd700]/10 px-3 py-1">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="#ffd700" stroke="#b8860b" strokeWidth="1"><path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" /></svg>
-                    <span className="text-[10px] text-[#b8860b]">2K 고해상도로 생성 중</span>
+                    <span className="text-[12px] text-[#b8860b]">2K 고해상도로 생성 중</span>
                   </div>
                 )}
               </div>
@@ -708,10 +708,10 @@ export default function StudioPage() {
           {/* Error */}
           {error && (
             <div className="mt-6 space-y-3">
-              <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 text-[13px] text-red-600 text-center">
+              <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 text-[15px] text-red-600 text-center">
                 {error}
               </div>
-              <button onClick={handleBack} className="w-full angel-btn angel-btn-secondary py-2.5 text-[12px]">
+              <button onClick={handleBack} className="w-full angel-btn angel-btn-secondary py-2.5 text-[14px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
@@ -725,7 +725,7 @@ export default function StudioPage() {
             <div className="mt-2 space-y-8">
               <div className="text-center">
                 <div className="celestial-divider mb-6">
-                  <span className="text-[10px] tracking-[0.3em] text-[var(--angel-lavender)]">RESULT</span>
+                  <span className="text-[12px] tracking-[0.3em] text-[var(--angel-lavender)]">RESULT</span>
                 </div>
                 <div className="glass-card rounded-2xl p-3 inline-block relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -733,42 +733,42 @@ export default function StudioPage() {
                   {premium && (
                     <div className="absolute top-5 right-5 flex items-center gap-1.5 rounded-full bg-[#ffd700]/90 px-2.5 py-1 shadow-md">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" stroke="#b8860b" strokeWidth="1"><path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" /></svg>
-                      <span className="text-[10px] font-medium text-white">2K</span>
+                      <span className="text-[12px] font-medium text-white">2K</span>
                     </div>
                   )}
                 </div>
 
                 {/* Prompt used */}
                 <div className="mt-4 mx-auto max-w-md">
-                  <p className="text-[10px] text-[var(--angel-text-faint)] mb-1">사용된 프롬프트</p>
-                  <p className="glass-card rounded-lg px-3 py-2 text-[11px] leading-relaxed text-[var(--angel-text-soft)] text-left">
+                  <p className="text-[12px] text-[var(--angel-text-faint)] mb-1">사용된 프롬프트</p>
+                  <p className="glass-card rounded-lg px-3 py-2 text-[13px] leading-relaxed text-[var(--angel-text-soft)] text-left">
                     {composedPromptKo || prompt}
                   </p>
                 </div>
 
                 {/* Action buttons */}
                 <div className="mt-4 flex flex-wrap justify-center gap-2 md:mt-5 md:gap-3">
-                  <button onClick={handleDownload} className="angel-btn angel-btn-secondary text-[12px]">
+                  <button onClick={handleDownload} className="angel-btn angel-btn-secondary text-[14px]">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                     다운로드
                   </button>
-                  <button onClick={handleSave} disabled={isSaved} className={`angel-btn text-[12px] ${isSaved ? "angel-btn-primary" : "angel-btn-secondary"}`}>
+                  <button onClick={handleSave} disabled={isSaved} className={`angel-btn text-[14px] ${isSaved ? "angel-btn-primary" : "angel-btn-secondary"}`}>
                     {isSaved ? (
                       <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>저장됨</>
                     ) : (
                       <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>저장하기</>
                     )}
                   </button>
-                  <button onClick={handleShare} disabled={isSharing || isShared} className={`angel-btn text-[12px] ${isShared ? "angel-btn-primary" : "angel-btn-secondary"}`}>
+                  <button onClick={handleShare} disabled={isSharing || isShared} className={`angel-btn text-[14px] ${isShared ? "angel-btn-primary" : "angel-btn-secondary"}`}>
                     {isShared ? (
                       <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>공유됨</>
                     ) : isSharing ? (
-                      <span className="flex items-center gap-1.5"><span className="twinkle text-[10px]">✦</span>공유 중...</span>
+                      <span className="flex items-center gap-1.5"><span className="twinkle text-[12px]">✦</span>공유 중...</span>
                     ) : (
                       <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>Discover에 공유</>
                     )}
                   </button>
-                  <button onClick={handleReset} className="angel-btn angel-btn-secondary text-[12px]">
+                  <button onClick={handleReset} className="angel-btn angel-btn-secondary text-[14px]">
                     새로 만들기
                   </button>
                 </div>

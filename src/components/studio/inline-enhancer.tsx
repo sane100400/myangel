@@ -239,10 +239,10 @@ export function InlineEnhancer({
               </svg>
             </div>
             <div>
-              <p className="text-[13px] font-semibold text-amber-800">
+              <p className="text-[15px] font-semibold text-amber-800">
                 프롬프트 강화
               </p>
-              <p className="text-[11px] text-amber-600/80">
+              <p className="text-[13px] text-amber-600/80">
                 {validSpans.filter((s) => !replacedWords[s.text] && !Object.values(replacedWords).includes(s.text)).length}개 표현을 더 구체적으로 바꿀 수 있어요
               </p>
             </div>
@@ -258,7 +258,7 @@ export function InlineEnhancer({
                 <button
                   key={`${span.text}-${i}`}
                   onClick={(e) => handleChipClick(span, e)}
-                  className={`relative rounded-xl px-3 py-1.5 text-[12px] font-medium transition-all md:px-3.5 md:py-2 md:text-[13px] ${
+                  className={`relative rounded-xl px-3 py-1.5 text-[14px] font-medium transition-all md:px-3.5 md:py-2 md:text-[15px] ${
                     isActive
                       ? "bg-[var(--angel-blue)]/15 text-[var(--angel-blue)] border-2 border-[var(--angel-blue)]/40 shadow-md scale-[1.03]"
                       : isReplaced
@@ -268,7 +268,7 @@ export function InlineEnhancer({
                 >
                   {span.text}
                   {!isReplaced && (
-                    <span className="ml-1.5 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-amber-400 text-[9px] text-white font-bold shadow-sm">
+                    <span className="ml-1.5 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-amber-400 text-[11px] text-white font-bold shadow-sm">
                       +
                     </span>
                   )}
@@ -284,7 +284,7 @@ export function InlineEnhancer({
             })}
           </div>
 
-          <p className="mt-3 text-[10px] text-amber-600/60 text-center">
+          <p className="mt-3 text-[12px] text-amber-600/60 text-center">
             단어를 클릭하면 AI가 더 구체적인 표현을 추천해줘요
           </p>
         </div>
@@ -306,7 +306,7 @@ export function InlineEnhancer({
             <div className="px-3.5 pt-3 pb-2 border-b border-[var(--angel-border)]/50 bg-gradient-to-r from-[var(--angel-blue)]/5 to-transparent">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-medium text-[var(--angel-text)]">
+                  <span className="text-[15px] font-medium text-[var(--angel-text)]">
                     &ldquo;{activeSpan.text}&rdquo;
                   </span>
                 </div>
@@ -322,14 +322,14 @@ export function InlineEnhancer({
                   </svg>
                 </button>
               </div>
-              <p className="text-[10px] text-[var(--angel-text-soft)] mt-0.5 leading-snug">
+              <p className="text-[12px] text-[var(--angel-text-soft)] mt-0.5 leading-snug">
                 {activeSpan.reason}
               </p>
             </div>
 
             {/* Alternatives */}
             <div className="p-1.5 max-h-64 overflow-y-auto">
-              <p className="px-2 py-1 text-[9px] text-[var(--angel-text-faint)] uppercase tracking-wider">
+              <p className="px-2 py-1 text-[11px] text-[var(--angel-text-faint)] uppercase tracking-wider">
                 이렇게 바꿔보세요
               </p>
               {activeSpan.alternatives.map((alt) => (
@@ -339,14 +339,14 @@ export function InlineEnhancer({
                   className="w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[var(--angel-blue)]/6 group"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[13px] font-medium text-[var(--angel-blue)] group-hover:text-[var(--angel-text)]">
+                    <span className="text-[15px] font-medium text-[var(--angel-blue)] group-hover:text-[var(--angel-text)]">
                       {alt.text}
                     </span>
-                    <span className="shrink-0 text-[9px] text-[var(--angel-text-faint)] tabular-nums bg-[var(--angel-bg-soft)] rounded-full px-1.5 py-0.5">
+                    <span className="shrink-0 text-[11px] text-[var(--angel-text-faint)] tabular-nums bg-[var(--angel-bg-soft)] rounded-full px-1.5 py-0.5">
                       {Math.round(alt.confidence * 100)}%
                     </span>
                   </div>
-                  <p className="mt-1 text-[10px] text-[var(--angel-text-soft)] leading-snug">
+                  <p className="mt-1 text-[12px] text-[var(--angel-text-soft)] leading-snug">
                     {alt.reasoning}
                   </p>
                 </button>
@@ -361,12 +361,12 @@ export function InlineEnhancer({
         <div className="mt-3">
           <button
             onClick={handleRewrite}
-            className="w-full rounded-xl border border-[var(--angel-blue)]/30 bg-[var(--angel-blue)]/6 py-2.5 text-[12px] font-medium text-[var(--angel-blue)] transition-all hover:bg-[var(--angel-blue)]/12 hover:border-[var(--angel-blue)]/50"
+            className="w-full rounded-xl border border-[var(--angel-blue)]/30 bg-[var(--angel-blue)]/6 py-2.5 text-[14px] font-medium text-[var(--angel-blue)] transition-all hover:bg-[var(--angel-blue)]/12 hover:border-[var(--angel-blue)]/50"
           >
-            <span className="text-[10px]">✦</span>
+            <span className="text-[12px]">✦</span>
             {" "}문장 다듬기
           </button>
-          <p className="mt-1 text-center text-[10px] text-[var(--angel-text-faint)]">
+          <p className="mt-1 text-center text-[12px] text-[var(--angel-text-faint)]">
             선택한 표현을 반영하여 문장을 자연스럽게 다듬어요
           </p>
         </div>
@@ -376,19 +376,19 @@ export function InlineEnhancer({
       <div className="mt-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           {isRewriting && (
-            <span className="flex items-center gap-2 text-[11px] text-[var(--angel-blue)] font-medium">
+            <span className="flex items-center gap-2 text-[13px] text-[var(--angel-blue)] font-medium">
               <span className="twinkle">✦</span>
               문장을 다듬고 있어요...
             </span>
           )}
           {!isRewriting && isAnalyzing && (
-            <span className="flex items-center gap-2 rounded-full bg-[var(--angel-lavender)]/10 px-3 py-1.5 text-[11px] text-[var(--angel-lavender)] font-medium">
+            <span className="flex items-center gap-2 rounded-full bg-[var(--angel-lavender)]/10 px-3 py-1.5 text-[13px] text-[var(--angel-lavender)] font-medium">
               <span className="twinkle">✦</span>
               프롬프트를 분석하고 있어요...
             </span>
           )}
           {!isAnalyzing && !isRewriting && validSpans.length === 0 && analyzedText && (
-            <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] text-emerald-600 font-medium">
+            <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-[13px] text-emerald-600 font-medium">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
               프롬프트가 이미 구체적이에요!
             </span>
@@ -398,7 +398,7 @@ export function InlineEnhancer({
           <button
             onClick={handleManualAnalyze}
             disabled={isAnalyzing || disabled}
-            className="rounded-full bg-[var(--angel-bg-soft)] px-3 py-1.5 text-[11px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] hover:bg-[var(--angel-blue)]/8 transition-all disabled:opacity-40"
+            className="rounded-full bg-[var(--angel-bg-soft)] px-3 py-1.5 text-[13px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] hover:bg-[var(--angel-blue)]/8 transition-all disabled:opacity-40"
           >
             다시 분석
           </button>

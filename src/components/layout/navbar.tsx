@@ -74,13 +74,13 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`nav-link flex flex-col items-center gap-0.5 px-4 py-1 text-[12px] tracking-[0.08em] ${
+                className={`nav-link flex flex-col items-center gap-0.5 px-4 py-1 text-[14px] tracking-[0.08em] ${
                   isActive
                     ? "nav-link-active text-[var(--angel-text)]"
                     : "text-[var(--angel-text-soft)]"
                 }`}
               >
-                <span className={`text-[10px] text-[var(--angel-lavender)] transition-opacity duration-200 ${isActive ? "opacity-100" : "opacity-0"}`}>
+                <span className={`text-[12px] text-[var(--angel-lavender)] transition-opacity duration-200 ${isActive ? "opacity-100" : "opacity-0"}`}>
                   ✦
                 </span>
                 {item.label}
@@ -101,13 +101,13 @@ export function Navbar() {
                   className="h-7 w-7 rounded-full border border-[var(--angel-border)] object-cover"
                 />
               )}
-              <span className="text-[11px] text-[var(--angel-text-soft)] max-w-[120px] truncate">
+              <span className="text-[13px] text-[var(--angel-text-soft)] max-w-[120px] truncate">
                 {displayEmail}
               </span>
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-4 py-1.5 text-[11px] tracking-[0.08em] text-[var(--angel-text-soft)] transition-all hover:bg-white/80 hover:border-red-300 hover:text-red-500 disabled:opacity-50"
+                className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-4 py-1.5 text-[13px] tracking-[0.08em] text-[var(--angel-text-soft)] transition-all hover:bg-white/80 hover:border-red-300 hover:text-red-500 disabled:opacity-50"
               >
                 {loggingOut ? "..." : "Logout"}
               </button>
@@ -115,7 +115,7 @@ export function Navbar() {
           ) : (
             <Link
               href="/auth/login"
-              className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-5 py-1.5 text-[11px] tracking-[0.08em] text-[var(--angel-text)] transition-all hover:bg-white/80 hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
+              className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-5 py-1.5 text-[13px] tracking-[0.08em] text-[var(--angel-text)] transition-all hover:bg-white/80 hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
             >
               Login
             </Link>
@@ -127,7 +127,7 @@ export function Navbar() {
           {!user && (
             <Link
               href="/auth/login"
-              className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-3.5 py-1.5 text-[11px] tracking-[0.06em] text-[var(--angel-text-soft)] transition-all active:bg-white/80"
+              className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-3.5 py-1.5 text-[13px] tracking-[0.06em] text-[var(--angel-text-soft)] transition-all active:bg-white/80"
             >
               Login
             </Link>
@@ -185,14 +185,14 @@ export function Navbar() {
                       className="h-7 w-7 rounded-full border border-[var(--angel-border)] object-cover shrink-0"
                     />
                   )}
-                  <span className="text-[12px] text-[var(--angel-text-soft)] truncate">
+                  <span className="text-[14px] text-[var(--angel-text-soft)] truncate">
                     {displayEmail}
                   </span>
                 </div>
                 <button
                   onClick={() => { setMobileOpen(false); handleLogout(); }}
                   disabled={loggingOut}
-                  className="shrink-0 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 px-4 py-2 text-[12px] text-red-400 transition-colors hover:bg-red-50"
+                  className="shrink-0 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 px-4 py-2 text-[14px] text-red-400 transition-colors hover:bg-red-50"
                 >
                   Logout
                 </button>
@@ -201,7 +201,7 @@ export function Navbar() {
               <Link
                 href="/auth/login"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center py-2.5 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 text-[13px] tracking-[0.06em] text-[var(--angel-text-soft)]"
+                className="flex items-center justify-center py-2.5 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 text-[15px] tracking-[0.06em] text-[var(--angel-text-soft)]"
               >
                 Login
               </Link>

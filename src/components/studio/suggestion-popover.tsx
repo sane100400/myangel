@@ -40,7 +40,7 @@ export function SuggestionPopover({
       }}
     >
       <div className="p-2">
-        <p className="px-2 py-1 text-[10px] text-[var(--angel-text-faint)]">
+        <p className="px-2 py-1 text-[12px] text-[var(--angel-text-faint)]">
           더 구체적인 표현을 선택하세요
         </p>
         <div className="mt-1 space-y-0.5">
@@ -51,14 +51,14 @@ export function SuggestionPopover({
               className="w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-[var(--angel-blue)]/8"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[12px] font-medium text-[var(--angel-text)]">
+                <span className="text-[14px] font-medium text-[var(--angel-text)]">
                   {s.text}
                 </span>
-                <span className="text-[9px] text-[var(--angel-text-faint)]">
+                <span className="text-[11px] text-[var(--angel-text-faint)]">
                   {Math.round(s.confidence * 100)}%
                 </span>
               </div>
-              <p className="mt-0.5 text-[10px] text-[var(--angel-text-soft)]">
+              <p className="mt-0.5 text-[12px] text-[var(--angel-text-soft)]">
                 {s.reasoning}
               </p>
             </button>

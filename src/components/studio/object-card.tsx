@@ -59,10 +59,10 @@ export function ObjectCard({ object, onChange, onDelete }: ObjectCardProps) {
       {/* Header */}
       <div className="flex items-center gap-2">
         <span className="text-base">{ROLE_ICONS[object.role] || "⚙️"}</span>
-        <span className="text-[12px] font-medium text-[var(--angel-text)]">
+        <span className="text-[14px] font-medium text-[var(--angel-text)]">
           {object.label}
         </span>
-        <span className="text-[9px] text-[var(--angel-text-faint)] uppercase">
+        <span className="text-[11px] text-[var(--angel-text-faint)] uppercase">
           {object.role}
         </span>
         <div className="ml-auto flex items-center gap-1">
@@ -111,7 +111,7 @@ export function ObjectCard({ object, onChange, onDelete }: ObjectCardProps) {
         type="text"
         value={object.description}
         onChange={(e) => handleDescriptionChange(e.target.value)}
-        className="mt-2 w-full rounded-lg bg-white/60 border border-transparent px-2.5 py-1.5 text-[12px] text-[var(--angel-text)] outline-none transition-all focus:border-[var(--angel-blue)]/30 focus:bg-white"
+        className="mt-2 w-full rounded-lg bg-white/60 border border-transparent px-2.5 py-1.5 text-[14px] text-[var(--angel-text)] outline-none transition-all focus:border-[var(--angel-blue)]/30 focus:bg-white"
         placeholder="설명을 입력하세요"
       />
 

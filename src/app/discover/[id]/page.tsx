@@ -109,7 +109,7 @@ export default function DiscoverDetailPage() {
       <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 md:px-5 md:pt-24">
         <div className="flex flex-col items-center justify-center py-20">
           <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
-          <p className="text-[12px] text-[var(--angel-text-soft)]">이미지를 불러오는 중...</p>
+          <p className="text-[14px] text-[var(--angel-text-soft)]">이미지를 불러오는 중...</p>
         </div>
       </div>
     );
@@ -122,8 +122,8 @@ export default function DiscoverDetailPage() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4">
         <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
-        <p className="text-[13px] text-[var(--angel-text-soft)]">이미지를 찾을 수 없어요</p>
-        <Link href="/discover" className="mt-4 angel-btn angel-btn-secondary text-[12px]">
+        <p className="text-[15px] text-[var(--angel-text-soft)]">이미지를 찾을 수 없어요</p>
+        <Link href="/discover" className="mt-4 angel-btn angel-btn-secondary text-[14px]">
           Discover로 돌아가기
         </Link>
       </div>
@@ -204,7 +204,7 @@ export default function DiscoverDetailPage() {
       {/* Back */}
       <button
         onClick={() => router.back()}
-        className="mb-6 flex items-center gap-1.5 text-[12px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] transition-colors"
+        className="mb-6 flex items-center gap-1.5 text-[14px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] transition-colors"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="15 18 9 12 15 6" />
@@ -227,12 +227,12 @@ export default function DiscoverDetailPage() {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" stroke="#b8860b" strokeWidth="1">
                   <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
                 </svg>
-                <span className="text-[10px] font-medium text-white">프리미엄</span>
+                <span className="text-[12px] font-medium text-white">프리미엄</span>
               </div>
             )}
             {isSharedId && (
               <div className="absolute top-4 left-4 z-10 flex items-center gap-1 rounded-full bg-[var(--angel-blue)]/80 px-2.5 py-1 shadow-md">
-                <span className="text-[10px] font-medium text-white">AI 생성</span>
+                <span className="text-[12px] font-medium text-white">AI 생성</span>
               </div>
             )}
             <div className="relative">
@@ -290,13 +290,13 @@ export default function DiscoverDetailPage() {
               <button
                 onClick={handleSaveTitle}
                 disabled={isSavingTitle || !editTitle.trim()}
-                className="shrink-0 rounded-lg bg-[var(--angel-blue)] px-3 py-2 text-[12px] text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+                className="shrink-0 rounded-lg bg-[var(--angel-blue)] px-3 py-2 text-[14px] text-white transition-opacity hover:opacity-90 disabled:opacity-40"
               >
                 {isSavingTitle ? "..." : "저장"}
               </button>
               <button
                 onClick={handleCancelEdit}
-                className="shrink-0 rounded-lg border border-[var(--angel-border)] bg-white/50 px-3 py-2 text-[12px] text-[var(--angel-text-soft)] transition-colors hover:bg-white/80"
+                className="shrink-0 rounded-lg border border-[var(--angel-border)] bg-white/50 px-3 py-2 text-[14px] text-[var(--angel-text-soft)] transition-colors hover:bg-white/80"
               >
                 취소
               </button>
@@ -328,7 +328,7 @@ export default function DiscoverDetailPage() {
                 <Link
                   key={tag}
                   href={`/discover?tag=${encodeURIComponent(tag)}`}
-                  className="angel-tag angel-tag-active text-[10px]"
+                  className="angel-tag angel-tag-active text-[12px]"
                 >
                   #{tag}
                 </Link>
@@ -339,15 +339,15 @@ export default function DiscoverDetailPage() {
           {/* Divider */}
           <div className="mt-5 flex items-center gap-3">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/20" />
-            <span className="text-[9px] text-[var(--angel-lavender)] twinkle">✦</span>
+            <span className="text-[11px] text-[var(--angel-lavender)] twinkle">✦</span>
             <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/20" />
           </div>
 
           {/* Prompt section */}
           <div className="mt-5">
             <div className="mb-2 flex items-center gap-1.5">
-              <span className="text-[9px] text-[var(--angel-lavender)]">✦</span>
-              <span className="text-[11px] font-medium text-[var(--angel-text-soft)] tracking-wider uppercase">
+              <span className="text-[11px] text-[var(--angel-lavender)]">✦</span>
+              <span className="text-[13px] font-medium text-[var(--angel-text-soft)] tracking-wider uppercase">
                 Prompt
               </span>
             </div>
@@ -355,33 +355,33 @@ export default function DiscoverDetailPage() {
             {"prompt" in item && item.prompt ? (
               isPremium ? (
                 <div className="glass-card rounded-xl p-4 relative overflow-hidden">
-                  <p className="text-[13px] leading-[1.9] text-[var(--angel-text)] blur-[5px] select-none [word-break:keep-all]">
+                  <p className="text-[15px] leading-[1.9] text-[var(--angel-text)] blur-[5px] select-none [word-break:keep-all]">
                     {item.prompt}
                   </p>
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-[2px]">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffd700" stroke="#b8860b" strokeWidth="1">
                       <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
                     </svg>
-                    <p className="mt-2 text-[12px] font-medium text-[#b8860b]">프리미엄 프롬프트</p>
-                    <p className="mt-1 text-[10px] text-[var(--angel-text-soft)]">구매 후 전체 프롬프트를 확인할 수 있어요</p>
+                    <p className="mt-2 text-[14px] font-medium text-[#b8860b]">프리미엄 프롬프트</p>
+                    <p className="mt-1 text-[12px] text-[var(--angel-text-soft)]">구매 후 전체 프롬프트를 확인할 수 있어요</p>
                   </div>
                 </div>
               ) : (
                 <div className="glass-card rounded-xl p-4">
-                  <p className="text-[13px] leading-[1.9] text-[var(--angel-text)] [word-break:keep-all]">
+                  <p className="text-[15px] leading-[1.9] text-[var(--angel-text)] [word-break:keep-all]">
                     {item.prompt}
                   </p>
                 </div>
               )
             ) : (
-              <p className="text-[12px] text-[var(--angel-text-faint)]">프롬프트 정보가 없어요</p>
+              <p className="text-[14px] text-[var(--angel-text-faint)]">프롬프트 정보가 없어요</p>
             )}
           </div>
 
           {/* Action buttons */}
           <div className="mt-6 space-y-3">
             {isPremium ? (
-              <button className="w-full angel-btn py-3 text-[13px] font-medium bg-gradient-to-r from-[#ffd700] to-[#f0c030] text-white border-none shadow-[0_0_20px_rgba(255,215,0,0.2)] hover:shadow-[0_0_30px_rgba(255,215,0,0.3)] transition-shadow rounded-xl flex items-center justify-center gap-2">
+              <button className="w-full angel-btn py-3 text-[15px] font-medium bg-gradient-to-r from-[#ffd700] to-[#f0c030] text-white border-none shadow-[0_0_20px_rgba(255,215,0,0.2)] hover:shadow-[0_0_30px_rgba(255,215,0,0.3)] transition-shadow rounded-xl flex items-center justify-center gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" stroke="#b8860b" strokeWidth="0.5">
                   <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" />
                 </svg>
@@ -390,9 +390,9 @@ export default function DiscoverDetailPage() {
             ) : (
               <Link
                 href={`/generate?prompt=${encodeURIComponent(("prompt" in item && item.prompt) || "")}`}
-                className="w-full angel-btn angel-btn-primary py-3 text-[13px] flex items-center justify-center gap-2"
+                className="w-full angel-btn angel-btn-primary py-3 text-[15px] flex items-center justify-center gap-2"
               >
-                <span className="text-[10px]">✦</span>
+                <span className="text-[12px]">✦</span>
                 이 프롬프트로 이미지 생성하기
               </Link>
             )}
@@ -404,7 +404,7 @@ export default function DiscoverDetailPage() {
                 }
               }}
               disabled={isPremium}
-              className="w-full angel-btn angel-btn-secondary py-2.5 text-[12px] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full angel-btn angel-btn-secondary py-2.5 text-[14px] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -416,18 +416,18 @@ export default function DiscoverDetailPage() {
 
           {/* Style info */}
           <div className="mt-6 glass-card rounded-xl p-4">
-            <div className="flex items-center justify-between text-[11px]">
+            <div className="flex items-center justify-between text-[13px]">
               <span className="text-[var(--angel-text-soft)]">스타일</span>
               <span className="text-[var(--angel-text)]">{item.tags?.[0] || "-"}</span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-[11px]">
+            <div className="mt-2 flex items-center justify-between text-[13px]">
               <span className="text-[var(--angel-text-soft)]">등급</span>
               <span className={isPremium ? "text-[#b8860b] font-medium" : "text-[var(--angel-text)]"}>
                 {isPremium ? "프리미엄" : "무료"}
               </span>
             </div>
             {isSharedId && (
-              <div className="mt-2 flex items-center justify-between text-[11px]">
+              <div className="mt-2 flex items-center justify-between text-[13px]">
                 <span className="text-[var(--angel-text-soft)]">출처</span>
                 <span className="text-[var(--angel-blue)]">AI 생성 (커뮤니티 공유)</span>
               </div>
@@ -439,7 +439,7 @@ export default function DiscoverDetailPage() {
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="mt-4 w-full rounded-xl border border-red-200 bg-red-50/80 py-2.5 text-[12px] text-red-500 transition-colors hover:bg-red-100 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="mt-4 w-full rounded-xl border border-red-200 bg-red-50/80 py-2.5 text-[14px] text-red-500 transition-colors hover:bg-red-100 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="3 6 5 6 21 6" />

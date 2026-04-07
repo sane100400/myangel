@@ -14,7 +14,7 @@ export function Footer() {
           <span className="text-sm tracking-[0.12em] text-[var(--angel-text)] font-heading md:text-base">
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </span>
-          <p className="text-[9px] tracking-[0.25em] text-[var(--angel-text-faint)] uppercase">
+          <p className="text-[11px] tracking-[0.25em] text-[var(--angel-text-faint)] uppercase">
             interactive prompt optimization studio
           </p>
         </div>
@@ -29,7 +29,7 @@ export function Footer() {
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-center gap-4 text-[11px] tracking-[0.08em] text-[var(--angel-text-soft)] mb-5 md:gap-6 md:mb-6">
+        <div className="flex items-center justify-center gap-4 text-[13px] tracking-[0.08em] text-[var(--angel-text-soft)] mb-5 md:gap-6 md:mb-6">
           <Link href="/" className="transition-colors hover:text-[var(--angel-text)]">Home</Link>
           <span className="text-[8px] text-[var(--angel-lavender)]/30">✟</span>
           <Link href="/generate" className="transition-colors hover:text-[var(--angel-text)]">Studio</Link>
@@ -42,7 +42,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="flex items-center justify-center gap-2">
           <span className="text-[7px] text-[var(--angel-lavender)]/30">✦</span>
-          <p className="text-[9px] tracking-[0.12em] text-[var(--angel-text-faint)]">
+          <p className="text-[11px] tracking-[0.12em] text-[var(--angel-text-faint)]">
             &copy; 2026 MyAngel
           </p>
           <span className="text-[7px] text-[var(--angel-lavender)]/30">✦</span>

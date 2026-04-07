@@ -29,17 +29,17 @@ export function BoardCard({ board }: BoardCardProps) {
 
         <div className="p-4">
           <h3
-            className="font-heading-light text-[13px] font-medium text-[var(--angel-text)] tracking-[0.04em]"
+            className="font-heading-light text-[15px] font-medium text-[var(--angel-text)] tracking-[0.04em]"
           >
             {board.title}
           </h3>
           {board.description && (
-            <p className="mt-1 text-[10px] text-[var(--angel-text-soft)] line-clamp-2 leading-relaxed">
+            <p className="mt-1 text-[12px] text-[var(--angel-text-soft)] line-clamp-2 leading-relaxed">
               {board.description}
             </p>
           )}
           <div className="mt-2">
-            <span className="angel-tag text-[9px]">
+            <span className="angel-tag text-[11px]">
               {board.is_public ? "공개" : "비공개"}
             </span>
           </div>

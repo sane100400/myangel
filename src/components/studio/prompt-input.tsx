@@ -34,14 +34,14 @@ export function PromptInput({
       <button
         onClick={onAnalyze}
         disabled={!value.trim() || isLoading}
-        className="mt-3 w-full angel-btn angel-btn-primary py-3 text-[13px] disabled:opacity-40 disabled:cursor-not-allowed"
+        className="mt-3 w-full angel-btn angel-btn-primary py-3 text-[15px] disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {isLoading ? (
           <span className="flex items-center justify-center gap-2">
-            <span className="twinkle text-[10px]">✦</span>
+            <span className="twinkle text-[12px]">✦</span>
             장면을 분석하고 있어요...
             <span
-              className="twinkle text-[10px]"
+              className="twinkle text-[12px]"
               style={{ animationDelay: "0.5s" }}
             >
               ✦
@@ -49,7 +49,7 @@ export function PromptInput({
           </span>
         ) : (
           <>
-            <span className="text-[10px]">✦</span>
+            <span className="text-[12px]">✦</span>
             프롬프트 분석하기
           </>
         )}

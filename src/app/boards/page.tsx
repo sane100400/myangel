@@ -26,7 +26,7 @@ export default function MyPage() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
           <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
-          <p className="text-[12px] text-[var(--angel-text-soft)]">로딩 중...</p>
+          <p className="text-[14px] text-[var(--angel-text-soft)]">로딩 중...</p>
         </div>
       </div>
     );
@@ -39,20 +39,20 @@ export default function MyPage() {
         <h1 className="font-heading text-3xl font-medium tracking-[0.08em] text-[var(--angel-text)]">
           Mypage
         </h1>
-        <p className="mt-2 text-[12px] text-[var(--angel-text-soft)]">
+        <p className="mt-2 text-[14px] text-[var(--angel-text-soft)]">
           저장한 이미지와 프롬프트를 확인하세요
         </p>
         <div className="mt-4 flex items-center justify-center gap-3">
           <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/30" />
-          <span className="text-[9px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
+          <span className="text-[11px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
           <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/30" />
         </div>
       </div>
 
       {/* Quick action */}
       <div className="mb-6 text-center">
-        <Link href="/generate" className="angel-btn angel-btn-secondary text-[12px]">
-          <span className="text-[10px] text-[var(--angel-lavender)]">✦</span>
+        <Link href="/generate" className="angel-btn angel-btn-secondary text-[14px]">
+          <span className="text-[12px] text-[var(--angel-lavender)]">✦</span>
           새 이미지 생성하기
         </Link>
       </div>
@@ -62,7 +62,7 @@ export default function MyPage() {
         <div className="mb-6 flex justify-center">
           <div className="glass-card rounded-xl px-5 py-2.5 text-center">
             <span className="text-lg font-heading text-[var(--angel-blue)]">{savedImages.length}</span>
-            <span className="ml-2 text-[11px] text-[var(--angel-text-soft)]">저장된 이미지</span>
+            <span className="ml-2 text-[13px] text-[var(--angel-text-soft)]">저장된 이미지</span>
           </div>
         </div>
       )}
@@ -71,13 +71,13 @@ export default function MyPage() {
       {savedImages.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mb-4 text-2xl text-[var(--angel-lavender)] twinkle">✦</div>
-          <p className="text-[13px] text-[var(--angel-text-soft)]">아직 저장한 이미지가 없어요</p>
-          <p className="mt-1.5 text-[11px] text-[var(--angel-text-faint)] [word-break:keep-all]">
+          <p className="text-[15px] text-[var(--angel-text-soft)]">아직 저장한 이미지가 없어요</p>
+          <p className="mt-1.5 text-[13px] text-[var(--angel-text-faint)] [word-break:keep-all]">
             Generate에서 이미지를 만들고 저장하면 여기에 나타나요
           </p>
           <div className="mt-6">
-            <Link href="/generate" className="angel-btn angel-btn-primary text-[12px]">
-              <span className="text-[10px]">✦</span>
+            <Link href="/generate" className="angel-btn angel-btn-primary text-[14px]">
+              <span className="text-[12px]">✦</span>
               이미지 생성하러 가기
             </Link>
           </div>

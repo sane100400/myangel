@@ -39,10 +39,10 @@ export function ObjectEditor({ objects, onChange }: ObjectEditorProps) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-[13px] font-medium text-[var(--angel-text)]">
+        <h3 className="text-[15px] font-medium text-[var(--angel-text)]">
           장면 구성 요소
         </h3>
-        <span className="text-[10px] text-[var(--angel-text-faint)]">
+        <span className="text-[12px] text-[var(--angel-text-faint)]">
           {objects.length}개 요소
         </span>
       </div>
@@ -60,7 +60,7 @@ export function ObjectEditor({ objects, onChange }: ObjectEditorProps) {
 
       <button
         onClick={handleAddObject}
-        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--angel-border)] py-2.5 text-[12px] text-[var(--angel-text-soft)] transition-all hover:border-[var(--angel-blue)]/50 hover:text-[var(--angel-blue)] hover:bg-white/50"
+        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--angel-border)] py-2.5 text-[14px] text-[var(--angel-text-soft)] transition-all hover:border-[var(--angel-blue)]/50 hover:text-[var(--angel-blue)] hover:bg-white/50"
       >
         <svg
           width="14"

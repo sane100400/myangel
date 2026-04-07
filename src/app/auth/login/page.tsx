@@ -33,7 +33,7 @@ export default function LoginPage() {
           <h1 className="font-heading text-2xl tracking-[0.08em] text-[var(--angel-text)]">
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </h1>
-          <p className="mt-2 text-[13px] text-[var(--angel-text-soft)]">
+          <p className="mt-2 text-[15px] text-[var(--angel-text-soft)]">
             로그인하고 나만의 이미지와 프롬프트를 관리하세요
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function LoginPage() {
         <div className="space-y-3">
           <button
             onClick={handleGoogleLogin}
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white border border-[#d0d8e8] py-3 text-[13px] text-[var(--angel-text)] transition-all hover:bg-[#f8f9fc] hover:shadow-sm"
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white border border-[#d0d8e8] py-3 text-[15px] text-[var(--angel-text)] transition-all hover:bg-[#f8f9fc] hover:shadow-sm"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -55,7 +55,7 @@ export default function LoginPage() {
 
           <button
             onClick={handleKakaoLogin}
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#FEE500] border border-[#FEE500] py-3 text-[13px] text-[#3C1E1E] transition-all hover:bg-[#FFEB3B] hover:shadow-sm"
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#FEE500] border border-[#FEE500] py-3 text-[15px] text-[#3C1E1E] transition-all hover:bg-[#FFEB3B] hover:shadow-sm"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -68,7 +68,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-[11px] text-[var(--angel-text-soft)]">
+        <p className="mt-6 text-center text-[13px] text-[var(--angel-text-soft)]">
           계속 진행하면 이용약관에 동의하는 것으로 간주합니다
         </p>
       </div>

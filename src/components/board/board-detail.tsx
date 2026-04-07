@@ -36,23 +36,23 @@ export function BoardDetail({ board, items, isOwner }: BoardDetailProps) {
             {board.title}
           </h1>
           {board.description && (
-            <p className="mt-2 text-[12px] text-[var(--angel-text-soft)]">
+            <p className="mt-2 text-[14px] text-[var(--angel-text-soft)]">
               {board.description}
             </p>
           )}
-          <span className="angel-tag text-[9px] mt-2 inline-block">
+          <span className="angel-tag text-[11px] mt-2 inline-block">
             {board.is_public ? "공개" : "비공개"}
           </span>
         </div>
         <div className="flex gap-2">
           <button
             onClick={handleShare}
-            className="angel-btn angel-btn-secondary text-[11px]"
+            className="angel-btn angel-btn-secondary text-[13px]"
           >
             공유
           </button>
           {isOwner && (
-            <button className="angel-btn angel-btn-secondary text-[11px]">
+            <button className="angel-btn angel-btn-secondary text-[13px]">
               편집
             </button>
           )}
@@ -63,8 +63,8 @@ export function BoardDetail({ board, items, isOwner }: BoardDetailProps) {
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-4 text-2xl text-[var(--angel-lavender)] twinkle">✦</div>
-          <p className="text-[12px] text-[var(--angel-text-soft)]">아직 저장된 아이템이 없어요.</p>
-          <p className="mt-1 text-[10px] text-[var(--angel-text-faint)]">무드보드에서 브랜드를 추천받고 보드에 저장해보세요.</p>
+          <p className="text-[14px] text-[var(--angel-text-soft)]">아직 저장된 아이템이 없어요.</p>
+          <p className="mt-1 text-[12px] text-[var(--angel-text-faint)]">무드보드에서 브랜드를 추천받고 보드에 저장해보세요.</p>
           <div className="cross-deco mt-6 flex justify-center"><GothicCross size={22} /></div>
         </div>
       ) : (

@@ -21,15 +21,15 @@ export function SavedImageCard({ image, onClick }: SavedImageCardProps) {
         className="w-full aspect-square object-cover"
       />
       <div className="p-3">
-        <p className="text-[11px] text-[var(--angel-text)] line-clamp-2 leading-[1.6] [word-break:keep-all]">
+        <p className="text-[13px] text-[var(--angel-text)] line-clamp-2 leading-[1.6] [word-break:keep-all]">
           {image.prompt}
         </p>
         <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
           {image.style_tags.slice(0, 2).map((tag) => (
-            <span key={tag} className="angel-tag text-[9px]">#{tag}</span>
+            <span key={tag} className="angel-tag text-[11px]">#{tag}</span>
           ))}
         </div>
-        <p className="mt-1.5 text-[9px] text-[var(--angel-text-faint)]">
+        <p className="mt-1.5 text-[11px] text-[var(--angel-text-faint)]">
           {new Date(image.created_at).toLocaleDateString("ko-KR")}
         </p>
       </div>

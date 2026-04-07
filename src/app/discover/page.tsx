@@ -61,12 +61,12 @@ function DiscoverContent() {
         >
           Discover
         </h1>
-        <p className="mt-2 text-[12px] text-[var(--angel-text-soft)]">
+        <p className="mt-2 text-[14px] text-[var(--angel-text-soft)]">
           다른 사람들이 만든 AI 이미지를 구경하세요
         </p>
         <div className="mt-4 flex items-center justify-center gap-3">
           <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/30" />
-          <span className="text-[9px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
+          <span className="text-[11px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
           <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/30" />
         </div>
       </div>

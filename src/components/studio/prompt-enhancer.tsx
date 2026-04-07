@@ -49,7 +49,7 @@ export function PromptEnhancer({
   const renderPrompt = () => {
     if (weakSpans.length === 0) {
       return (
-        <span className="text-[13px] text-[var(--angel-text)]">{prompt}</span>
+        <span className="text-[15px] text-[var(--angel-text)]">{prompt}</span>
       );
     }
 
@@ -62,7 +62,7 @@ export function PromptEnhancer({
       // Text before this span
       if (span.start > lastEnd) {
         parts.push(
-          <span key={`text-${lastEnd}`} className="text-[13px] text-[var(--angel-text)]">
+          <span key={`text-${lastEnd}`} className="text-[15px] text-[var(--angel-text)]">
             {prompt.slice(lastEnd, span.start)}
           </span>
         );
@@ -74,7 +74,7 @@ export function PromptEnhancer({
         <span
           key={`span-${span.start}`}
           onClick={(e) => !isReplaced && handleSpanClick(span, e)}
-          className={`relative inline text-[13px] rounded px-0.5 transition-colors ${
+          className={`relative inline text-[15px] rounded px-0.5 transition-colors ${
             isReplaced
               ? "bg-emerald-100/70 text-emerald-700 cursor-default"
               : "bg-amber-100/70 text-amber-700 cursor-pointer hover:bg-amber-200/70"
@@ -91,7 +91,7 @@ export function PromptEnhancer({
     // Remaining text
     if (lastEnd < prompt.length) {
       parts.push(
-        <span key={`text-${lastEnd}`} className="text-[13px] text-[var(--angel-text)]">
+        <span key={`text-${lastEnd}`} className="text-[15px] text-[var(--angel-text)]">
           {prompt.slice(lastEnd)}
         </span>
       );
@@ -103,13 +103,13 @@ export function PromptEnhancer({
   return (
     <div ref={containerRef}>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-[13px] font-medium text-[var(--angel-text)]">
+        <h3 className="text-[15px] font-medium text-[var(--angel-text)]">
           프롬프트 강화
         </h3>
         <button
           onClick={onReanalyze}
           disabled={isLoading}
-          className="text-[11px] text-[var(--angel-blue)] hover:underline disabled:opacity-40"
+          className="text-[13px] text-[var(--angel-blue)] hover:underline disabled:opacity-40"
         >
           다시 분석
         </button>
@@ -117,10 +117,10 @@ export function PromptEnhancer({
 
       {isLoading ? (
         <div className="flex items-center justify-center gap-2 rounded-xl border border-[var(--angel-border)] bg-white/50 p-6">
-          <span className="twinkle text-[10px] text-[var(--angel-lavender)]">
+          <span className="twinkle text-[12px] text-[var(--angel-lavender)]">
             ✦
           </span>
-          <span className="text-[12px] text-[var(--angel-text-soft)]">
+          <span className="text-[14px] text-[var(--angel-text-soft)]">
             추상적 표현을 분석하고 있어요...
           </span>
         </div>
@@ -131,7 +131,7 @@ export function PromptEnhancer({
           </div>
 
           {weakSpans.length > 0 && (
-            <div className="mt-2 flex items-center gap-3 text-[10px] text-[var(--angel-text-faint)]">
+            <div className="mt-2 flex items-center gap-3 text-[12px] text-[var(--angel-text-faint)]">
               <span className="flex items-center gap-1">
                 <span className="inline-block h-2.5 w-2.5 rounded bg-amber-100/70" />
                 개선 가능한 표현
@@ -144,7 +144,7 @@ export function PromptEnhancer({
           )}
 
           {weakSpans.length === 0 && (
-            <p className="mt-2 text-[11px] text-[var(--angel-text-faint)]">
+            <p className="mt-2 text-[13px] text-[var(--angel-text-faint)]">
               추상적인 표현이 발견되지 않았어요. 프롬프트가 이미 구체적이에요!
             </p>
           )}
