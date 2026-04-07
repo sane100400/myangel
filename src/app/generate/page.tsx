@@ -95,6 +95,10 @@ export default function StudioPage() {
   const [composedPromptKo, setComposedPromptKo] = useState("");
   const [composedPromptEn, setComposedPromptEn] = useState("");
 
+  // Prefetch: background compose when user stops editing in Step 2
+  const prefetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prefetchedFor = useRef<string>(""); // serialized objects snapshot
+
   // Step 4: Generate
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<{ image: string; promptUsed: string } | null>(null);
@@ -114,6 +118,38 @@ export default function StudioPage() {
   const estimatedTime = premium ? EST_PREMIUM : EST_STANDARD;
   const progress = Math.min(95, (elapsed / estimatedTime) * 90);
   const remaining = Math.max(0, Math.ceil(estimatedTime - elapsed));
+
+  // ── Background prefetch compose-prompt when editing stops in Step 2 ──
+  useEffect(() => {
+    if (step !== 2 || sceneObjects.length === 0) return;
+
+    if (prefetchTimer.current) clearTimeout(prefetchTimer.current);
+
+    prefetchTimer.current = setTimeout(async () => {
+      const snapshot = JSON.stringify(sceneObjects);
+      if (snapshot === prefetchedFor.current) return; // already prefetched
+
+      try {
+        const res = await fetch("/api/compose-prompt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ objects: sceneObjects, selectedAlternatives: {} }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        // Only cache if objects haven't changed during fetch
+        prefetchedFor.current = snapshot;
+        setComposedPromptKo(data.promptKo);
+        setComposedPromptEn(data.promptEn);
+      } catch {
+        // silent — will retry on Step 3
+      }
+    }, 2000);
+
+    return () => {
+      if (prefetchTimer.current) clearTimeout(prefetchTimer.current);
+    };
+  }, [step, sceneObjects]);
 
   const startTimer = useCallback(() => {
     setElapsed(0);
@@ -230,6 +266,15 @@ export default function StudioPage() {
   const handleGoToStep3 = async () => {
     if (sceneObjects.length === 0) return;
     setStep(3);
+
+    // Check if prefetch result is still valid
+    const currentSnapshot = JSON.stringify(sceneObjects);
+    if (prefetchedFor.current === currentSnapshot && composedPromptKo && composedPromptEn) {
+      // Prefetch hit — skip API call, instant transition
+      setIsComposing(false);
+      return;
+    }
+
     setIsComposing(true);
     try {
       const res = await fetch("/api/compose-prompt", {
@@ -244,6 +289,7 @@ export default function StudioPage() {
       const data = await res.json();
       setComposedPromptKo(data.promptKo);
       setComposedPromptEn(data.promptEn);
+      prefetchedFor.current = currentSnapshot;
     } catch {
       toast.error("프롬프트 조합에 실패했어요.");
       setStep(2);
