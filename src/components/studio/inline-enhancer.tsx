@@ -5,6 +5,7 @@ import {
   useRef,
   useCallback,
   useEffect,
+  useMemo,
 } from "react";
 import type { WeakSpan, EnhancementSuggestion } from "@/types";
 
@@ -31,6 +32,7 @@ export function InlineEnhancer({
   const [originalInput, setOriginalInput] = useState("");
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -67,7 +69,6 @@ export function InlineEnhancer({
       setActiveSpan(null);
       setBubblePos(null);
 
-      // Clear stale spans when text changes significantly
       if (analyzedText && newVal !== analyzedText) {
         const noOverlap = !newVal.includes(analyzedText) && !analyzedText.includes(newVal);
         if (noOverlap) {
@@ -78,7 +79,6 @@ export function InlineEnhancer({
         }
       }
 
-      // Auto-analyze when no valid analysis exists
       if (newVal.trim().length >= 2) {
         const needsAnalysis = !analyzedText || !newVal.includes(analyzedText) && !analyzedText.includes(newVal);
         if (needsAnalysis) {
@@ -113,20 +113,20 @@ export function InlineEnhancer({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Handle chip click — show bubble
-  const handleChipClick = useCallback(
+  // Handle highlighted word click — show bubble
+  const handleWordClick = useCallback(
     (span: WeakSpan, e: React.MouseEvent) => {
-      const chip = e.currentTarget as HTMLElement;
+      const el = e.currentTarget as HTMLElement;
       const containerRect = containerRef.current?.getBoundingClientRect();
       if (!containerRect) return;
 
-      const chipRect = chip.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
       const isMobile = containerRect.width < 400;
       const bubbleWidth = isMobile ? containerRect.width : 288;
       setBubblePos({
-        top: chipRect.bottom - containerRect.top + 8,
+        top: elRect.bottom - containerRect.top + 8,
         left: isMobile ? 0 : Math.max(0, Math.min(
-          chipRect.left - containerRect.left,
+          elRect.left - containerRect.left,
           containerRect.width - bubbleWidth
         )),
       });
@@ -135,7 +135,7 @@ export function InlineEnhancer({
     []
   );
 
-  // Manual rewrite — only called when user clicks "문장 다듬기"
+  // Manual rewrite
   const handleRewrite = useCallback(async () => {
     if (!originalInput || isRewriting) return;
     setIsRewriting(true);
@@ -161,7 +161,7 @@ export function InlineEnhancer({
     }
   }, [originalInput, value, onChange, isRewriting]);
 
-  // Select alternative — local text replacement only, no API call
+  // Select alternative
   const handleSelect = useCallback(
     (suggestion: EnhancementSuggestion) => {
       if (!activeSpan) return;
@@ -174,7 +174,6 @@ export function InlineEnhancer({
         return;
       }
 
-      // Save original input on first replacement
       if (!originalInput) setOriginalInput(value);
 
       const before = value.slice(0, idx);
@@ -182,13 +181,11 @@ export function InlineEnhancer({
       const newValue = before + suggestion.text + after;
       onChange(newValue);
 
-      // Track replacement
       setReplacedWords((prev) => ({
         ...prev,
         [currentText]: suggestion.text,
       }));
 
-      // Update spans locally (adjust positions, mark this one as replaced)
       const diff = suggestion.text.length - currentText.length;
       setSpans((prev) =>
         prev.map((s) => {
@@ -216,22 +213,100 @@ export function InlineEnhancer({
     (s) => value.includes(s.text) && s.alternatives && s.alternatives.length > 0
   );
 
+  const unresolvedCount = validSpans.filter(
+    (s) => !replacedWords[s.text] && !Object.values(replacedWords).includes(s.text)
+  ).length;
+
+  // ── Build highlighted text preview ──
+  const highlightedPreview = useMemo(() => {
+    if (validSpans.length === 0 || !value) return null;
+
+    // Sort spans by position in text
+    const sorted = [...validSpans]
+      .map((s) => ({ ...s, idx: value.indexOf(s.text) }))
+      .filter((s) => s.idx !== -1)
+      .sort((a, b) => a.idx - b.idx);
+
+    if (sorted.length === 0) return null;
+
+    const parts: { text: string; span: WeakSpan | null; isReplaced: boolean }[] = [];
+    let cursor = 0;
+
+    for (const s of sorted) {
+      if (s.idx < cursor) continue; // overlapping span
+      if (s.idx > cursor) {
+        parts.push({ text: value.slice(cursor, s.idx), span: null, isReplaced: false });
+      }
+      const isReplaced = !!replacedWords[s.text] || Object.values(replacedWords).includes(s.text);
+      parts.push({ text: s.text, span: s, isReplaced });
+      cursor = s.idx + s.text.length;
+    }
+    if (cursor < value.length) {
+      parts.push({ text: value.slice(cursor), span: null, isReplaced: false });
+    }
+
+    return parts;
+  }, [value, validSpans, replacedWords]);
+
   return (
     <div ref={containerRef} className="relative">
-      {/* Textarea */}
+      {/* Textarea — hidden when preview is active */}
       <div className="relative">
-        <textarea
-          value={value}
-          onChange={handleChange}
-          disabled={disabled || isAnalyzing}
-          placeholder={placeholder}
-          rows={4}
-          className={`w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)] ${isAnalyzing ? "opacity-60" : ""}`}
-        />
+        {highlightedPreview ? (
+          <>
+            {/* Hidden textarea for input */}
+            <textarea
+              value={value}
+              onChange={handleChange}
+              disabled={disabled || isAnalyzing}
+              placeholder={placeholder}
+              rows={4}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10 resize-none"
+              style={{ caretColor: "var(--angel-text)" }}
+            />
+            {/* Grammarly-style highlighted preview */}
+            <div
+              ref={previewRef}
+              className={`w-full rounded-xl bg-white border border-[var(--angel-blue)]/30 px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] min-h-[120px] shadow-[0_0_0_3px_rgba(91,155,213,0.08)] ${isAnalyzing ? "opacity-60" : ""}`}
+            >
+              {highlightedPreview.map((part, i) =>
+                part.span ? (
+                  <span
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleWordClick(part.span!, e);
+                    }}
+                    className={`relative cursor-pointer transition-all ${
+                      part.isReplaced
+                        ? "text-emerald-700 bg-emerald-50 rounded px-0.5 decoration-emerald-400 underline decoration-2 underline-offset-[3px]"
+                        : activeSpan?.text === part.text
+                        ? "text-amber-800 bg-amber-100 rounded px-0.5 decoration-amber-500 underline decoration-wavy decoration-2 underline-offset-[3px]"
+                        : "text-amber-800 bg-amber-50/80 rounded px-0.5 decoration-amber-400 underline decoration-wavy decoration-2 underline-offset-[3px] hover:bg-amber-100 hover:decoration-amber-500"
+                    }`}
+                  >
+                    {part.text}
+                  </span>
+                ) : (
+                  <span key={i}>{part.text}</span>
+                )
+              )}
+            </div>
+          </>
+        ) : (
+          <textarea
+            value={value}
+            onChange={handleChange}
+            disabled={disabled || isAnalyzing}
+            placeholder={placeholder}
+            rows={4}
+            className={`w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)] ${isAnalyzing ? "opacity-60" : ""}`}
+          />
+        )}
 
-        {/* Analyzing overlay — prominent */}
+        {/* Analyzing overlay */}
         {isAnalyzing && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/70 backdrop-blur-[2px]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/70 backdrop-blur-[2px] z-20">
             <div className="flex items-center gap-2.5 rounded-full bg-[var(--angel-lavender)]/12 border border-[var(--angel-lavender)]/25 px-5 py-2.5 shadow-sm">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-lavender)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56" />
@@ -245,7 +320,7 @@ export function InlineEnhancer({
 
         {/* Rewriting overlay */}
         {isRewriting && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/70 backdrop-blur-[2px]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/70 backdrop-blur-[2px] z-20">
             <div className="flex items-center gap-2.5 rounded-full bg-[var(--angel-blue)]/12 border border-[var(--angel-blue)]/25 px-5 py-2.5 shadow-sm">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56" />
@@ -258,125 +333,94 @@ export function InlineEnhancer({
         )}
       </div>
 
-      {/* Enhancement panel — shown below textarea */}
-      {validSpans.length > 0 && (
-        <div className="mt-3 rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white/60 to-orange-50/40 p-3 shadow-sm md:mt-4 md:p-4">
-          {/* Header */}
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-400/20">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-[15px] font-semibold text-amber-800">
-                프롬프트 강화
-              </p>
-              <p className="text-[13px] text-amber-600/80">
-                {validSpans.filter((s) => !replacedWords[s.text] && !Object.values(replacedWords).includes(s.text)).length}개 표현을 더 구체적으로 바꿀 수 있어요
-              </p>
-            </div>
+      {/* ── Issue counter badge (Grammarly-style) ── */}
+      {validSpans.length > 0 && !isAnalyzing && (
+        <div className="mt-3 flex items-center gap-3">
+          <div className={`flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium ${
+            unresolvedCount > 0
+              ? "bg-amber-50 border border-amber-200/60 text-amber-800"
+              : "bg-emerald-50 border border-emerald-200/60 text-emerald-700"
+          }`}>
+            {unresolvedCount > 0 ? (
+              <>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-[11px] font-bold text-white">
+                  {unresolvedCount}
+                </span>
+                개선할 수 있는 표현
+              </>
+            ) : (
+              <>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
+                모든 표현이 개선되었어요
+              </>
+            )}
           </div>
-
-          {/* Chips */}
-          <div className="flex flex-wrap gap-2">
-            {validSpans.map((span, i) => {
-              const isReplaced = !!replacedWords[span.text] || Object.values(replacedWords).includes(span.text);
-              const isActive = activeSpan?.text === span.text;
-
-              return (
-                <button
-                  key={`${span.text}-${i}`}
-                  onClick={(e) => handleChipClick(span, e)}
-                  className={`relative rounded-xl px-3 py-1.5 text-[14px] font-medium transition-all md:px-3.5 md:py-2 md:text-[15px] ${
-                    isActive
-                      ? "bg-[var(--angel-blue)]/15 text-[var(--angel-blue)] border-2 border-[var(--angel-blue)]/40 shadow-md scale-[1.03]"
-                      : isReplaced
-                      ? "bg-emerald-100/80 text-emerald-700 border border-emerald-300/60 hover:bg-emerald-100"
-                      : "bg-white text-amber-800 border border-amber-300/70 shadow-sm hover:bg-amber-50 hover:border-amber-400/70 hover:shadow-md hover:scale-[1.02]"
-                  }`}
-                >
-                  {span.text}
-                  {!isReplaced && (
-                    <span className="ml-1.5 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-amber-400 text-[11px] text-white font-bold shadow-sm">
-                      +
-                    </span>
-                  )}
-                  {isReplaced && (
-                    <span className="ml-1.5 text-emerald-500">
-                      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="inline">
-                        <polyline points="3 8 7 12 13 4" />
-                      </svg>
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="mt-3 text-[12px] text-amber-600/60 text-center">
-            단어를 클릭하면 AI가 더 구체적인 표현을 추천해줘요
-          </p>
+          <span className="text-[12px] text-[var(--angel-text-faint)]">
+            밑줄 친 단어를 클릭하세요
+          </span>
         </div>
       )}
 
-      {/* Speech bubble */}
+      {/* ── Speech bubble (popup on click) ── */}
       {activeSpan && bubblePos && (
         <div
           ref={bubbleRef}
-          className="absolute z-50 w-full md:w-72"
+          className="absolute z-50 w-full md:w-80"
           style={{ top: bubblePos.top, left: bubblePos.left }}
         >
           {/* Arrow */}
           <div className="ml-6 h-2.5 w-2.5 rotate-45 bg-white border-l border-t border-[var(--angel-border)] -mb-1.5 relative z-10" />
 
           {/* Bubble body */}
-          <div className="rounded-xl border border-[var(--angel-border)] bg-white shadow-lg overflow-hidden">
-            {/* Header */}
-            <div className="px-3.5 pt-3 pb-2 border-b border-[var(--angel-border)]/50 bg-gradient-to-r from-[var(--angel-blue)]/5 to-transparent">
+          <div className="rounded-xl border border-[var(--angel-border)] bg-white shadow-xl overflow-hidden">
+            {/* Header — strikethrough original */}
+            <div className="px-4 pt-3.5 pb-2.5 border-b border-[var(--angel-border)]/50 bg-gradient-to-r from-amber-50/80 to-transparent">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-medium text-[var(--angel-text)]">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-[10px] font-bold text-white">!</span>
+                  <span className="text-[15px] font-semibold text-amber-800">
                     &ldquo;{activeSpan.text}&rdquo;
                   </span>
                 </div>
                 <button
-                  onClick={() => {
-                    setActiveSpan(null);
-                    setBubblePos(null);
-                  }}
-                  className="text-[var(--angel-text-faint)] hover:text-[var(--angel-text-soft)] transition-colors p-0.5"
+                  onClick={() => { setActiveSpan(null); setBubblePos(null); }}
+                  className="text-[var(--angel-text-faint)] hover:text-[var(--angel-text-soft)] transition-colors p-1"
                 >
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                     <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
                 </button>
               </div>
-              <p className="text-[12px] text-[var(--angel-text-soft)] mt-0.5 leading-snug">
+              <p className="text-[13px] text-amber-700/70 mt-1 leading-snug">
                 {activeSpan.reason}
               </p>
             </div>
 
             {/* Alternatives */}
-            <div className="p-1.5 max-h-64 overflow-y-auto">
-              <p className="px-2 py-1 text-[11px] text-[var(--angel-text-faint)] uppercase tracking-wider">
-                이렇게 바꿔보세요
+            <div className="p-2 max-h-64 overflow-y-auto">
+              <p className="px-2 py-1 text-[11px] text-[var(--angel-text-faint)] uppercase tracking-wider font-medium">
+                추천 대안
               </p>
               {activeSpan.alternatives.map((alt) => (
                 <button
                   key={alt.id}
                   onClick={() => handleSelect(alt)}
-                  className="w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[var(--angel-blue)]/6 group"
+                  className="w-full rounded-lg px-3 py-2.5 text-left transition-all hover:bg-emerald-50 group border border-transparent hover:border-emerald-200/60"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[15px] font-medium text-[var(--angel-blue)] group-hover:text-[var(--angel-text)]">
-                      {alt.text}
-                    </span>
-                    <span className="shrink-0 text-[11px] text-[var(--angel-text-faint)] tabular-nums bg-[var(--angel-bg-soft)] rounded-full px-1.5 py-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
+                      </span>
+                      <span className="text-[15px] font-medium text-[var(--angel-text)] group-hover:text-emerald-700">
+                        {alt.text}
+                      </span>
+                    </div>
+                    <span className="shrink-0 text-[11px] text-[var(--angel-text-faint)] tabular-nums bg-[var(--angel-bg-soft)] rounded-full px-2 py-0.5">
                       {Math.round(alt.confidence * 100)}%
                     </span>
                   </div>
-                  <p className="mt-1 text-[12px] text-[var(--angel-text-soft)] leading-snug">
+                  <p className="mt-1 text-[12px] text-[var(--angel-text-soft)] leading-snug pl-5">
                     {alt.reasoning}
                   </p>
                 </button>
@@ -386,7 +430,7 @@ export function InlineEnhancer({
         </div>
       )}
 
-      {/* Rewrite button — shown after replacements */}
+      {/* Rewrite button */}
       {hasReplacements && !isRewriting && (
         <div className="mt-3">
           <button
