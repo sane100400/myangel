@@ -385,36 +385,33 @@ export default function StudioPage() {
       </div>
 
       {/* Step Indicator */}
-      <div className="flex items-center justify-center gap-0 mb-6 md:mb-8">
-        {STEPS.map((s, i) => (
-          <Fragment key={s.num}>
-            {i > 0 && (
-              <div
-                className={`h-0.5 w-6 md:w-10 transition-colors ${
-                  step > s.num - 1
-                    ? "bg-[var(--angel-blue)]"
-                    : "bg-[var(--angel-border)]"
-                }`}
-              />
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                if (s.num < step && !isGenerating) setStep(s.num as 1 | 2 | 3 | 4);
-              }}
-              disabled={s.num >= step || isGenerating}
-              className={`flex flex-col items-center gap-1 ${
-                s.num < step && !isGenerating ? "cursor-pointer" : "cursor-default"
-              }`}
-            >
-              <div
+      <div className="mb-6 md:mb-8">
+        {/* Circles + Lines row */}
+        <div className="flex items-center justify-center gap-0">
+          {STEPS.map((s, i) => (
+            <Fragment key={s.num}>
+              {i > 0 && (
+                <div
+                  className={`h-0.5 w-6 md:w-10 transition-colors ${
+                    step > s.num - 1
+                      ? "bg-[var(--angel-blue)]"
+                      : "bg-[var(--angel-border)]"
+                  }`}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (s.num < step && !isGenerating) setStep(s.num as 1 | 2 | 3 | 4);
+                }}
+                disabled={s.num >= step || isGenerating}
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-medium transition-all md:h-9 md:w-9 md:text-[15px] ${
                   s.num < step
                     ? "bg-[var(--angel-blue)] text-white"
                     : s.num === step
                     ? "bg-[var(--angel-blue)]/15 text-[var(--angel-blue)] ring-2 ring-[var(--angel-blue)]/30"
                     : "bg-white/60 text-[var(--angel-text-faint)] border border-[var(--angel-border)]"
-                }`}
+                } ${s.num < step && !isGenerating ? "cursor-pointer" : "cursor-default"}`}
               >
                 {s.num < step ? (
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -423,17 +420,25 @@ export default function StudioPage() {
                 ) : (
                   s.num
                 )}
-              </div>
-              <span className={`text-[12px] hidden md:block ${
+              </button>
+            </Fragment>
+          ))}
+        </div>
+        {/* Labels row */}
+        <div className="hidden md:flex items-center justify-center gap-0 mt-1.5">
+          {STEPS.map((s, i) => (
+            <Fragment key={s.num}>
+              {i > 0 && <div className="w-6 md:w-10" />}
+              <span className={`w-8 md:w-9 text-center text-[12px] ${
                 s.num === step
                   ? "text-[var(--angel-blue)] font-medium"
                   : "text-[var(--angel-text-faint)]"
               }`}>
                 {s.label}
               </span>
-            </button>
-          </Fragment>
-        ))}
+            </Fragment>
+          ))}
+        </div>
       </div>
 
       {/* ═══ Step 1: Input ═══ */}

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { SEED_MOOD_IMAGES, getImageUrl } from "@/lib/seed-data";
+import { getImageUrl } from "@/lib/seed-data";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -21,17 +21,9 @@ export default function DiscoverDetailPage() {
   const router = useRouter();
   const id = params.id as string;
 
-  const isSharedId = id.startsWith("shared-");
-
-  // Seed 이미지 lookup (즉시)
-  const seedItem = useMemo(
-    () => SEED_MOOD_IMAGES.find((img) => img.id === id),
-    [id]
-  );
-
   // Shared 이미지 state
   const [sharedItem, setSharedItem] = useState<SharedImageData | null>(null);
-  const [isLoading, setIsLoading] = useState(isSharedId);
+  const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
   // 현재 유저
@@ -61,10 +53,9 @@ export default function DiscoverDetailPage() {
   }, []);
 
   useEffect(() => {
-    if (!isSharedId) return;
     let cancelled = false;
 
-    async function fetchSharedImage() {
+    async function fetchImage() {
       try {
         const res = await fetch(`/api/discover/images`);
         if (!res.ok) throw new Error();
@@ -86,9 +77,9 @@ export default function DiscoverDetailPage() {
       }
     }
 
-    fetchSharedImage();
+    fetchImage();
     return () => { cancelled = true; };
-  }, [id, isSharedId]);
+  }, [id]);
 
   // id 변경 시 이미지 상태 리셋
   useEffect(() => {
@@ -116,7 +107,7 @@ export default function DiscoverDetailPage() {
   }
 
   // 아이템 결정
-  const item = isSharedId ? sharedItem : seedItem;
+  const item = sharedItem;
 
   if (!item || fetchError) {
     return (
@@ -130,12 +121,11 @@ export default function DiscoverDetailPage() {
     );
   }
 
-  const isPremium = "is_premium" in item && item.is_premium;
+  const isPremium = item.is_premium ?? false;
   const isOwner =
-    isSharedId &&
     currentUserId !== null &&
-    "user_id" in item &&
     item.user_id !== null &&
+    item.user_id !== undefined &&
     item.user_id === currentUserId;
 
   // 제목 수정 핸들러
@@ -230,7 +220,7 @@ export default function DiscoverDetailPage() {
                 <span className="text-[12px] font-medium text-white">프리미엄</span>
               </div>
             )}
-            {isSharedId && (
+            {true && (
               <div className="absolute top-4 left-4 z-10 flex items-center gap-1 rounded-full bg-[var(--angel-blue)]/80 px-2.5 py-1 shadow-md">
                 <span className="text-[12px] font-medium text-white">AI 생성</span>
               </div>
@@ -426,7 +416,7 @@ export default function DiscoverDetailPage() {
                 {isPremium ? "프리미엄" : "무료"}
               </span>
             </div>
-            {isSharedId && (
+            {true && (
               <div className="mt-2 flex items-center justify-between text-[13px]">
                 <span className="text-[var(--angel-text-soft)]">출처</span>
                 <span className="text-[var(--angel-blue)]">AI 생성 (커뮤니티 공유)</span>

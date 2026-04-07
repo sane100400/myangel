@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { TrendingTags } from "@/components/discover/trending-tags";
 import { MoodGallery } from "@/components/discover/mood-gallery";
-import { SEED_MOOD_IMAGES, SEED_TAGS } from "@/lib/seed-data";
+import { SEED_TAGS } from "@/lib/seed-data";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface DiscoverImage {
@@ -21,7 +21,7 @@ function DiscoverContent() {
   const searchParams = useSearchParams();
   const initialTag = searchParams.get("tag");
   const [selectedTag, setSelectedTag] = useState<string | null>(initialTag);
-  const [images, setImages] = useState<DiscoverImage[]>(SEED_MOOD_IMAGES);
+  const [images, setImages] = useState<DiscoverImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ function DiscoverContent() {
         }
       } catch {
         // Fallback: seed 이미지 사용
-        if (!cancelled) setImages(SEED_MOOD_IMAGES);
+        if (!cancelled) setImages([]);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
