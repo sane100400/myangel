@@ -205,6 +205,144 @@ export default function HomePage() {
         <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
       </div>
 
+      {/* ══ Object Studio Showcase ══ */}
+      <section className="snap-section relative mx-auto w-full px-5 py-12 md:py-20 bg-gradient-to-b from-[#e0e7f4] to-[#e2e8f5]">
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-3 flex justify-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--angel-blue)]/12 border border-[var(--angel-blue)]/25 px-3 py-1 text-[13px] font-medium text-[var(--angel-blue)]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              핵심 기능
+            </span>
+          </div>
+          <h2 className="mb-2 text-center text-2xl tracking-[0.06em] text-[var(--angel-text)] font-heading md:text-3xl">
+            오브젝트 스튜디오
+          </h2>
+          <p className="mb-8 text-center text-[14px] leading-[1.8] text-[var(--angel-text-soft)] md:text-[15px] md:mb-10 [word-break:keep-all]">
+            장면을 구성 요소별로 분해하고,<br />
+            각 요소를 독립적으로 편집해요
+          </p>
+
+          {/* Visual Demo — Canvas + Sidebar mock */}
+          <div className="rounded-2xl border border-[var(--angel-blue)]/20 bg-white/80 p-3 shadow-md md:p-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Canvas mock */}
+              <div className="flex-1 min-w-0 relative rounded-xl border border-[var(--angel-border)] bg-white/70 min-h-[200px] md:min-h-[260px]"
+                style={{
+                  backgroundImage: "radial-gradient(circle, rgba(91,155,213,0.10) 1px, transparent 1px)",
+                  backgroundSize: "20px 20px",
+                }}>
+                {/* Mock objects on canvas */}
+                <div className="absolute left-[12%] top-[18%] rounded-xl border border-blue-300/60 bg-blue-50/50 px-3 py-1.5 shadow-sm">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">🎯</span>
+                    <span className="text-[13px] font-medium text-[var(--angel-text)]">피사체: 펭귄</span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)]">갓태어난 황제펭귄</p>
+                </div>
+                <div className="absolute right-[10%] top-[12%] rounded-xl border border-sky-300/60 bg-sky-50/50 px-3 py-1.5 shadow-sm">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">🏞️</span>
+                    <span className="text-[13px] font-medium text-[var(--angel-text)]">배경</span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)]">이불 속</p>
+                </div>
+                <div className="absolute left-[30%] bottom-[15%] rounded-xl border border-blue-300/60 bg-blue-50/50 px-3 py-1.5 shadow-sm">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">🎯</span>
+                    <span className="text-[13px] font-medium text-[var(--angel-text)]">피사체: 인형</span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)]">곰인형</p>
+                </div>
+                {/* Drag hint */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 text-[11px] text-[var(--angel-text-faint)]">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3" /><line x1="12" y1="2" x2="12" y2="22" /><line x1="2" y1="12" x2="22" y2="12" /></svg>
+                  드래그로 배치
+                </div>
+              </div>
+
+              {/* Sidebar mock */}
+              <div className="md:w-[200px] shrink-0 space-y-2">
+                <p className="text-[11px] font-medium text-[var(--angel-text-soft)] mb-1">장면 속성</p>
+                {/* Lighting */}
+                <div className="rounded-xl border border-amber-200/60 bg-amber-50/40 px-3 py-2">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-xs">💡</span>
+                    <span className="text-[12px] font-medium text-[var(--angel-text)]">조명</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-[var(--angel-text-soft)] w-10">따뜻함</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-[var(--angel-blue)]/10 relative">
+                      <div className="absolute left-0 top-0 h-full w-[75%] rounded-full bg-[var(--angel-blue)]" />
+                    </div>
+                    <span className="text-[11px] text-[var(--angel-text-soft)] w-5 text-right">75</span>
+                  </div>
+                </div>
+                {/* Mood */}
+                <div className="rounded-xl border border-indigo-200/60 bg-indigo-50/40 px-3 py-2">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-xs">✨</span>
+                    <span className="text-[12px] font-medium text-[var(--angel-text)]">분위기</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-[var(--angel-text-soft)] w-10">포근함</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-[var(--angel-blue)]/10 relative">
+                      <div className="absolute left-0 top-0 h-full w-[85%] rounded-full bg-[var(--angel-blue)]" />
+                    </div>
+                    <span className="text-[11px] text-[var(--angel-text-soft)] w-5 text-right">85</span>
+                  </div>
+                </div>
+                {/* Color */}
+                <div className="rounded-xl border border-blue-200/60 bg-blue-50/30 px-3 py-2">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-xs">🎨</span>
+                    <span className="text-[12px] font-medium text-[var(--angel-text)]">색감</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-[var(--angel-text-soft)] w-10">따뜻한</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-[var(--angel-blue)]/10 relative">
+                      <div className="absolute left-0 top-0 h-full w-[60%] rounded-full bg-[var(--angel-blue)]" />
+                    </div>
+                    <span className="text-[11px] text-[var(--angel-text-soft)] w-5 text-right">60</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-3 text-center text-[12px] text-[var(--angel-text-faint)] md:text-[13px]">
+              피사체는 캔버스에서 배치 · 조명/분위기/색감은 사이드바에서 조절
+            </p>
+          </div>
+
+          {/* Benefits */}
+          <div className="mt-6 grid grid-cols-3 gap-2 md:gap-3 md:mt-8">
+            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
+              <div className="text-lg mb-1 md:text-xl md:mb-2">🧩</div>
+              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">자동 분해</p>
+              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">입력을 요소별로 분리</p>
+            </div>
+            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
+              <div className="text-lg mb-1 md:text-xl md:mb-2">🎚️</div>
+              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">속성 슬라이더</p>
+              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">세밀한 강도 조절</p>
+            </div>
+            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
+              <div className="text-lg mb-1 md:text-xl md:mb-2">⚠️</div>
+              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">충돌 감지</p>
+              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">속성 간 모순 자동 경고</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ Section Divider ══ */}
+      <div className="section-divider bg-gradient-to-b from-[#e2e8f5] to-[#e0e7f4]">
+        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
+      </div>
+
       {/* ══ Other Features ══ */}
       <section className="snap-section relative mx-auto w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
         <div className="mx-auto max-w-2xl">
@@ -216,24 +354,7 @@ export default function HomePage() {
           </p>
 
           <div className="space-y-3 md:space-y-4">
-            {/* Feature 1: Visual Canvas Studio */}
-            <div className="glass-card rounded-2xl px-5 py-4 md:px-6 md:py-5">
-              <div className="flex items-center gap-2 mb-2 md:mb-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-blue)]/12 text-[14px]">
-                  🎨
-                </span>
-                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-base">
-                  비주얼 캔버스 스튜디오
-                </h3>
-              </div>
-              <p className="text-[14px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
-                AI가 입력을 <strong className="text-[var(--angel-text)]">피사체, 배경, 분위기, 조명, 색감</strong> 등으로 자동 분해해요.
-                피사체는 <strong className="text-[var(--angel-text)]">캔버스 위에서 드래그로 배치</strong>하고 최대 3개까지 추가할 수 있어요.
-                조명, 분위기 같은 장면 속성은 <strong className="text-[var(--angel-text)]">사이드바</strong>에서 슬라이더로 세밀하게 조절하면 최종 프롬프트에 반영돼요.
-              </p>
-            </div>
-
-            {/* Feature 2: Prompt Comparison */}
+            {/* Feature 1: Prompt Comparison */}
             <div className="glass-card rounded-2xl px-5 py-4 md:px-6 md:py-5">
               <div className="flex items-center gap-2 mb-2 md:mb-3">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-lavender)]/12 text-[14px]">
