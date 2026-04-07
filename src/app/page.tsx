@@ -136,7 +136,7 @@ export default function HomePage() {
           </p>
 
           {/* Visual Demo */}
-          <div className="rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white/90 to-orange-50/40 p-4 shadow-md md:p-6">
+          <div className="rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white/90 to-amber-50/30 p-4 shadow-md md:p-6">
             {/* Fake textarea */}
             <div className="rounded-xl border border-[var(--angel-border)] bg-white/80 px-3 py-3 text-[14px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[15px]">
               하얀 침대가 있는 <span className="inline-block rounded bg-amber-100/80 px-1 text-amber-700 border-b-2 border-amber-300">예쁜</span> 방,{" "}
@@ -155,9 +155,9 @@ export default function HomePage() {
             </div>
 
             {/* Enhanced result */}
-            <div className="rounded-xl border border-emerald-200/60 bg-emerald-50/50 px-3 py-3 text-[14px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[15px]">
-              하얀 침대가 있는 <span className="inline-block rounded bg-emerald-100/80 px-1 text-emerald-700 border-b-2 border-emerald-400">아이보리 톤의 미니멀한</span> 방,{" "}
-              <span className="inline-block rounded bg-emerald-100/80 px-1 text-emerald-700 border-b-2 border-emerald-400">부드러운 자연광이 들어오는 따뜻한</span> 분위기의 창문
+            <div className="rounded-xl border border-sky-200/60 bg-sky-50/50 px-3 py-3 text-[14px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[15px]">
+              하얀 침대가 있는 <span className="inline-block rounded bg-sky-100/80 px-1 text-sky-700 border-b-2 border-sky-400">아이보리 톤의 미니멀한</span> 방,{" "}
+              <span className="inline-block rounded bg-sky-100/80 px-1 text-sky-700 border-b-2 border-sky-400">부드러운 자연광이 들어오는 따뜻한</span> 분위기의 창문
             </div>
 
             {/* Demo chips */}
@@ -166,7 +166,7 @@ export default function HomePage() {
                 예쁜
                 <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[8px] text-white font-bold">+</span>
               </span>
-              <span className="rounded-xl bg-emerald-100/80 px-3 py-1.5 text-[14px] font-medium text-emerald-700 border border-emerald-300/60">
+              <span className="rounded-xl bg-sky-100/80 px-3 py-1.5 text-[14px] font-medium text-sky-700 border border-sky-300/60">
                 감성적인
                 <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="inline ml-1">
                   <polyline points="3 8 7 12 13 4" />

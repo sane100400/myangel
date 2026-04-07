@@ -76,7 +76,7 @@ export function PromptEnhancer({
           onClick={(e) => !isReplaced && handleSpanClick(span, e)}
           className={`relative inline text-[15px] rounded px-0.5 transition-colors ${
             isReplaced
-              ? "bg-emerald-100/70 text-emerald-700 cursor-default"
+              ? "bg-sky-100/70 text-sky-700 cursor-default"
               : "bg-amber-100/70 text-amber-700 cursor-pointer hover:bg-amber-200/70"
           }`}
           title={isReplaced ? `원본: ${span.text}` : span.reason}
@@ -137,7 +137,7 @@ export function PromptEnhancer({
                 개선 가능한 표현
               </span>
               <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded bg-emerald-100/70" />
+                <span className="inline-block h-2.5 w-2.5 rounded bg-sky-100/70" />
                 개선된 표현
               </span>
             </div>

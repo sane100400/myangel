@@ -279,7 +279,7 @@ export function InlineEnhancer({
                     }}
                     className={`relative cursor-pointer transition-all ${
                       part.isReplaced
-                        ? "text-emerald-700 bg-emerald-50 rounded px-0.5 decoration-emerald-400 underline decoration-2 underline-offset-[3px]"
+                        ? "text-sky-700 bg-sky-50 rounded px-0.5 decoration-sky-400 underline decoration-2 underline-offset-[3px]"
                         : activeSpan?.text === part.text
                         ? "text-amber-800 bg-amber-100 rounded px-0.5 decoration-amber-500 underline decoration-wavy decoration-2 underline-offset-[3px]"
                         : "text-amber-800 bg-amber-50/80 rounded px-0.5 decoration-amber-400 underline decoration-wavy decoration-2 underline-offset-[3px] hover:bg-amber-100 hover:decoration-amber-500"
@@ -339,7 +339,7 @@ export function InlineEnhancer({
           <div className={`flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium ${
             unresolvedCount > 0
               ? "bg-amber-50 border border-amber-200/60 text-amber-800"
-              : "bg-emerald-50 border border-emerald-200/60 text-emerald-700"
+              : "bg-sky-50 border border-sky-200/60 text-sky-700"
           }`}>
             {unresolvedCount > 0 ? (
               <>
@@ -405,14 +405,14 @@ export function InlineEnhancer({
                 <button
                   key={alt.id}
                   onClick={() => handleSelect(alt)}
-                  className="w-full rounded-lg px-3 py-2.5 text-left transition-all hover:bg-emerald-50 group border border-transparent hover:border-emerald-200/60"
+                  className="w-full rounded-lg px-3 py-2.5 text-left transition-all hover:bg-sky-50 group border border-transparent hover:border-sky-200/60"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity">
                         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
                       </span>
-                      <span className="text-[15px] font-medium text-[var(--angel-text)] group-hover:text-emerald-700">
+                      <span className="text-[15px] font-medium text-[var(--angel-text)] group-hover:text-sky-700">
                         {alt.text}
                       </span>
                     </div>
@@ -450,7 +450,7 @@ export function InlineEnhancer({
       <div className="mt-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           {!isAnalyzing && !isRewriting && validSpans.length === 0 && analyzedText && (
-            <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-[13px] text-emerald-600 font-medium">
+            <span className="flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-[13px] text-sky-600 font-medium">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
               프롬프트가 이미 구체적이에요!
             </span>

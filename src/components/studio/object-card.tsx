@@ -17,11 +17,11 @@ const ROLE_ICONS: Record<string, string> = {
 
 const ROLE_COLORS: Record<string, string> = {
   subject: "border-blue-300/50 bg-blue-50/30",
-  background: "border-emerald-300/50 bg-emerald-50/30",
-  mood: "border-purple-300/50 bg-purple-50/30",
+  background: "border-sky-300/50 bg-sky-50/30",
+  mood: "border-indigo-300/50 bg-indigo-50/30",
   lighting: "border-amber-300/50 bg-amber-50/30",
-  color: "border-pink-300/50 bg-pink-50/30",
-  texture: "border-orange-300/50 bg-orange-50/30",
+  color: "border-blue-200/50 bg-blue-50/20",
+  texture: "border-slate-300/50 bg-slate-50/30",
   composition: "border-cyan-300/50 bg-cyan-50/30",
   custom: "border-gray-300/50 bg-gray-50/30",
 };

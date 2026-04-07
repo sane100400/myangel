@@ -21,40 +21,40 @@ const ROLE_ICONS: Record<string, string> = {
 
 const ROLE_COLORS: Record<string, string> = {
   subject: "border-blue-300/60 bg-blue-50/50",
-  background: "border-emerald-300/60 bg-emerald-50/50",
-  mood: "border-purple-300/60 bg-purple-50/50",
+  background: "border-sky-300/60 bg-sky-50/50",
+  mood: "border-indigo-300/60 bg-indigo-50/50",
   lighting: "border-amber-300/60 bg-amber-50/50",
-  color: "border-pink-300/60 bg-pink-50/50",
-  texture: "border-orange-300/60 bg-orange-50/50",
+  color: "border-blue-200/60 bg-blue-50/40",
+  texture: "border-slate-300/60 bg-slate-50/50",
   composition: "border-cyan-300/60 bg-cyan-50/50",
   custom: "border-gray-300/60 bg-gray-50/50",
 };
 
 const ROLE_RING: Record<string, string> = {
   subject: "ring-blue-400/40",
-  background: "ring-emerald-400/40",
-  mood: "ring-purple-400/40",
+  background: "ring-sky-400/40",
+  mood: "ring-indigo-400/40",
   lighting: "ring-amber-400/40",
-  color: "ring-pink-400/40",
-  texture: "ring-orange-400/40",
+  color: "ring-blue-300/40",
+  texture: "ring-slate-400/40",
   composition: "ring-cyan-400/40",
   custom: "ring-gray-400/40",
 };
 
 const ROLE_BG_ACCENT: Record<string, string> = {
-  mood: "bg-purple-50/60",
+  mood: "bg-indigo-50/60",
   lighting: "bg-amber-50/60",
-  color: "bg-pink-50/60",
-  texture: "bg-orange-50/60",
+  color: "bg-blue-50/50",
+  texture: "bg-slate-50/60",
   composition: "bg-cyan-50/60",
   custom: "bg-gray-50/60",
 };
 
 const ROLE_BORDER_ACCENT: Record<string, string> = {
-  mood: "border-purple-200/60",
+  mood: "border-indigo-200/60",
   lighting: "border-amber-200/60",
-  color: "border-pink-200/60",
-  texture: "border-orange-200/60",
+  color: "border-blue-200/60",
+  texture: "border-slate-200/60",
   composition: "border-cyan-200/60",
   custom: "border-gray-200/60",
 };
