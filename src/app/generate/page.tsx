@@ -564,7 +564,7 @@ export default function StudioPage() {
               <SceneCanvas objects={sceneObjects} onChange={setSceneObjects} />
 
               <p className="text-[10px] text-[var(--angel-text-faint)] text-center">
-                요소를 드래그해서 배치하고, 클릭하면 속성을 조절할 수 있어요
+                피사체를 드래그로 배치하고, 우측 패널에서 조명·분위기 등을 조절할 수 있어요
               </p>
             </>
           )}
