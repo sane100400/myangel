@@ -6,7 +6,7 @@ import { saveImage } from "@/lib/saved-images";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { InlineEnhancer } from "@/components/studio/inline-enhancer";
-import { ObjectEditor } from "@/components/studio/object-editor";
+import { SceneCanvas } from "@/components/studio/scene-canvas";
 import { PromptComparison } from "@/components/studio/prompt-comparison";
 import type { SceneObject } from "@/types";
 
@@ -561,10 +561,10 @@ export default function StudioPage() {
                 <p className="text-[13px] text-[var(--angel-text)] leading-relaxed">{prompt}</p>
               </div>
 
-              <ObjectEditor objects={sceneObjects} onChange={setSceneObjects} />
+              <SceneCanvas objects={sceneObjects} onChange={setSceneObjects} />
 
               <p className="text-[10px] text-[var(--angel-text-faint)] text-center">
-                각 요소를 펼쳐서 속성 슬라이더로 세밀하게 조절할 수 있어요
+                요소를 드래그해서 배치하고, 클릭하면 속성을 조절할 수 있어요
               </p>
             </>
           )}
