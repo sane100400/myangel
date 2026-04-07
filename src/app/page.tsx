@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* ══ Hero Section ══ */}
-      <section className="relative flex flex-col items-center justify-center px-5 pt-28 pb-16 text-center md:pt-52 md:pb-40 overflow-hidden bg-gradient-to-b from-[#d6deee] to-[#dce4f2] star-bg-desktop">
+      <section className="relative flex flex-col items-center justify-center px-4 pt-20 pb-12 text-center md:px-5 md:pt-52 md:pb-40 overflow-hidden bg-gradient-to-b from-[#d6deee] to-[#dce4f2] star-bg-desktop">
         <AsciiHearts />
 
         <div className="md:hidden">
@@ -29,7 +29,7 @@ export default function HomePage() {
           <AngelLogo size={80} priority />
         </div>
 
-        <h1 className="relative z-10 max-w-lg text-4xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-7xl">
+        <h1 className="relative z-10 max-w-lg text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-7xl">
           My<span className="shimmer-text">Angel</span>
         </h1>
 
@@ -65,16 +65,16 @@ export default function HomePage() {
       </div>
 
       {/* ══ The Problem ══ */}
-      <section className="snap-section w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
+      <section className="snap-section w-full px-4 py-10 md:px-5 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
         <div className="mx-auto max-w-2xl">
-          <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
+          <h2 className="mb-2 text-center text-2xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-3xl">
             The Problem
           </h2>
-          <p className="mb-10 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)]">
+          <p className="mb-6 text-center text-[10px] tracking-[0.2em] text-[var(--angel-text-soft)] md:mb-10 md:text-[11px]">
             ✦ 프롬프트 작성, 왜 어려울까? ✦
           </p>
 
-          <div className="glass-card rounded-2xl px-6 py-5 mb-6 max-w-lg mx-auto">
+          <div className="glass-card rounded-2xl px-5 py-4 mb-5 max-w-lg mx-auto md:px-6 md:py-5 md:mb-6">
             <p className="text-[13px] leading-[2] text-[var(--angel-text)] text-center [word-break:keep-all]">
               AI 이미지 생성 모델은 강력하지만,
               <br />
@@ -116,66 +116,151 @@ export default function HomePage() {
         <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
       </div>
 
-      {/* ══ Core Features ══ */}
-      <section className="snap-section relative mx-auto w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
+      {/* ══ Prompt Enhancement Showcase ══ */}
+      <section className="snap-section relative mx-auto w-full px-5 py-12 md:py-20 bg-gradient-to-b from-[#e0e7f4] to-[#e2e8f5]">
         <div className="mx-auto max-w-2xl">
-          <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
-            Core Features
+          <div className="mb-3 flex justify-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/15 border border-amber-300/40 px-3 py-1 text-[11px] font-medium text-amber-700">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              핵심 기능
+            </span>
+          </div>
+          <h2 className="mb-2 text-center text-2xl tracking-[0.06em] text-[var(--angel-text)] font-heading md:text-3xl">
+            프롬프트 강화
           </h2>
-          <p className="mb-10 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)]">
-            ✦ 세 가지 핵심 기능 ✦
+          <p className="mb-8 text-center text-[12px] leading-[1.8] text-[var(--angel-text-soft)] md:text-[13px] md:mb-10 [word-break:keep-all]">
+            추상적인 표현을 AI가 자동으로 감지하고,<br />
+            클릭 한 번으로 더 구체적인 표현으로 바꿔줘요
           </p>
 
-          <div className="space-y-4">
+          {/* Visual Demo */}
+          <div className="rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white/90 to-orange-50/40 p-4 shadow-md md:p-6">
+            {/* Fake textarea */}
+            <div className="rounded-xl border border-[var(--angel-border)] bg-white/80 px-3 py-3 text-[13px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[14px]">
+              하얀 침대가 있는 <span className="inline-block rounded bg-amber-100/80 px-1 text-amber-700 border-b-2 border-amber-300">예쁜</span> 방,{" "}
+              <span className="inline-block rounded bg-amber-100/80 px-1 text-amber-700 border-b-2 border-amber-300">감성적인</span> 분위기의 창문
+            </div>
+
+            {/* Arrow */}
+            <div className="flex justify-center my-3 md:my-4">
+              <div className="flex flex-col items-center gap-1">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <polyline points="19 12 12 19 5 12" />
+                </svg>
+                <span className="text-[10px] font-medium text-[var(--angel-blue)]">AI 강화</span>
+              </div>
+            </div>
+
+            {/* Enhanced result */}
+            <div className="rounded-xl border border-emerald-200/60 bg-emerald-50/50 px-3 py-3 text-[13px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[14px]">
+              하얀 침대가 있는 <span className="inline-block rounded bg-emerald-100/80 px-1 text-emerald-700 border-b-2 border-emerald-400">아이보리 톤의 미니멀한</span> 방,{" "}
+              <span className="inline-block rounded bg-emerald-100/80 px-1 text-emerald-700 border-b-2 border-emerald-400">부드러운 자연광이 들어오는 따뜻한</span> 분위기의 창문
+            </div>
+
+            {/* Demo chips */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="rounded-xl bg-white px-3 py-1.5 text-[12px] font-medium text-amber-800 border border-amber-300/70 shadow-sm">
+                예쁜
+                <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[8px] text-white font-bold">+</span>
+              </span>
+              <span className="rounded-xl bg-emerald-100/80 px-3 py-1.5 text-[12px] font-medium text-emerald-700 border border-emerald-300/60">
+                감성적인
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="inline ml-1">
+                  <polyline points="3 8 7 12 13 4" />
+                </svg>
+              </span>
+            </div>
+
+            <p className="mt-3 text-center text-[10px] text-amber-600/70 md:text-[11px]">
+              노란색 단어를 클릭하면 AI가 대안을 추천해요
+            </p>
+          </div>
+
+          {/* Benefits */}
+          <div className="mt-6 grid grid-cols-3 gap-2 md:gap-3 md:mt-8">
+            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
+              <div className="text-lg mb-1 md:text-xl md:mb-2">🎯</div>
+              <p className="text-[11px] font-medium text-[var(--angel-text)] md:text-[12px]">자동 감지</p>
+              <p className="mt-0.5 text-[9px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[10px] [word-break:keep-all]">약한 표현을 AI가 찾아줘요</p>
+            </div>
+            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
+              <div className="text-lg mb-1 md:text-xl md:mb-2">✨</div>
+              <p className="text-[11px] font-medium text-[var(--angel-text)] md:text-[12px]">원클릭 개선</p>
+              <p className="mt-0.5 text-[9px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[10px] [word-break:keep-all]">클릭만으로 구체화</p>
+            </div>
+            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
+              <div className="text-lg mb-1 md:text-xl md:mb-2">🌐</div>
+              <p className="text-[11px] font-medium text-[var(--angel-text)] md:text-[12px]">자동 번역</p>
+              <p className="mt-0.5 text-[9px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[10px] [word-break:keep-all]">한국어→영어 최적화</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ Section Divider ══ */}
+      <div className="section-divider bg-gradient-to-b from-[#e2e8f5] to-[#e0e7f4]">
+        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
+      </div>
+
+      {/* ══ Other Features ══ */}
+      <section className="snap-section relative mx-auto w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="mb-2 text-center text-2xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-3xl">
+            More Features
+          </h2>
+          <p className="mb-8 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)] md:mb-10">
+            ✦ 프롬프트 강화 외에도 ✦
+          </p>
+
+          <div className="space-y-3 md:space-y-4">
             {/* Feature 1: Object Editor */}
-            <div className="glass-card rounded-2xl px-6 py-5">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="glass-card rounded-2xl px-5 py-4 md:px-6 md:py-5">
+              <div className="flex items-center gap-2 mb-2 md:mb-3">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-blue)]/12 text-[12px]">
                   🎯
                 </span>
-                <h3 className="text-[14px] font-medium tracking-[0.04em] text-[var(--angel-text)]">
-                  오브젝트 에디터
+                <h3 className="text-[13px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-[14px]">
+                  장면 분해 &amp; 오브젝트 에디터
                 </h3>
               </div>
-              <p className="text-[12px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all]">
-                입력한 설명을 <strong className="text-[var(--angel-text)]">피사체, 배경, 분위기, 조명, 색감</strong> 등의 요소로 자동 분해해요.
-                각 요소의 속성을 슬라이더로 세밀하게 조절할 수 있어서,
-                &ldquo;배경은 몽환적으로, 피사체는 사실적으로&rdquo; 같은 세밀한 제어가 가능해요.
+              <p className="text-[11px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[12px]">
+                AI가 입력을 <strong className="text-[var(--angel-text)]">피사체, 배경, 분위기, 조명, 색감</strong> 등의 요소로 자동 분해해요.
+                각 요소를 펼쳐 속성 슬라이더로 세밀하게 조절하면, 그 강도가 최종 프롬프트에 반영돼요.
               </p>
             </div>
 
-            {/* Feature 2: Dynamic Enhancement */}
-            <div className="glass-card rounded-2xl px-6 py-5">
-              <div className="flex items-center gap-2 mb-3">
+            {/* Feature 2: Prompt Comparison */}
+            <div className="glass-card rounded-2xl px-5 py-4 md:px-6 md:py-5">
+              <div className="flex items-center gap-2 mb-2 md:mb-3">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-lavender)]/12 text-[12px]">
-                  ✨
+                  📊
                 </span>
-                <h3 className="text-[14px] font-medium tracking-[0.04em] text-[var(--angel-text)]">
-                  동적 프롬프트 강화
+                <h3 className="text-[13px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-[14px]">
+                  프롬프트 비교
                 </h3>
               </div>
-              <p className="text-[12px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all]">
-                &ldquo;예쁜&rdquo;, &ldquo;감성적인&rdquo; 같은 <strong className="text-[var(--angel-text)]">추상적 표현을 자동 감지</strong>하고 하이라이트해요.
-                클릭하면 문맥에 맞는 구체적인 대안을 제시해서,
-                이미지 생성 모델이 더 잘 이해할 수 있는 프롬프트로 개선해요.
+              <p className="text-[11px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[12px]">
+                원본 입력과 AI가 최적화한 프롬프트를 <strong className="text-[var(--angel-text)]">나란히 비교</strong>할 수 있어요.
+                한국어/영어 토글로 실제 이미지 생성에 사용되는 영어 프롬프트도 확인 가능해요.
               </p>
             </div>
 
             {/* Feature 3: AI Image Generation */}
-            <div className="glass-card rounded-2xl px-6 py-5">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="glass-card rounded-2xl px-5 py-4 md:px-6 md:py-5">
+              <div className="flex items-center gap-2 mb-2 md:mb-3">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-pink)]/12 text-[12px]">
                   🖼️
                 </span>
-                <h3 className="text-[14px] font-medium tracking-[0.04em] text-[var(--angel-text)]">
+                <h3 className="text-[13px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-[14px]">
                   AI 이미지 생성
                 </h3>
               </div>
-              <p className="text-[12px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all]">
+              <p className="text-[11px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[12px]">
                 최적화된 프롬프트로 바로 이미지를 생성해요.
-                <strong className="text-[var(--angel-text)]"> 강화 전/후 결과를 비교</strong>할 수 있어서
-                어떤 수정이 어떤 영향을 미쳤는지 직관적으로 확인할 수 있어요.
-                한국어로 입력해도 내부적으로 영어로 최적화돼요.
+                레퍼런스 이미지 업로드와 프리미엄 2K 고해상도도 지원해요.
               </p>
             </div>
           </div>
@@ -188,24 +273,24 @@ export default function HomePage() {
       </div>
 
       {/* ══ How it works ══ */}
-      <section className="snap-section relative mx-auto w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#dce4f2]">
+      <section className="snap-section relative mx-auto w-full px-4 py-10 md:px-5 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#dce4f2]">
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-2 text-center text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading">
+          <h2 className="mb-2 text-center text-2xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-3xl">
             How it works
           </h2>
-          <p className="mb-10 text-center text-[11px] tracking-[0.2em] text-[var(--angel-text-soft)]">
+          <p className="mb-6 text-center text-[10px] tracking-[0.2em] text-[var(--angel-text-soft)] md:mb-10 md:text-[11px]">
             ✦ five steps to your perfect image ✦
           </p>
 
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-5 md:gap-3">
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-5 md:gap-3">
             {[
               { num: "I", title: "입력", desc: "원하는 이미지를 간단하게 설명해요" },
               { num: "II", title: "분해", desc: "장면을 구성 요소 단위로 자동 분해해요" },
               { num: "III", title: "편집", desc: "각 요소의 속성을 세밀하게 조절해요" },
               { num: "IV", title: "강화", desc: "추상적 표현을 구체적으로 개선해요" },
               { num: "V", title: "생성", desc: "최적화된 프롬프트로 이미지를 만들어요" },
-            ].map((step) => (
-              <div key={step.num} className="glass-card rounded-xl p-3 text-center md:rounded-2xl md:p-4">
+            ].map((step, i) => (
+              <div key={step.num} className={`glass-card rounded-xl p-3 text-center md:rounded-2xl md:p-4 ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
                 <div className="mb-1.5 flex items-center justify-center gap-1.5 md:mb-2">
                   <span className="text-[8px] text-[var(--angel-lavender)] opacity-40">✦</span>
                   <span className="text-base text-[var(--angel-blue)] font-heading md:text-lg">{step.num}</span>

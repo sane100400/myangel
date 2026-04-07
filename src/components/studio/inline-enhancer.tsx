@@ -121,11 +121,13 @@ export function InlineEnhancer({
       if (!containerRect) return;
 
       const chipRect = chip.getBoundingClientRect();
+      const isMobile = containerRect.width < 400;
+      const bubbleWidth = isMobile ? containerRect.width : 288;
       setBubblePos({
         top: chipRect.bottom - containerRect.top + 8,
-        left: Math.max(0, Math.min(
+        left: isMobile ? 0 : Math.max(0, Math.min(
           chipRect.left - containerRect.left,
-          containerRect.width - 288 // 288 = bubble width (w-72)
+          containerRect.width - bubbleWidth
         )),
       });
       setActiveSpan(span);
@@ -226,15 +228,28 @@ export function InlineEnhancer({
         className="w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)]"
       />
 
-      {/* Word chips — shown below textarea */}
+      {/* Enhancement panel — shown below textarea */}
       {validSpans.length > 0 && (
-        <div className="mt-3">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[10px] text-[var(--angel-text-faint)]">
-              단어를 클릭하면 더 구체적인 표현을 추천해줘요
-            </span>
+        <div className="mt-3 rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white/60 to-orange-50/40 p-3 shadow-sm md:mt-4 md:p-4">
+          {/* Header */}
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-400/20">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-[13px] font-semibold text-amber-800">
+                프롬프트 강화
+              </p>
+              <p className="text-[11px] text-amber-600/80">
+                {validSpans.filter((s) => !replacedWords[s.text] && !Object.values(replacedWords).includes(s.text)).length}개 표현을 더 구체적으로 바꿀 수 있어요
+              </p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+
+          {/* Chips */}
+          <div className="flex flex-wrap gap-2">
             {validSpans.map((span, i) => {
               const isReplaced = !!replacedWords[span.text] || Object.values(replacedWords).includes(span.text);
               const isActive = activeSpan?.text === span.text;
@@ -243,23 +258,23 @@ export function InlineEnhancer({
                 <button
                   key={`${span.text}-${i}`}
                   onClick={(e) => handleChipClick(span, e)}
-                  className={`relative rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all ${
+                  className={`relative rounded-xl px-3 py-1.5 text-[12px] font-medium transition-all md:px-3.5 md:py-2 md:text-[13px] ${
                     isActive
-                      ? "bg-[var(--angel-blue)]/15 text-[var(--angel-blue)] border border-[var(--angel-blue)]/30 shadow-sm"
+                      ? "bg-[var(--angel-blue)]/15 text-[var(--angel-blue)] border-2 border-[var(--angel-blue)]/40 shadow-md scale-[1.03]"
                       : isReplaced
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50 hover:bg-emerald-100/70"
-                      : "bg-amber-50 text-amber-700 border border-amber-200/50 hover:bg-amber-100/70 hover:border-amber-300/50"
+                      ? "bg-emerald-100/80 text-emerald-700 border border-emerald-300/60 hover:bg-emerald-100"
+                      : "bg-white text-amber-800 border border-amber-300/70 shadow-sm hover:bg-amber-50 hover:border-amber-400/70 hover:shadow-md hover:scale-[1.02]"
                   }`}
                 >
                   {span.text}
                   {!isReplaced && (
-                    <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400/80 text-[8px] text-white font-bold">
+                    <span className="ml-1.5 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-amber-400 text-[9px] text-white font-bold shadow-sm">
                       +
                     </span>
                   )}
                   {isReplaced && (
-                    <span className="ml-1 text-[10px] text-emerald-500">
-                      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="inline">
+                    <span className="ml-1.5 text-emerald-500">
+                      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="inline">
                         <polyline points="3 8 7 12 13 4" />
                       </svg>
                     </span>
@@ -268,6 +283,10 @@ export function InlineEnhancer({
               );
             })}
           </div>
+
+          <p className="mt-3 text-[10px] text-amber-600/60 text-center">
+            단어를 클릭하면 AI가 더 구체적인 표현을 추천해줘요
+          </p>
         </div>
       )}
 
@@ -275,7 +294,7 @@ export function InlineEnhancer({
       {activeSpan && bubblePos && (
         <div
           ref={bubbleRef}
-          className="absolute z-50 w-72"
+          className="absolute z-50 w-full md:w-72"
           style={{ top: bubblePos.top, left: bubblePos.left }}
         >
           {/* Arrow */}
@@ -354,24 +373,24 @@ export function InlineEnhancer({
       )}
 
       {/* Status bar */}
-      <div className="mt-2 flex items-center justify-between px-1">
+      <div className="mt-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           {isRewriting && (
-            <span className="flex items-center gap-1.5 text-[10px] text-[var(--angel-blue)]">
+            <span className="flex items-center gap-2 text-[11px] text-[var(--angel-blue)] font-medium">
               <span className="twinkle">✦</span>
               문장을 다듬고 있어요...
             </span>
           )}
           {!isRewriting && isAnalyzing && (
-            <span className="flex items-center gap-1.5 text-[10px] text-[var(--angel-lavender)]">
+            <span className="flex items-center gap-2 rounded-full bg-[var(--angel-lavender)]/10 px-3 py-1.5 text-[11px] text-[var(--angel-lavender)] font-medium">
               <span className="twinkle">✦</span>
-              단어를 분석하고 있어요...
+              프롬프트를 분석하고 있어요...
             </span>
           )}
-          {!isAnalyzing && !isRewriting && validSpans.length > 0 && (
-            <span className="flex items-center gap-1.5 text-[10px] text-[var(--angel-text-soft)]">
-              <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
-              {validSpans.length}개 단어 강화 가능
+          {!isAnalyzing && !isRewriting && validSpans.length === 0 && analyzedText && (
+            <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] text-emerald-600 font-medium">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
+              프롬프트가 이미 구체적이에요!
             </span>
           )}
         </div>
@@ -379,7 +398,7 @@ export function InlineEnhancer({
           <button
             onClick={handleManualAnalyze}
             disabled={isAnalyzing || disabled}
-            className="text-[10px] text-[var(--angel-text-faint)] hover:text-[var(--angel-blue)] transition-colors disabled:opacity-40"
+            className="rounded-full bg-[var(--angel-bg-soft)] px-3 py-1.5 text-[11px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] hover:bg-[var(--angel-blue)]/8 transition-all disabled:opacity-40"
           >
             다시 분석
           </button>
