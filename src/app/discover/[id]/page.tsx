@@ -299,21 +299,6 @@ export default function DiscoverDetailPage() {
             </div>
           )}
 
-          {/* Tags */}
-          {item.tags && item.tags.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {item.tags.map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/discover?tag=${encodeURIComponent(tag)}`}
-                  className="angel-tag angel-tag-active text-[12px]"
-                >
-                  #{tag}
-                </Link>
-              ))}
-            </div>
-          )}
-
           {/* Divider */}
           <div className="mt-5 flex items-center gap-3">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/20" />
@@ -371,10 +356,6 @@ export default function DiscoverDetailPage() {
           {/* Style info */}
           <div className="mt-6 glass-card rounded-xl p-4">
             <div className="flex items-center justify-between text-[13px]">
-              <span className="text-[var(--angel-text-soft)]">스타일</span>
-              <span className="text-[var(--angel-text)]">{item.tags?.[0] || "-"}</span>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-[13px]">
               <span className="text-[var(--angel-text-soft)]">출처</span>
               <span className="text-[var(--angel-blue)]">AI 생성 (커뮤니티 공유)</span>
             </div>
