@@ -110,6 +110,8 @@
   --angel-text: #1e2d42;
   --angel-text-soft: #3d5a80;
   --angel-text-faint: #6b85a5;
+  --angel-border: #d4deee;
+  --angel-bg-soft: #eef3fc;
 }
 
 @layer base {
@@ -311,8 +313,8 @@
   justify-content: center;
   gap: 6px;
   border-radius: 9999px;
-  padding: 10px 26px;
-  font-size: 13px;
+  padding: 11px 28px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.04em;
   transition: all 0.3s ease;
@@ -350,8 +352,8 @@
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  padding: 5px 14px;
-  font-size: 12px;
+  padding: 6px 16px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.03em;
   background: #ffffff;

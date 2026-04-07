@@ -43,7 +43,7 @@ export default function HomePage() {
           <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/40 md:w-10" />
         </div>
 
-        <p className="relative z-10 mt-5 max-w-sm text-[15px] leading-[1.8] text-[var(--angel-text)] md:mt-6 md:text-[14px]">
+        <p className="relative z-10 mt-5 max-w-sm text-[14px] leading-[1.8] text-[var(--angel-text)] md:mt-6 md:text-base">
           간단한 입력만으로 <strong className="text-[var(--angel-blue)]">프롬프트를 최적화</strong>하고,
           <br />
           원하는 이미지를 정확하게
@@ -138,7 +138,7 @@ export default function HomePage() {
           {/* Visual Demo */}
           <div className="rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white/90 to-orange-50/40 p-4 shadow-md md:p-6">
             {/* Fake textarea */}
-            <div className="rounded-xl border border-[var(--angel-border)] bg-white/80 px-3 py-3 text-[15px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[14px]">
+            <div className="rounded-xl border border-[var(--angel-border)] bg-white/80 px-3 py-3 text-[14px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[15px]">
               하얀 침대가 있는 <span className="inline-block rounded bg-amber-100/80 px-1 text-amber-700 border-b-2 border-amber-300">예쁜</span> 방,{" "}
               <span className="inline-block rounded bg-amber-100/80 px-1 text-amber-700 border-b-2 border-amber-300">감성적인</span> 분위기의 창문
             </div>
@@ -155,7 +155,7 @@ export default function HomePage() {
             </div>
 
             {/* Enhanced result */}
-            <div className="rounded-xl border border-emerald-200/60 bg-emerald-50/50 px-3 py-3 text-[15px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[14px]">
+            <div className="rounded-xl border border-emerald-200/60 bg-emerald-50/50 px-3 py-3 text-[14px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[15px]">
               하얀 침대가 있는 <span className="inline-block rounded bg-emerald-100/80 px-1 text-emerald-700 border-b-2 border-emerald-400">아이보리 톤의 미니멀한</span> 방,{" "}
               <span className="inline-block rounded bg-emerald-100/80 px-1 text-emerald-700 border-b-2 border-emerald-400">부드러운 자연광이 들어오는 따뜻한</span> 분위기의 창문
             </div>
@@ -222,11 +222,11 @@ export default function HomePage() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-blue)]/12 text-[14px]">
                   🎨
                 </span>
-                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-[14px]">
+                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-base">
                   비주얼 캔버스 스튜디오
                 </h3>
               </div>
-              <p className="text-[13px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[14px]">
+              <p className="text-[14px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
                 AI가 입력을 <strong className="text-[var(--angel-text)]">피사체, 배경, 분위기, 조명, 색감</strong> 등으로 자동 분해해요.
                 피사체는 <strong className="text-[var(--angel-text)]">캔버스 위에서 드래그로 배치</strong>하고 최대 3개까지 추가할 수 있어요.
                 조명, 분위기 같은 장면 속성은 <strong className="text-[var(--angel-text)]">사이드바</strong>에서 슬라이더로 세밀하게 조절하면 최종 프롬프트에 반영돼요.
@@ -239,11 +239,11 @@ export default function HomePage() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-lavender)]/12 text-[14px]">
                   📊
                 </span>
-                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-[14px]">
+                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-base">
                   프롬프트 비교
                 </h3>
               </div>
-              <p className="text-[13px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[14px]">
+              <p className="text-[14px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
                 원본 입력과 AI가 최적화한 프롬프트를 <strong className="text-[var(--angel-text)]">나란히 비교</strong>할 수 있어요.
                 한국어/영어 토글로 실제 이미지 생성에 사용되는 영어 프롬프트도 확인 가능해요.
               </p>
@@ -255,11 +255,11 @@ export default function HomePage() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-pink)]/12 text-[14px]">
                   🖼️
                 </span>
-                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-[14px]">
+                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-base">
                   AI 이미지 생성
                 </h3>
               </div>
-              <p className="text-[13px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[14px]">
+              <p className="text-[14px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
                 최적화된 프롬프트로 바로 이미지를 생성해요.
                 레퍼런스 이미지 업로드와 프리미엄 2K 고해상도도 지원해요.
               </p>

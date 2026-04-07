@@ -58,12 +58,22 @@ export function MoodGallery({ images }: MoodGalleryProps) {
 
   if (images.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
-        <p className="text-[14px] text-[var(--angel-text-soft)]">아직 이 태그의 무드 이미지가 없어요.</p>
-        <div className="mt-4 flex justify-center">
-          <span className="text-[12px] text-[var(--angel-lavender)]">✦ ✧ ✦</span>
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--angel-blue)]/8">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
         </div>
+        <p className="text-[15px] font-medium text-[var(--angel-text)]">아직 공유된 이미지가 없어요</p>
+        <p className="mt-2 text-[13px] text-[var(--angel-text-soft)] max-w-xs">
+          Studio에서 이미지를 생성하고 공유하면 여기에 표시돼요
+        </p>
+        <a href="/generate" className="mt-6 angel-btn angel-btn-primary text-[13px]">
+          <span className="text-[11px]">✦</span>
+          이미지 만들러 가기
+        </a>
       </div>
     );
   }
