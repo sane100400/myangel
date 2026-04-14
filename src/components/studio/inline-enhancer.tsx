@@ -248,89 +248,140 @@ export function InlineEnhancer({
     return parts;
   }, [value, validSpans, replacedWords]);
 
+  const showSuccessHint =
+    !isAnalyzing && !isRewriting && validSpans.length === 0 && !!analyzedText;
+  const showManualBtn =
+    value.trim().length >= 2 && !isRewriting && !isAnalyzing;
+
   return (
     <div ref={containerRef} className="relative">
-      {/* Textarea — hidden when preview is active */}
-      <div className="relative">
-        {highlightedPreview ? (
-          <>
-            {/* Hidden textarea for input */}
+      {/* ══ Editor card — Grammarly-style writing surface ══ */}
+      <div className="group relative overflow-hidden rounded-2xl border border-[var(--angel-blue)]/25 bg-white shadow-[0_1px_2px_rgba(30,58,95,0.04),0_16px_40px_-20px_rgba(91,155,213,0.45)] transition-all duration-300 focus-within:border-[var(--angel-blue)]/55 focus-within:shadow-[0_1px_2px_rgba(30,58,95,0.04),0_24px_56px_-22px_rgba(91,155,213,0.55),0_0_0_4px_rgba(91,155,213,0.1)]">
+        {/* Top lavender hairline */}
+        <div className="h-[2px] bg-gradient-to-r from-transparent via-[var(--angel-lavender)]/55 to-transparent" />
+
+        {/* Header toolbar */}
+        <div className="flex items-center justify-between px-5 pt-3 pb-1.5">
+          <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.24em] text-[var(--angel-text-faint)]">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 3 Q 14 4, 9 9 Q 4 14, 3 21 Q 10 20, 15 15 Q 20 10, 20 3 Z" />
+              <path d="M3 21 L 10 14" />
+            </svg>
+            <span>Prompt</span>
+            <span className="text-[var(--angel-lavender)]/75 twinkle">✦</span>
+          </div>
+          <div className="flex items-center gap-1.5 tabular-nums text-[11px] text-[var(--angel-text-faint)]">
+            <span className="text-[var(--angel-text-soft)]/80">{value.length}</span>
+            <span className="text-[var(--angel-text-faint)]/55">chars</span>
+          </div>
+        </div>
+
+        {/* Input surface */}
+        <div className="relative">
+          {highlightedPreview ? (
+            <>
+              <textarea
+                value={value}
+                onChange={handleChange}
+                disabled={disabled || isAnalyzing}
+                placeholder={placeholder}
+                rows={4}
+                className="absolute inset-0 z-10 h-full w-full cursor-text resize-none bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] opacity-0 outline-none"
+                style={{ caretColor: "var(--angel-text)" }}
+              />
+              <div
+                ref={previewRef}
+                className={`min-h-[128px] w-full bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] text-[var(--angel-text)] ${isAnalyzing ? "opacity-60" : ""}`}
+              >
+                {highlightedPreview.map((part, i) =>
+                  part.span ? (
+                    <span
+                      key={i}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleWordClick(part.span!, e);
+                      }}
+                      className={`relative cursor-pointer transition-all ${
+                        part.isReplaced
+                          ? "text-sky-700 bg-sky-50 rounded px-0.5 decoration-sky-400 underline decoration-2 underline-offset-[3px]"
+                          : activeSpan?.text === part.text
+                          ? "text-amber-800 bg-amber-100 rounded px-0.5 decoration-amber-500 underline decoration-wavy decoration-2 underline-offset-[3px]"
+                          : "text-amber-800 bg-amber-50/80 rounded px-0.5 decoration-amber-400 underline decoration-wavy decoration-2 underline-offset-[3px] hover:bg-amber-100 hover:decoration-amber-500"
+                      }`}
+                    >
+                      {part.text}
+                    </span>
+                  ) : (
+                    <span key={i}>{part.text}</span>
+                  )
+                )}
+              </div>
+            </>
+          ) : (
             <textarea
               value={value}
               onChange={handleChange}
               disabled={disabled || isAnalyzing}
               placeholder={placeholder}
               rows={4}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10 resize-none"
-              style={{ caretColor: "var(--angel-text)" }}
+              className={`min-h-[128px] w-full resize-none border-0 bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] text-[var(--angel-text)] outline-none placeholder:text-[var(--angel-text-faint)]/55 ${isAnalyzing ? "opacity-60" : ""}`}
             />
-            {/* Grammarly-style highlighted preview */}
-            <div
-              ref={previewRef}
-              className={`w-full rounded-xl bg-white border border-[var(--angel-blue)]/30 px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] min-h-[120px] shadow-[0_0_0_3px_rgba(91,155,213,0.08)] ${isAnalyzing ? "opacity-60" : ""}`}
+          )}
+
+          {/* Analyzing overlay */}
+          {isAnalyzing && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[2px]">
+              <div className="flex items-center gap-2.5 rounded-full border border-[var(--angel-lavender)]/25 bg-[var(--angel-lavender)]/12 px-5 py-2.5 shadow-sm">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-lavender)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                <span className="text-[14px] font-medium text-[var(--angel-lavender)]">
+                  프롬프트를 강화하고 있어요...
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Rewriting overlay */}
+          {isRewriting && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[2px]">
+              <div className="flex items-center gap-2.5 rounded-full border border-[var(--angel-blue)]/25 bg-[var(--angel-blue)]/12 px-5 py-2.5 shadow-sm">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                <span className="text-[14px] font-medium text-[var(--angel-blue)]">
+                  문장을 다듬고 있어요...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer status bar */}
+        <div className="flex items-center justify-between gap-3 border-t border-[var(--angel-blue)]/12 bg-gradient-to-b from-white to-[rgba(91,155,213,0.035)] px-5 py-2.5">
+          {showSuccessHint ? (
+            <span className="flex items-center gap-1.5 text-[12px] font-medium text-sky-600">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <polyline points="3 8 7 12 13 4" />
+              </svg>
+              프롬프트가 이미 구체적이에요
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 text-[11px] text-[var(--angel-text-faint)]">
+              <span className="text-[var(--angel-lavender)]/75 twinkle">✦</span>
+              <span>약한 표현은 AI가 자동으로 찾아드려요</span>
+            </span>
+          )}
+          {showManualBtn && (
+            <button
+              onClick={handleManualAnalyze}
+              disabled={isAnalyzing || disabled}
+              className="shrink-0 rounded-full border border-[var(--angel-blue)]/20 bg-white px-3 py-1 text-[11px] font-medium tracking-wide text-[var(--angel-blue)] transition-all hover:border-[var(--angel-blue)]/45 hover:bg-[var(--angel-blue)]/8 disabled:opacity-40"
             >
-              {highlightedPreview.map((part, i) =>
-                part.span ? (
-                  <span
-                    key={i}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleWordClick(part.span!, e);
-                    }}
-                    className={`relative cursor-pointer transition-all ${
-                      part.isReplaced
-                        ? "text-sky-700 bg-sky-50 rounded px-0.5 decoration-sky-400 underline decoration-2 underline-offset-[3px]"
-                        : activeSpan?.text === part.text
-                        ? "text-amber-800 bg-amber-100 rounded px-0.5 decoration-amber-500 underline decoration-wavy decoration-2 underline-offset-[3px]"
-                        : "text-amber-800 bg-amber-50/80 rounded px-0.5 decoration-amber-400 underline decoration-wavy decoration-2 underline-offset-[3px] hover:bg-amber-100 hover:decoration-amber-500"
-                    }`}
-                  >
-                    {part.text}
-                  </span>
-                ) : (
-                  <span key={i}>{part.text}</span>
-                )
-              )}
-            </div>
-          </>
-        ) : (
-          <textarea
-            value={value}
-            onChange={handleChange}
-            disabled={disabled || isAnalyzing}
-            placeholder={placeholder}
-            rows={4}
-            className={`w-full rounded-xl bg-white/70 border border-[var(--angel-border)] px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] placeholder-[var(--angel-text-soft)]/60 outline-none transition-all resize-none focus:bg-white focus:border-[var(--angel-blue)]/50 focus:shadow-[0_0_20px_rgba(126,184,216,0.15)] ${isAnalyzing ? "opacity-60" : ""}`}
-          />
-        )}
-
-        {/* Analyzing overlay */}
-        {isAnalyzing && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/70 backdrop-blur-[2px] z-20">
-            <div className="flex items-center gap-2.5 rounded-full bg-[var(--angel-lavender)]/12 border border-[var(--angel-lavender)]/25 px-5 py-2.5 shadow-sm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-lavender)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              <span className="text-[14px] font-medium text-[var(--angel-lavender)]">
-                프롬프트를 강화하고 있어요...
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Rewriting overlay */}
-        {isRewriting && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/70 backdrop-blur-[2px] z-20">
-            <div className="flex items-center gap-2.5 rounded-full bg-[var(--angel-blue)]/12 border border-[var(--angel-blue)]/25 px-5 py-2.5 shadow-sm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              <span className="text-[14px] font-medium text-[var(--angel-blue)]">
-                문장을 다듬고 있어요...
-              </span>
-            </div>
-          </div>
-        )}
+              다시 분석
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Issue counter badge (Grammarly-style) ── */}
@@ -446,26 +497,6 @@ export function InlineEnhancer({
         </div>
       )}
 
-      {/* Status bar */}
-      <div className="mt-3 flex items-center justify-between px-1">
-        <div className="flex items-center gap-2">
-          {!isAnalyzing && !isRewriting && validSpans.length === 0 && analyzedText && (
-            <span className="flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-[13px] text-sky-600 font-medium">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
-              프롬프트가 이미 구체적이에요!
-            </span>
-          )}
-        </div>
-        {value.trim().length >= 2 && !isRewriting && !isAnalyzing && (
-          <button
-            onClick={handleManualAnalyze}
-            disabled={isAnalyzing || disabled}
-            className="rounded-full bg-[var(--angel-bg-soft)] px-3 py-1.5 text-[13px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] hover:bg-[var(--angel-blue)]/8 transition-all disabled:opacity-40"
-          >
-            다시 분석
-          </button>
-        )}
-      </div>
     </div>
   );
 }

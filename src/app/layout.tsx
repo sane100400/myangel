@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Libre_Bodoni } from "next/font/google";
+import { Libre_Bodoni, Italianno, Cormorant_Garamond } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/sonner";
@@ -9,6 +9,21 @@ const logo = Libre_Bodoni({
   variable: "--font-logo",
   subsets: ["latin"],
   weight: ["700"],
+  display: "swap",
+});
+
+const script = Italianno({
+  variable: "--font-script",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
+const serif = Cormorant_Garamond({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -34,7 +49,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${logo.variable} font-sans antialiased`}
+        className={`${logo.variable} ${script.variable} ${serif.variable} font-sans antialiased`}
       >
         <Navbar />
         <main className="min-h-[calc(100vh-4.5rem)]">{children}</main>

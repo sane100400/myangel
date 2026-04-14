@@ -124,9 +124,11 @@
 }
 
 /* ═══════════════════════════════════
-   Typography — 통일된 폰트 시스템
-   heading: Libre Bodoni (영문 제목, 로고)
-   body: Gothic A1 (본문, UI)
+   Typography — 天使界隈 폰트 시스템
+   heading : Libre Bodoni (영문 제목, 로고)
+   script  : Italianno     (장식용 필사체)
+   serif   : Cormorant Garamond (이탤릭 액센트)
+   body    : Gothic A1     (본문, UI)
    ═══════════════════════════════════ */
 .font-heading {
   font-family: var(--font-logo), 'Libre Bodoni', serif;
@@ -135,6 +137,22 @@
 .font-heading-light {
   font-family: var(--font-logo), 'Libre Bodoni', serif;
   font-weight: 600;
+}
+.font-script {
+  font-family: var(--font-script), 'Italianno', 'Snell Roundhand', cursive;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+/* serif classes include Gothic A1 fallback so Korean chars render in the
+   body font instead of collapsing to a generic serif. */
+.font-serif {
+  font-family: var(--font-serif), 'Cormorant Garamond', 'EB Garamond', 'Gothic A1', 'Apple SD Gothic Neo', serif;
+  font-weight: 500;
+}
+.font-serif-italic {
+  font-family: var(--font-serif), 'Cormorant Garamond', 'EB Garamond', 'Gothic A1', 'Apple SD Gothic Neo', serif;
+  font-style: italic;
+  font-weight: 500;
 }
 
 /* ═══════════════════════════════════
@@ -535,3 +553,329 @@
   background: rgba(91, 155, 213, 0.25);
   color: #2d3748;
 }
+
+/* ═══════════════════════════════════════════════════════
+   ✟  天使界隈 — Devotional / Lace System  (landing only)
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Ribbon Banner ──
+   A cloth banner with notched tails. Used for section labels.
+   Default tone: lavender. Variants: .pink .blue .ivory
+*/
+.ribbon-banner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 34px 11px;
+  background: var(--angel-lavender);
+  color: #fdf9f3;
+  font-family: var(--font-logo), 'Libre Bodoni', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.14),
+    0 8px 18px rgba(124, 92, 173, 0.25);
+}
+.ribbon-banner::before,
+.ribbon-banner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 18px;
+  height: 100%;
+  background: inherit;
+  box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.18);
+}
+.ribbon-banner::before {
+  left: -14px;
+  clip-path: polygon(100% 0, 100% 100%, 0 50%);
+  filter: brightness(0.82);
+}
+.ribbon-banner::after {
+  right: -14px;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  filter: brightness(0.82);
+}
+.ribbon-banner.pink { background: var(--angel-pink); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25), inset 0 -3px 8px rgba(0,0,0,0.14), 0 8px 18px rgba(196, 138, 174, 0.28); }
+.ribbon-banner.blue { background: var(--angel-blue); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25), inset 0 -3px 8px rgba(0,0,0,0.14), 0 8px 18px rgba(91, 155, 213, 0.28); }
+.ribbon-banner.ivory { background: #e9dcc8; color: #5a4a38; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4), inset 0 -3px 8px rgba(90,74,56,0.15), 0 8px 18px rgba(154, 127, 92, 0.22); }
+
+/* ── Devotional Frame ──
+   Card with ornate corner marks and inner hairline.
+   Gives the feel of a prayer-card or illustration plate.
+*/
+.devotional-frame {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f9fe 100%);
+  border: 1px solid rgba(91, 155, 213, 0.22);
+  box-shadow:
+    inset 0 0 0 1px #ffffff,
+    inset 0 0 0 2px rgba(91, 155, 213, 0.14),
+    0 18px 40px -20px rgba(91, 155, 213, 0.35);
+  padding: 34px 28px;
+}
+@media (min-width: 768px) {
+  .devotional-frame { padding: 48px 44px; }
+}
+.devotional-frame::before,
+.devotional-frame::after {
+  content: "";
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28' fill='none' stroke='%237c5cad' stroke-width='1' stroke-linecap='round'><path d='M2 2 L12 2 M2 2 L2 12 M6 2 Q6 6, 2 6 M2 6 Q6 6, 6 10 M10 2 Q10 6, 14 6'/><circle cx='2' cy='2' r='1.6' fill='%237c5cad'/></svg>");
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+.devotional-frame::before { top: 6px; left: 6px; }
+.devotional-frame::after  { top: 6px; right: 6px; transform: scaleX(-1); }
+
+.devotional-frame > .corner-bl,
+.devotional-frame > .corner-br {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28' fill='none' stroke='%237c5cad' stroke-width='1' stroke-linecap='round'><path d='M2 2 L12 2 M2 2 L2 12 M6 2 Q6 6, 2 6 M2 6 Q6 6, 6 10 M10 2 Q10 6, 14 6'/><circle cx='2' cy='2' r='1.6' fill='%237c5cad'/></svg>");
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+.devotional-frame > .corner-bl { bottom: 6px; left: 6px; transform: scaleY(-1); }
+.devotional-frame > .corner-br { bottom: 6px; right: 6px; transform: scale(-1, -1); }
+
+/* ── Lace Strip ──
+   Standalone horizontal lace band (section separator).
+   Uses existing lace.webp, mirrored to form a symmetrical strip.
+*/
+.lace-strip {
+  position: relative;
+  height: 28px;
+  pointer-events: none;
+}
+.lace-strip::before,
+.lace-strip::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background-image: url("/lace.webp");
+  background-size: auto 14px;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.55;
+}
+.lace-strip::before { top: 0; }
+.lace-strip::after  { bottom: 0; transform: scaleY(-1); }
+@media (min-width: 768px) {
+  .lace-strip { height: 44px; }
+  .lace-strip::before, .lace-strip::after { height: 22px; background-size: auto 22px; }
+}
+
+/* ── Watermark Cross Background ──
+   Faint repeating cross pattern — use on section containers.
+*/
+.watermark-cross {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><g fill='none' stroke='%237c5cad' stroke-width='0.7' opacity='0.09'><path d='M60 36 L60 84 M42 60 L78 60'/><path d='M55 36 Q55 40, 60 40 Q65 40, 65 36'/><path d='M55 84 Q55 80, 60 80 Q65 80, 65 84'/><path d='M42 55 Q46 55, 46 60 Q46 65, 42 65'/><path d='M78 55 Q74 55, 74 60 Q74 65, 78 65'/><circle cx='60' cy='60' r='1.4' fill='%237c5cad'/></g></svg>");
+  background-size: 120px 120px;
+  background-repeat: repeat;
+}
+
+/* ── Dropcap — illuminated capital ── */
+.dropcap::first-letter {
+  font-family: var(--font-logo), 'Libre Bodoni', serif;
+  font-size: 3.6em;
+  font-weight: 700;
+  line-height: 0.85;
+  float: left;
+  padding: 6px 10px 0 0;
+  margin-top: 4px;
+  color: var(--angel-lavender);
+}
+
+/* ── Roman Medallion — circular number badge ── */
+.roman-medallion {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffffff, #f3e9f7 65%, #e5d4ee 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(124, 92, 173, 0.25),
+    inset 0 0 0 4px #ffffff,
+    inset 0 0 0 5px rgba(124, 92, 173, 0.18),
+    0 10px 24px -12px rgba(124, 92, 173, 0.4);
+  font-family: var(--font-logo), 'Libre Bodoni', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--angel-lavender);
+}
+.roman-medallion::before,
+.roman-medallion::after {
+  content: "✦";
+  position: absolute;
+  font-size: 8px;
+  color: var(--angel-pink);
+  opacity: 0.9;
+}
+.roman-medallion::before { top: -2px; left: 50%; transform: translateX(-50%); }
+.roman-medallion::after  { bottom: -2px; left: 50%; transform: translateX(-50%); }
+
+/* ── Prayer Body — Korean-friendly serif fallback ── */
+.prayer-body {
+  font-family: var(--font-serif), 'Cormorant Garamond', 'Gothic A1', 'Apple SD Gothic Neo', serif;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.95;
+  color: var(--angel-text-soft);
+  letter-spacing: 0.005em;
+}
+.prayer-body strong {
+  font-weight: 600;
+  color: var(--angel-lavender);
+}
+
+/* ── Ornament divider (cross + heart + cross) ── */
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.ornament-divider::before,
+.ornament-divider::after {
+  content: "";
+  flex: 0 1 90px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(124, 92, 173, 0.45), transparent);
+}
+
+/* ── Winged CTA ── */
+.winged-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 32px 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f5fc 100%);
+  border: 1px solid rgba(91, 155, 213, 0.32);
+  box-shadow:
+    inset 0 0 0 1px #ffffff,
+    inset 0 -6px 12px rgba(91, 155, 213, 0.08),
+    0 12px 28px -10px rgba(91, 155, 213, 0.35);
+  /* Korean-friendly stack: Gothic A1 first so 한글 doesn't fall through
+     to the system serif. English looks fine in Gothic A1 too. */
+  font-family: 'Gothic A1', 'Apple SD Gothic Neo', var(--font-logo), 'Libre Bodoni', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--angel-text);
+  border-radius: 9999px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.winged-cta:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px #ffffff,
+    inset 0 -6px 12px rgba(91, 155, 213, 0.14),
+    0 18px 40px -14px rgba(91, 155, 213, 0.5);
+}
+.winged-cta::before,
+.winged-cta::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(91, 155, 213, 0.5));
+}
+.winged-cta::before { left: -56px; }
+.winged-cta::after  { right: -56px; background: linear-gradient(to left, transparent, rgba(91, 155, 213, 0.5)); }
+
+/* ── Parchment base — vertical sky-blue → soft lavender wash ──
+   Single continuous gradient over the whole page, drifts from sky
+   blue at top toward a hint of blue-lavender mid-page and back.
+   This is the project's identity gradient — DO NOT replace with
+   pink/cream/white. */
+.parchment-ground {
+  background:
+    linear-gradient(
+      180deg,
+      #d6deee 0%,
+      #dce4f2 18%,
+      #dee0ef 36%,
+      #dadcee 54%,
+      #d7d6e9 72%,
+      #dadbec 86%,
+      #dce4f2 100%
+    );
+}
+
+.paper-ground,
+.lavender-ground,
+.pink-ground {
+  background:
+    linear-gradient(
+      180deg,
+      #d6deee 0%,
+      #dce4f2 18%,
+      #dee0ef 36%,
+      #dadcee 54%,
+      #d7d6e9 72%,
+      #dadbec 86%,
+      #dce4f2 100%
+    );
+}
+
+/* ── Ornamental corner flourish (inline SVG helper via class) ── */
+.corner-flourish {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* ── Small ornament list row ── */
+.ornament-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.ornament-row-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffffff, #f3e9f7 70%, #e5d4ee 100%);
+  box-shadow: inset 0 0 0 1px rgba(124, 92, 173, 0.25), inset 0 0 0 3px #ffffff, inset 0 0 0 4px rgba(124, 92, 173, 0.15);
+  color: var(--angel-lavender);
+  flex: none;
+}
+
+/* ── Subtle ascend animation for hero items ── */
+@keyframes ascend {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ascend { animation: ascend 1.2s ease-out both; }
+.ascend-d1 { animation-delay: 0.1s; }
+.ascend-d2 { animation-delay: 0.25s; }
+.ascend-d3 { animation-delay: 0.4s; }
+.ascend-d4 { animation-delay: 0.55s; }
+.ascend-d5 { animation-delay: 0.7s; }
+.ascend-d6 { animation-delay: 0.85s; }

@@ -2,358 +2,483 @@ import Link from "next/link";
 import { AngelLogo } from "@/components/ui/angel-logo";
 import { AsciiHearts } from "@/components/ui/ascii-hearts";
 import { StudioDemo } from "@/components/home/studio-demo";
+import {
+  OrnateCross,
+  LineHeart,
+  HaloRays,
+  Quill,
+  Hourglass,
+  Fleur,
+  RadiantEye,
+  Chalice,
+  Orb,
+} from "@/components/ui/ornaments";
 
+/**
+ * Landing page — 天使界隈 / lace-devotional aesthetic.
+ *
+ * Layout principle: ONE parchment ground runs end-to-end. Section variation
+ * comes from local glow blobs and ribbon banner colors, not from different
+ * background bases — so the page reads as one continuous illustrated book.
+ */
 export default function HomePage() {
   return (
-    <div className="flex flex-col">
-      {/* ══ Hero Section ══ */}
-      <section className="relative flex flex-col items-center justify-center px-4 pt-20 pb-12 text-center md:px-5 md:pt-52 md:pb-40 overflow-hidden bg-gradient-to-b from-[#d6deee] to-[#dce4f2] star-bg-desktop">
-        <AsciiHearts />
+    <div className="parchment-ground">
+      {/* Page-wide watermark cross (subtle) */}
+      <div className="watermark-cross pointer-events-none fixed inset-0 opacity-60" />
 
-        <div className="md:hidden">
-          <div className="absolute top-8 left-[5%] h-20 w-20 rounded-full bg-[var(--angel-blue)]/6 blur-[40px]" />
-          <div className="absolute bottom-12 right-[8%] h-24 w-24 rounded-full bg-[var(--angel-lavender)]/8 blur-[40px]" />
-        </div>
-        <div className="hidden md:block">
-          <div className="absolute top-12 left-[8%] h-40 w-40 rounded-full bg-[var(--angel-blue)]/8 blur-[80px]" />
-          <div className="absolute bottom-16 right-[10%] h-48 w-48 rounded-full bg-[var(--angel-lavender)]/10 blur-[80px]" />
-          <div className="absolute top-28 right-[25%] h-24 w-24 rounded-full bg-[var(--angel-pink)]/8 blur-[60px]" />
-          <div className="absolute bottom-32 left-[20%] h-32 w-32 rounded-full bg-[var(--angel-blue)]/6 blur-[70px]" />
-        </div>
+      <div className="relative">
+        {/* ════════════════════════════════════════════
+            ✟  HERO
+            ════════════════════════════════════════════ */}
+        <section className="relative flex flex-col items-center justify-center overflow-hidden px-4 pt-20 pb-24 text-center md:px-5 md:pt-28 md:pb-32">
+          <AsciiHearts />
 
-        <div className="pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vw] rounded-full border-[2px] border-[var(--angel-blue)]/20 rotate-slow md:w-[min(580px,70vw)] md:h-[min(580px,70vw)] md:border-[3px] md:border-[var(--angel-blue)]/30" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[135vw] h-[135vw] rounded-full border-[1.5px] border-[var(--angel-lavender)]/15 md:w-[min(620px,75vw)] md:h-[min(620px,75vw)] md:border-[2px] md:border-[var(--angel-lavender)]/25" style={{ animation: "rotate-slow 35s linear infinite reverse" }} />
-        </div>
-
-        <div className="mb-5 relative z-10 md:float-gentle md:mb-6">
-          <AngelLogo size={80} priority />
-        </div>
-
-        <h1 className="relative z-10 max-w-lg text-3xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-7xl">
-          My<span className="shimmer-text">Angel</span>
-        </h1>
-
-        <p className="relative z-10 mt-5 text-[12px] font-medium tracking-[0.3em] text-[var(--angel-text-soft)] uppercase md:mt-8 md:text-[14px]">
-          ✦ interactive prompt optimization studio ✦
-        </p>
-
-        <div className="relative z-10 mt-3 flex items-center gap-3 text-[var(--angel-text-faint)] md:mt-4">
-          <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/40 md:w-10" />
-          <span className="text-[12px] tracking-[0.2em] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
-          <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/40 md:w-10" />
-        </div>
-
-        <p className="relative z-10 mt-5 max-w-sm text-[14px] leading-[1.8] text-[var(--angel-text)] md:mt-6 md:text-base">
-          간단한 입력만으로 <strong className="text-[var(--angel-blue)]">프롬프트를 최적화</strong>하고,
-          <br />
-          원하는 이미지를 정확하게
-          <br />
-          생성해보세요.
-        </p>
-
-        <div className="relative z-10 mt-5">
-          <Link href="/generate" className="angel-btn angel-btn-primary">
-            <span className="text-[12px]">✦</span>
-            Studio 시작하기
-          </Link>
-        </div>
-      </section>
-
-      {/* ══ Section Divider ══ */}
-      <div className="section-divider bg-gradient-to-b from-[#dce4f2] to-[#e0e7f4]">
-        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
-      </div>
-
-      {/* ══ The Problem ══ */}
-      <section className="snap-section w-full px-4 py-10 md:px-5 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="mb-2 text-center text-2xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-3xl">
-            The Problem
-          </h2>
-          <p className="mb-6 text-center text-[12px] tracking-[0.2em] text-[var(--angel-text-soft)] md:mb-10 md:text-[13px]">
-            ✦ 프롬프트 작성, 왜 어려울까? ✦
-          </p>
-
-          <div className="glass-card rounded-2xl px-5 py-4 mb-5 max-w-lg mx-auto md:px-6 md:py-5 md:mb-6">
-            <p className="text-[15px] leading-[2] text-[var(--angel-text)] text-center [word-break:keep-all]">
-              AI 이미지 생성 모델은 강력하지만,
-              <br />
-              <strong className="text-[var(--angel-blue)]">프롬프트를 잘 써야</strong> 원하는 결과가 나와요.
-            </p>
+          {/* Soft localized glows */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute left-[10%] top-[16%] h-44 w-44 rounded-full bg-[var(--angel-blue)]/15 blur-[90px] md:h-60 md:w-60" />
+            <div className="absolute right-[12%] top-[12%] h-48 w-48 rounded-full bg-[var(--angel-lavender)]/15 blur-[90px] md:h-64 md:w-64" />
+            <div className="absolute bottom-[18%] left-[20%] h-36 w-36 rounded-full bg-[var(--angel-blue)]/12 blur-[80px] md:h-52 md:w-52" />
           </div>
 
-          <p className="text-center text-[14px] leading-[1.9] text-[var(--angel-text-soft)] mb-10 max-w-sm mx-auto [word-break:keep-all]">
-            &ldquo;예쁜 방&rdquo;, &ldquo;감성적인 분위기&rdquo; 같은 표현은
+          {/* Slowly rotating concentric circles */}
+          <div className="pointer-events-none">
+            <div className="absolute left-1/2 top-1/2 h-[min(540px,90vw)] w-[min(540px,90vw)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--angel-blue)]/22 rotate-slow md:h-[min(620px,68vw)] md:w-[min(620px,68vw)]" />
+            <div
+              className="absolute left-1/2 top-1/2 h-[min(600px,96vw)] w-[min(600px,96vw)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[var(--angel-lavender)]/22 md:h-[min(680px,76vw)] md:w-[min(680px,76vw)]"
+              style={{ animation: "rotate-slow 50s linear infinite reverse" }}
+            />
+          </div>
+
+          {/* Logo (no halo behind, no side wings — the logo itself is winged) */}
+          <div className="relative z-10 ascend ascend-d1 flex items-center justify-center">
+            <div className="relative float-gentle">
+              <AngelLogo size={92} priority />
+            </div>
+          </div>
+
+          {/* Main heading */}
+          <h1 className="relative z-10 ascend ascend-d2 mt-8 font-heading text-[52px] leading-[0.95] tracking-[0.02em] text-[var(--angel-text)] md:mt-10 md:text-[96px]">
+            My<span className="shimmer-text">Angel</span>
+          </h1>
+
+          {/* Uppercase subtitle (NO script font — keeps things calm) */}
+          <p className="relative z-10 ascend ascend-d3 mt-5 text-[11px] font-medium uppercase tracking-[0.32em] text-[var(--angel-text-soft)] md:mt-7 md:text-[13px]">
+            ✦ Interactive Prompt Optimization Studio ✦
+          </p>
+
+          {/* Ornament divider — echoes section-divider */}
+          <div className="relative z-10 ascend ascend-d3 mt-5 flex items-center gap-4 md:mt-7">
+            <span className="h-px w-16 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/60 md:w-20" />
+            <span className="text-[16px] text-[var(--angel-lavender)] twinkle">✦</span>
+            <span className="h-px w-16 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/60 md:w-20" />
+          </div>
+
+          {/* Korean lead body */}
+          <p className="relative z-10 ascend ascend-d4 mt-6 max-w-sm text-[14px] leading-[2] text-[var(--angel-text)] [word-break:keep-all] md:mt-8 md:max-w-md md:text-[16px]">
+            간단한 입력만으로{" "}
+            <strong className="font-semibold text-[var(--angel-lavender)]">
+              프롬프트를 최적화
+            </strong>
+            하고,
             <br />
-            AI가 이해하기엔 너무 추상적이에요.
-            <br />
-            결국 수십 번 수정하며 시간과 비용을 낭비하게 돼요.
+            원하는 이미지를 정확하게 생성해보세요.
           </p>
-
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/40" />
-            <span className="text-[11px] tracking-[0.2em] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/40" />
-          </div>
-
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[var(--angel-blue)]/10 px-5 py-2 text-[14px] font-medium text-[var(--angel-blue)] mb-5">
-              MyAngel이 해결해요
-            </div>
-            <p className="text-[14px] leading-[2] text-[var(--angel-text-soft)] max-w-sm mx-auto [word-break:keep-all]">
-              추상적인 입력을 <strong className="text-[var(--angel-text)]">구조화된 프롬프트</strong>로 변환하고,
-              <br />
-              약한 표현을 자동으로 감지해 개선해줘요.
-              <br />
-              시행착오 없이 원하는 이미지를 바로 만들 수 있어요.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ Section Divider ══ */}
-      <div className="section-divider bg-gradient-to-b from-[#e4eaf6] to-[#e0e7f4]">
-        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
-      </div>
-
-      {/* ══ Prompt Enhancement Showcase ══ */}
-      <section className="snap-section relative mx-auto w-full px-5 py-12 md:py-20 bg-gradient-to-b from-[#e0e7f4] to-[#e2e8f5]">
-        <div className="mx-auto max-w-2xl">
-          <div className="mb-3 flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/15 border border-amber-300/40 px-3 py-1 text-[13px] font-medium text-amber-700">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              핵심 기능
-            </span>
-          </div>
-          <h2 className="mb-2 text-center text-2xl tracking-[0.06em] text-[var(--angel-text)] font-heading md:text-3xl">
-            프롬프트 강화
-          </h2>
-          <p className="mb-8 text-center text-[14px] leading-[1.8] text-[var(--angel-text-soft)] md:text-[15px] md:mb-10 [word-break:keep-all]">
-            추상적인 표현을 AI가 자동으로 감지하고,<br />
-            클릭 한 번으로 더 구체적인 표현으로 바꿔줘요
-          </p>
-
-          {/* Visual Demo */}
-          <div className="rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white/90 to-amber-50/30 p-4 shadow-md md:p-6">
-            {/* Fake textarea */}
-            <div className="rounded-xl border border-[var(--angel-border)] bg-white/80 px-3 py-3 text-[14px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[15px]">
-              하얀 침대가 있는 <span className="inline-block rounded bg-amber-100/80 px-1 text-amber-700 border-b-2 border-amber-300">예쁜</span> 방,{" "}
-              <span className="inline-block rounded bg-amber-100/80 px-1 text-amber-700 border-b-2 border-amber-300">감성적인</span> 분위기의 창문
-            </div>
-
-            {/* Arrow */}
-            <div className="flex justify-center my-3 md:my-4">
-              <div className="flex flex-col items-center gap-1">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <polyline points="19 12 12 19 5 12" />
-                </svg>
-                <span className="text-[12px] font-medium text-[var(--angel-blue)]">AI 강화</span>
-              </div>
-            </div>
-
-            {/* Enhanced result */}
-            <div className="rounded-xl border border-sky-200/60 bg-sky-50/50 px-3 py-3 text-[14px] leading-[1.9] text-[var(--angel-text)] md:px-4 md:text-[15px]">
-              하얀 침대가 있는 <span className="inline-block rounded bg-sky-100/80 px-1 text-sky-700 border-b-2 border-sky-400">아이보리 톤의 미니멀한</span> 방,{" "}
-              <span className="inline-block rounded bg-sky-100/80 px-1 text-sky-700 border-b-2 border-sky-400">부드러운 자연광이 들어오는 따뜻한</span> 분위기의 창문
-            </div>
-
-            {/* Demo chips */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-xl bg-white px-3 py-1.5 text-[14px] font-medium text-amber-800 border border-amber-300/70 shadow-sm">
-                예쁜
-                <span className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[8px] text-white font-bold">+</span>
-              </span>
-              <span className="rounded-xl bg-sky-100/80 px-3 py-1.5 text-[14px] font-medium text-sky-700 border border-sky-300/60">
-                감성적인
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="inline ml-1">
-                  <polyline points="3 8 7 12 13 4" />
-                </svg>
-              </span>
-            </div>
-
-            <p className="mt-3 text-center text-[12px] text-amber-600/70 md:text-[13px]">
-              노란색 단어를 클릭하면 AI가 대안을 추천해요
-            </p>
-          </div>
-
-          {/* Benefits */}
-          <div className="mt-6 grid grid-cols-3 gap-2 md:gap-3 md:mt-8">
-            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
-              <div className="text-lg mb-1 md:text-xl md:mb-2">🎯</div>
-              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">자동 감지</p>
-              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">약한 표현을 AI가 찾아줘요</p>
-            </div>
-            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
-              <div className="text-lg mb-1 md:text-xl md:mb-2">✨</div>
-              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">원클릭 개선</p>
-              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">클릭만으로 구체화</p>
-            </div>
-            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
-              <div className="text-lg mb-1 md:text-xl md:mb-2">🌐</div>
-              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">자동 번역</p>
-              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">한국어→영어 최적화</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ Section Divider ══ */}
-      <div className="section-divider bg-gradient-to-b from-[#e2e8f5] to-[#e0e7f4]">
-        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
-      </div>
-
-      {/* ══ Object Studio Showcase ══ */}
-      <section className="snap-section relative mx-auto w-full px-5 py-12 md:py-20 bg-gradient-to-b from-[#e0e7f4] to-[#e2e8f5]">
-        <div className="mx-auto max-w-2xl">
-          <div className="mb-3 flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--angel-blue)]/12 border border-[var(--angel-blue)]/25 px-3 py-1 text-[13px] font-medium text-[var(--angel-blue)]">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-              핵심 기능
-            </span>
-          </div>
-          <h2 className="mb-2 text-center text-2xl tracking-[0.06em] text-[var(--angel-text)] font-heading md:text-3xl">
-            오브젝트 스튜디오
-          </h2>
-          <p className="mb-8 text-center text-[14px] leading-[1.8] text-[var(--angel-text-soft)] md:text-[15px] md:mb-10 [word-break:keep-all]">
-            장면을 구성 요소별로 분해하고,<br />
-            각 요소를 독립적으로 편집해요
-          </p>
-
-          {/* Interactive Demo */}
-          <StudioDemo />
-
-          {/* Benefits */}
-          <div className="mt-6 grid grid-cols-3 gap-2 md:gap-3 md:mt-8">
-            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
-              <div className="text-lg mb-1 md:text-xl md:mb-2">🧩</div>
-              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">자동 분해</p>
-              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">입력을 요소별로 분리</p>
-            </div>
-            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
-              <div className="text-lg mb-1 md:text-xl md:mb-2">🎚️</div>
-              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">속성 슬라이더</p>
-              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">세밀한 강도 조절</p>
-            </div>
-            <div className="rounded-xl bg-white/80 border border-[var(--angel-border)] p-3 text-center md:p-4">
-              <div className="text-lg mb-1 md:text-xl md:mb-2">⚠️</div>
-              <p className="text-[13px] font-medium text-[var(--angel-text)] md:text-[14px]">충돌 감지</p>
-              <p className="mt-0.5 text-[11px] text-[var(--angel-text-soft)] leading-[1.5] md:text-[12px] [word-break:keep-all]">속성 간 모순 자동 경고</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ Section Divider ══ */}
-      <div className="section-divider bg-gradient-to-b from-[#e2e8f5] to-[#e0e7f4]">
-        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
-      </div>
-
-      {/* ══ Other Features ══ */}
-      <section className="snap-section relative mx-auto w-full px-5 py-10 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#e4eaf6]">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="mb-2 text-center text-2xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-3xl">
-            More Features
-          </h2>
-          <p className="mb-8 text-center text-[13px] tracking-[0.2em] text-[var(--angel-text-soft)] md:mb-10">
-            ✦ 프롬프트 강화 외에도 ✦
-          </p>
-
-          <div className="space-y-3 md:space-y-4">
-            {/* Feature 1: Prompt Comparison */}
-            <div className="glass-card rounded-2xl px-5 py-4 md:px-6 md:py-5">
-              <div className="flex items-center gap-2 mb-2 md:mb-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-lavender)]/12 text-[14px]">
-                  📊
-                </span>
-                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-base">
-                  프롬프트 비교
-                </h3>
-              </div>
-              <p className="text-[14px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
-                원본 입력과 AI가 최적화한 프롬프트를 <strong className="text-[var(--angel-text)]">나란히 비교</strong>할 수 있어요.
-                한국어/영어 토글로 실제 이미지 생성에 사용되는 영어 프롬프트도 확인 가능해요.
-              </p>
-            </div>
-
-            {/* Feature 3: AI Image Generation */}
-            <div className="glass-card rounded-2xl px-5 py-4 md:px-6 md:py-5">
-              <div className="flex items-center gap-2 mb-2 md:mb-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--angel-pink)]/12 text-[14px]">
-                  🖼️
-                </span>
-                <h3 className="text-[15px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:text-base">
-                  AI 이미지 생성
-                </h3>
-              </div>
-              <p className="text-[14px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
-                최적화된 프롬프트로 바로 이미지를 생성해요.
-                레퍼런스 이미지 업로드와 프리미엄 2K 고해상도도 지원해요.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ Section Divider ══ */}
-      <div className="section-divider bg-gradient-to-b from-[#e4eaf6] to-[#e0e7f4]">
-        <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✧</span>
-      </div>
-
-      {/* ══ How it works ══ */}
-      <section className="snap-section relative mx-auto w-full px-4 py-10 md:px-5 md:py-16 bg-gradient-to-b from-[#e0e7f4] to-[#dce4f2]">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="mb-2 text-center text-2xl tracking-[0.08em] text-[var(--angel-text)] font-heading md:text-3xl">
-            How it works
-          </h2>
-          <p className="mb-6 text-center text-[12px] tracking-[0.2em] text-[var(--angel-text-soft)] md:mb-10 md:text-[13px]">
-            ✦ five steps to your perfect image ✦
-          </p>
-
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-5 md:gap-3">
-            {[
-              { num: "I", title: "입력", desc: "원하는 이미지를 간단하게 설명해요" },
-              { num: "II", title: "분해", desc: "장면을 구성 요소 단위로 자동 분해해요" },
-              { num: "III", title: "편집", desc: "각 요소의 속성을 세밀하게 조절해요" },
-              { num: "IV", title: "강화", desc: "추상적 표현을 구체적으로 개선해요" },
-              { num: "V", title: "생성", desc: "최적화된 프롬프트로 이미지를 만들어요" },
-            ].map((step, i) => (
-              <div key={step.num} className={`glass-card rounded-xl p-3 text-center md:rounded-2xl md:p-4 ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
-                <div className="mb-1.5 flex items-center justify-center gap-1.5 md:mb-2">
-                  <span className="text-[8px] text-[var(--angel-lavender)] opacity-40">✦</span>
-                  <span className="text-base text-[var(--angel-blue)] font-heading md:text-lg">{step.num}</span>
-                  <span className="text-[8px] text-[var(--angel-lavender)] opacity-40">✦</span>
-                </div>
-                <h3 className="mb-1 text-[13px] font-medium tracking-[0.04em] text-[var(--angel-text)] md:mb-1.5 md:text-[14px]">{step.title}</h3>
-                <p className="text-[12px] leading-[1.6] text-[var(--angel-text-soft)] md:text-[13px] [word-break:keep-all]">{step.desc}</p>
-              </div>
-            ))}
-          </div>
 
           {/* CTA */}
-          <div className="mt-10 text-center">
-            <Link href="/generate" className="angel-btn angel-btn-primary">
-              <span className="text-[12px]">✦</span>
-              지금 시작하기
+          <div className="relative z-10 ascend ascend-d5 mt-10 md:mt-12">
+            <Link href="/generate" className="winged-cta">
+              <OrnateCross size={13} className="text-[var(--angel-lavender)]" />
+              Studio 시작하기
+              <OrnateCross size={13} className="text-[var(--angel-lavender)]" />
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ══ Bottom decoration ══ */}
-      <div className="pt-6 pb-16 text-center bg-[#dce4f2]">
-        <div className="flex items-center justify-center gap-3">
-          <span className="text-[12px] text-[var(--angel-lavender)]">✦</span>
-          <span className="text-[14px] text-[var(--angel-lavender)]">✧</span>
-          <span className="text-[12px] text-[var(--angel-lavender)]">✦</span>
+        <div className="section-divider">
+          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
         </div>
+
+        {/* ════════════════════════════════════════════
+            ✟  THE PROBLEM
+            ════════════════════════════════════════════ */}
+        <section className="relative overflow-hidden px-4 pt-20 pb-24 md:px-5 md:pt-24 md:pb-28">
+          <div className="pointer-events-none absolute -top-12 left-1/2 h-72 w-[80vw] max-w-[640px] -translate-x-1/2 rounded-full bg-[var(--angel-blue)]/12 blur-[100px]" />
+
+          <div className="relative mx-auto max-w-2xl">
+            <SectionTitle eyebrow="Chapter I" title="The Problem" />
+
+            <p className="mt-12 text-center text-[16px] leading-[2] text-[var(--angel-text)] [word-break:keep-all] md:text-[18px]">
+              강력한 AI 이미지 모델 앞에서도,
+              <br />
+              우리는 여전히 <strong className="font-semibold text-[var(--angel-lavender)]">좋은 프롬프트</strong>가 필요합니다.
+            </p>
+
+            <p className="mx-auto mt-10 max-w-md text-center text-[14px] leading-[2] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
+              &ldquo;예쁜 방&rdquo;, &ldquo;감성적인 분위기&rdquo; 같은 표현은
+              <br />
+              AI가 이해하기엔 너무 추상적입니다.
+              <br />
+              결국 수십 번 수정하며 시간과 비용을 낭비하게 돼요.
+            </p>
+
+            <p className="mx-auto mt-12 max-w-md text-center text-[14px] leading-[2] text-[var(--angel-text)] [word-break:keep-all] md:text-[15px]">
+              MyAngel은 추상적인 입력을{" "}
+              <strong className="font-semibold text-[var(--angel-lavender)]">
+                구조화된 프롬프트
+              </strong>
+              로 바꾸고,
+              <br />
+              약한 표현을 자동으로 가려 고쳐드립니다.
+            </p>
+          </div>
+        </section>
+
+        <div className="section-divider">
+          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
+        </div>
+
+        {/* ════════════════════════════════════════════
+            ✟  FEATURE I — Prompt Enhancement
+            ════════════════════════════════════════════ */}
+        <section className="relative overflow-hidden px-4 pt-20 pb-24 md:px-5 md:pt-24 md:pb-28">
+          <div className="pointer-events-none absolute -top-12 right-[10%] h-72 w-72 rounded-full bg-[var(--angel-blue)]/12 blur-[100px]" />
+          <div className="pointer-events-none absolute bottom-0 left-[8%] h-64 w-64 rounded-full bg-[var(--angel-lavender)]/10 blur-[90px]" />
+
+          <div className="relative mx-auto max-w-3xl">
+            <SectionTitle
+              eyebrow="Chapter II"
+              title="Prompt Enhancement"
+              subtitle="약한 표현을 가려, 더 구체적인 문장으로 다듬어드려요."
+            />
+            <div className="mb-12" />
+
+            <div className="devotional-frame rounded-sm">
+              <span className="corner-bl" />
+              <span className="corner-br" />
+
+              <div className="mb-1 flex items-center gap-2 text-[10px] tracking-[0.28em] uppercase text-[var(--angel-text-faint)]">
+                <Quill size={11} className="text-amber-500" />
+                Before
+              </div>
+              <div className="rounded-xl border border-[var(--angel-blue)]/30 bg-white px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] shadow-[0_0_0_3px_rgba(91,155,213,0.08)] md:text-[15px]">
+                하얀 침대가 있는{" "}
+                <span className="rounded px-0.5 bg-amber-50/80 text-amber-800 underline decoration-wavy decoration-2 decoration-amber-400 underline-offset-[3px]">
+                  예쁜
+                </span>{" "}
+                방,{" "}
+                <span className="rounded px-0.5 bg-amber-50/80 text-amber-800 underline decoration-wavy decoration-2 decoration-amber-400 underline-offset-[3px]">
+                  감성적인
+                </span>{" "}
+                분위기의 창문
+              </div>
+
+              <div className="mt-3 flex items-center gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200/60 px-4 py-2 text-[13px] font-medium text-amber-800">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-[11px] font-bold text-white">
+                    2
+                  </span>
+                  개선할 수 있는 표현
+                </span>
+              </div>
+
+              <div className="my-5 flex items-center justify-center gap-3 text-[var(--angel-lavender)]/55">
+                <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/50" />
+                <OrnateCross size={12} />
+                <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/50" />
+              </div>
+
+              <div className="mb-1 flex items-center gap-2 text-[10px] tracking-[0.28em] uppercase text-[var(--angel-text-faint)]">
+                <Fleur size={11} className="text-sky-500" />
+                After
+              </div>
+              <div className="rounded-xl border border-[var(--angel-blue)]/30 bg-white px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] shadow-[0_0_0_3px_rgba(91,155,213,0.08)] md:text-[15px]">
+                하얀 침대가 있는{" "}
+                <span className="rounded px-0.5 bg-sky-50 text-sky-700 underline decoration-2 decoration-sky-400 underline-offset-[3px]">
+                  아이보리 톤의 미니멀한
+                </span>{" "}
+                방,{" "}
+                <span className="rounded px-0.5 bg-sky-50 text-sky-700 underline decoration-2 decoration-sky-400 underline-offset-[3px]">
+                  부드러운 자연광이 들어오는 따뜻한
+                </span>{" "}
+                분위기의 창문
+              </div>
+
+              <div className="mt-3 flex items-center gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 border border-sky-200/60 px-4 py-2 text-[13px] font-medium text-sky-700">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <polyline points="3 8 7 12 13 4" />
+                  </svg>
+                  모든 표현이 개선되었어요
+                </span>
+              </div>
+
+              <p className="mt-5 text-center text-[12px] text-[var(--angel-text-faint)]">
+                — 밑줄 친 단어를 클릭하면 더 구체적인 표현이 추천돼요 —
+              </p>
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 gap-4 md:mt-12 md:grid-cols-3 md:gap-5">
+              <BenefitCard
+                icon={<RadiantEye size={17} className="text-[var(--angel-lavender)]" />}
+                title="자동 감지"
+                desc="약한 표현을 AI가 찾아내요"
+              />
+              <BenefitCard
+                icon={<LineHeart size={17} className="text-[var(--angel-pink)]" />}
+                title="원클릭 개선"
+                desc="클릭 한 번으로 구체화"
+              />
+              <BenefitCard
+                icon={<Orb size={17} className="text-[var(--angel-blue)]" />}
+                title="자동 번역"
+                desc="한국어 → 영어 최적화"
+              />
+            </div>
+          </div>
+        </section>
+
+        <div className="section-divider">
+          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
+        </div>
+
+        {/* ════════════════════════════════════════════
+            ✟  FEATURE II — Object Studio
+            ════════════════════════════════════════════ */}
+        <section className="relative overflow-hidden px-4 pt-20 pb-24 md:px-5 md:pt-24 md:pb-28">
+          <div className="pointer-events-none absolute top-0 left-[10%] h-72 w-72 rounded-full bg-[var(--angel-blue)]/10 blur-[100px]" />
+          <div className="pointer-events-none absolute bottom-0 right-[10%] h-72 w-72 rounded-full bg-[var(--angel-lavender)]/12 blur-[100px]" />
+
+          <div className="relative mx-auto max-w-3xl">
+            <SectionTitle
+              eyebrow="Chapter III"
+              title="Object Studio"
+              subtitle="장면을 구성 요소로 나누고, 각 요소를 독립적으로 다듬어요."
+            />
+            <div className="mb-12" />
+
+            <div className="devotional-frame rounded-sm">
+              <span className="corner-bl" />
+              <span className="corner-br" />
+              <StudioDemo />
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 gap-4 md:mt-12 md:grid-cols-3 md:gap-5">
+              <BenefitCard
+                icon={<Fleur size={17} className="text-[var(--angel-lavender)]" />}
+                title="자동 분해"
+                desc="입력을 요소별로 분리"
+              />
+              <BenefitCard
+                icon={<Hourglass size={17} className="text-[var(--angel-pink)]" />}
+                title="속성 슬라이더"
+                desc="세밀한 강도 조절"
+              />
+              <BenefitCard
+                icon={<OrnateCross size={17} className="text-[var(--angel-blue)]" />}
+                title="충돌 감지"
+                desc="속성 간 모순을 경고"
+              />
+            </div>
+          </div>
+        </section>
+
+        <div className="section-divider">
+          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
+        </div>
+
+        {/* ════════════════════════════════════════════
+            ✟  MORE FEATURES
+            ════════════════════════════════════════════ */}
+        <section className="relative overflow-hidden px-4 pt-20 pb-24 md:px-5 md:pt-24 md:pb-28">
+          <div className="pointer-events-none absolute top-0 right-[20%] h-64 w-64 rounded-full bg-[var(--angel-lavender)]/10 blur-[100px]" />
+
+          <div className="relative mx-auto max-w-2xl">
+            <SectionTitle
+              eyebrow="Chapter IV"
+              title="More"
+              subtitle="프롬프트 강화 외에도 작은 도움들이 있어요."
+            />
+            <div className="mb-12" />
+
+            <div className="space-y-5 md:space-y-6">
+              <DevotionalRow
+                icon={<Chalice size={18} className="text-[var(--angel-lavender)]" />}
+                title="프롬프트 비교"
+                body={
+                  <>
+                    원본 입력과 AI가 정제한 프롬프트를 <strong>나란히</strong> 비교할 수 있어요.
+                    한국어/영어 토글로 실제 이미지 생성에 쓰이는 영어 프롬프트도 확인 가능합니다.
+                  </>
+                }
+              />
+              <DevotionalRow
+                icon={<HaloRays size={20} className="text-[var(--angel-pink)]" />}
+                title="AI 이미지 생성"
+                body={
+                  <>
+                    최적화된 프롬프트로 바로 이미지를 생성해요.
+                    레퍼런스 이미지 업로드와 <strong>프리미엄 2K 고해상도</strong>까지 지원합니다.
+                  </>
+                }
+              />
+            </div>
+          </div>
+        </section>
+
+        <div className="section-divider">
+          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
+        </div>
+
+        {/* ════════════════════════════════════════════
+            ✟  HOW IT WORKS
+            ════════════════════════════════════════════ */}
+        <section className="relative overflow-hidden px-4 pt-20 pb-28 md:px-5 md:pt-24 md:pb-32">
+          <div className="pointer-events-none absolute -top-12 left-1/2 h-80 w-[80vw] max-w-[700px] -translate-x-1/2 rounded-full bg-[var(--angel-lavender)]/12 blur-[110px]" />
+
+          <div className="relative mx-auto max-w-5xl">
+            <SectionTitle
+              eyebrow="Chapter V"
+              title="How it works"
+              subtitle="한 줄의 입력에서 완성된 이미지까지, 다섯 단계."
+            />
+            <div className="mb-16 md:mb-20" />
+
+            <div className="grid grid-cols-1 gap-12 md:grid-cols-5 md:gap-4">
+              {STEPS.map((step, i) => (
+                <div key={step.num} className="relative flex flex-col items-center text-center">
+                  {i < STEPS.length - 1 && (
+                    <span className="absolute left-[calc(50%+36px)] right-[calc(-50%+36px)] top-[32px] hidden h-px bg-gradient-to-r from-[var(--angel-lavender)]/40 via-[var(--angel-pink)]/30 to-[var(--angel-lavender)]/40 md:block" />
+                  )}
+
+                  <div className="roman-medallion">{step.num}</div>
+
+                  <h3 className="mt-5 text-[15px] font-semibold tracking-[0.04em] text-[var(--angel-text)]">
+                    {step.kor}
+                  </h3>
+                  <p className="mt-2 max-w-[200px] text-[13px] leading-[1.75] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[14px]">
+                    {step.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-20 flex flex-col items-center md:mt-24">
+              <Link href="/generate" className="winged-cta">
+                <LineHeart size={13} className="text-[var(--angel-pink)]" />
+                지금 시작하기
+                <LineHeart size={13} className="text-[var(--angel-pink)]" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer sign-off — echoes the section divider */}
+        <div className="pb-16 pt-4 text-center">
+          <div className="mx-auto flex items-center justify-center gap-4">
+            <span className="h-px w-16 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/55 md:w-24" />
+            <span className="text-[14px] text-[var(--angel-lavender)] twinkle">✦</span>
+            <span className="h-px w-16 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/55 md:w-24" />
+          </div>
+          <p className="mt-4 font-script text-[22px] leading-none text-[var(--angel-lavender)]/75 md:text-[26px]">
+            sincerely, your angel
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Local helpers
+   ═══════════════════════════════════════════════════════ */
+
+const STEPS = [
+  { num: "I",   kor: "입력", desc: "원하는 이미지를 한 문장으로 설명해요" },
+  { num: "II",  kor: "분해", desc: "장면을 구성 요소 단위로 자동 분해해요" },
+  { num: "III", kor: "편집", desc: "각 요소의 속성을 세밀하게 조절해요" },
+  { num: "IV",  kor: "강화", desc: "추상적 표현을 구체적으로 개선해요" },
+  { num: "V",   kor: "생성", desc: "최적화된 프롬프트로 이미지를 만들어요" },
+];
+
+function SectionTitle({
+  eyebrow,
+  title,
+  subtitle,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="text-center">
+      <p className="text-[10px] font-medium uppercase tracking-[0.36em] text-[var(--angel-text-faint)] md:text-[11px]">
+        {eyebrow}
+      </p>
+      <h2 className="mt-4 font-heading text-[32px] leading-[1.05] tracking-[0.02em] text-[var(--angel-text)] md:mt-5 md:text-[46px]">
+        {title}
+      </h2>
+      <div className="mx-auto mt-5 flex items-center justify-center gap-4 md:mt-6">
+        <span className="h-px w-14 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/60 md:w-20" />
+        <span className="text-[14px] text-[var(--angel-lavender)] twinkle">✦</span>
+        <span className="h-px w-14 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/60 md:w-20" />
+      </div>
+      {subtitle && (
+        <p className="mx-auto mt-5 max-w-md text-[14px] leading-[1.85] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function BenefitCard({
+  icon,
+  title,
+  desc,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="group relative px-5 py-6 text-center">
+      <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[var(--angel-lavender)]/45 to-transparent" />
+      <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--angel-lavender)]/30 bg-white/70">
+        {icon}
+      </div>
+      <p className="text-[14px] font-semibold tracking-[0.04em] text-[var(--angel-text)]">
+        {title}
+      </p>
+      <p className="mx-auto mt-1.5 max-w-[180px] text-[12px] leading-[1.7] text-[var(--angel-text-soft)] [word-break:keep-all]">
+        {desc}
+      </p>
+    </div>
+  );
+}
+
+function DevotionalRow({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: React.ReactNode;
+}) {
+  return (
+    <div className="group relative flex items-start gap-5 px-2 py-6">
+      <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-[var(--angel-lavender)]/40 to-transparent" />
+      <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--angel-lavender)]/30 bg-white/70">
+        {icon}
+      </div>
+      <div className="flex-1">
+        <h3 className="text-[16px] font-semibold tracking-[0.03em] text-[var(--angel-text)] md:text-[17px]">
+          {title}
+        </h3>
+        <p className="mt-2 text-[14px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
+          {body}
+        </p>
       </div>
     </div>
   );
