@@ -83,7 +83,7 @@ export function InlineEnhancer({
         const needsAnalysis = !analyzedText || !newVal.includes(analyzedText) && !analyzedText.includes(newVal);
         if (needsAnalysis) {
           if (debounceRef.current) clearTimeout(debounceRef.current);
-          debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 1500);
+          debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 700);
         }
       }
     },
@@ -280,18 +280,22 @@ export function InlineEnhancer({
         <div className="relative">
           {highlightedPreview ? (
             <>
+              {/* textarea sits BEHIND the highlight layer (z-0, opacity-0) so
+                  that span clicks reach the preview. Preview is on top with
+                  pointer-events-none on non-span text — clicks on empty text
+                  fall through to the textarea below. */}
               <textarea
                 value={value}
                 onChange={handleChange}
-                disabled={disabled || isAnalyzing}
+                disabled={disabled}
                 placeholder={placeholder}
                 rows={4}
-                className="absolute inset-0 z-10 h-full w-full cursor-text resize-none bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] opacity-0 outline-none"
+                className="absolute inset-0 z-0 h-full w-full cursor-text resize-none bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] opacity-0 outline-none"
                 style={{ caretColor: "var(--angel-text)" }}
               />
               <div
                 ref={previewRef}
-                className={`min-h-[128px] w-full bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] text-[var(--angel-text)] ${isAnalyzing ? "opacity-60" : ""}`}
+                className="pointer-events-none relative z-10 min-h-[128px] w-full bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] text-[var(--angel-text)]"
               >
                 {highlightedPreview.map((part, i) =>
                   part.span ? (
@@ -301,7 +305,7 @@ export function InlineEnhancer({
                         e.stopPropagation();
                         handleWordClick(part.span!, e);
                       }}
-                      className={`relative cursor-pointer transition-all ${
+                      className={`pointer-events-auto relative cursor-pointer transition-all ${
                         part.isReplaced
                           ? "text-sky-700 bg-sky-50 rounded px-0.5 decoration-sky-400 underline decoration-2 underline-offset-[3px]"
                           : activeSpan?.text === part.text
@@ -321,28 +325,15 @@ export function InlineEnhancer({
             <textarea
               value={value}
               onChange={handleChange}
-              disabled={disabled || isAnalyzing}
+              disabled={disabled}
               placeholder={placeholder}
               rows={4}
-              className={`min-h-[128px] w-full resize-none border-0 bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] text-[var(--angel-text)] outline-none placeholder:text-[var(--angel-text-faint)]/55 ${isAnalyzing ? "opacity-60" : ""}`}
+              className="min-h-[128px] w-full resize-none border-0 bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] text-[var(--angel-text)] outline-none placeholder:text-[var(--angel-text-faint)]/55"
             />
           )}
 
-          {/* Analyzing overlay */}
-          {isAnalyzing && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[2px]">
-              <div className="flex items-center gap-2.5 rounded-full border border-[var(--angel-lavender)]/25 bg-[var(--angel-lavender)]/12 px-5 py-2.5 shadow-sm">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-lavender)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                </svg>
-                <span className="text-[14px] font-medium text-[var(--angel-lavender)]">
-                  프롬프트를 강화하고 있어요...
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Rewriting overlay */}
+          {/* Rewriting overlay — rewrite *does* need to block editing, because
+              it replaces the entire sentence. Analysis does not. */}
           {isRewriting && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[2px]">
               <div className="flex items-center gap-2.5 rounded-full border border-[var(--angel-blue)]/25 bg-[var(--angel-blue)]/12 px-5 py-2.5 shadow-sm">
@@ -359,7 +350,14 @@ export function InlineEnhancer({
 
         {/* Footer status bar */}
         <div className="flex items-center justify-between gap-3 border-t border-[var(--angel-blue)]/12 bg-gradient-to-b from-white to-[rgba(91,155,213,0.035)] px-5 py-2.5">
-          {showSuccessHint ? (
+          {isAnalyzing ? (
+            <span className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--angel-lavender)]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              약한 표현을 찾고 있어요
+            </span>
+          ) : showSuccessHint ? (
             <span className="flex items-center gap-1.5 text-[12px] font-medium text-sky-600">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
                 <polyline points="3 8 7 12 13 4" />
