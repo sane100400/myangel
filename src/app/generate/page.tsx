@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, Fragment } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { saveImage } from "@/lib/saved-images";
 import { toast } from "sonner";
@@ -75,18 +75,84 @@ const STEPS = [
 ] as const;
 
 // ── Example prompts — chosen to contain weak spans so the enhancer hints fire. ──
+// Pool of 50+ prompts; a random subset is shown on each mount (see pickExamples).
 
-const EXAMPLE_PROMPTS = [
+const EXAMPLE_PROMPTS: readonly string[] = [
   "예쁜 카페의 감성적인 분위기",
   "몽환적인 방에 하얀 침대",
-  "고양이가 노는 공원",
+  "고양이가 노는 평화로운 공원",
   "해질녘 거리의 소녀",
+  "따뜻한 햇살이 비추는 거실",
+  "비 내리는 도쿄 골목길의 야경",
+  "눈 내리는 유럽 시골 마을",
+  "아늑한 북유럽 스타일 서재",
+  "귀여운 강아지가 창밖을 보는 장면",
+  "신비로운 숲속 작은 오두막",
+  "낭만적인 파리의 밤거리",
+  "잔잔한 호수 위의 작은 보트",
+  "빈티지한 레코드 가게 내부",
+  "세련된 미니멀 인테리어 거실",
+  "화려한 벚꽃이 만개한 일본 정원",
+  "차가운 겨울 바다와 외딴 등대",
+  "고즈넉한 한옥의 마당",
+  "환상적인 오로라가 펼쳐진 밤하늘",
+  "몽글몽글한 구름 위의 성",
+  "러프한 갈색 가죽 소파가 있는 거실",
+  "부드러운 조명의 북카페",
+  "쓸쓸한 새벽의 기차역 플랫폼",
+  "활기찬 재래시장의 풍경",
+  "우아한 발레리나의 연습실",
+  "푸릇푸릇한 봄날의 언덕",
+  "청량한 여름 계곡의 오후",
+  "풍성한 가을 단풍이 물든 숲길",
+  "아기자기한 작은 꽃집의 쇼윈도",
+  "모던한 고층 빌딩의 라운지",
+  "빈티지 자전거가 있는 유럽 골목",
+  "동화 속 마녀의 다락방",
+  "은은한 달빛이 비추는 서재",
+  "사이버펑크 스타일의 홍콩 야경",
+  "레트로한 다이너에서 커피 마시는 소녀",
+  "잔디밭에서 책 읽는 여자",
+  "비 오는 창가의 따뜻한 차 한 잔",
+  "음산한 안개 낀 중세 성곽",
+  "반짝이는 크리스마스 마켓",
+  "고요한 새벽 안개의 호수",
+  "귀여운 토끼가 뛰노는 들판",
+  "정교한 시계 장인의 작업실",
+  "몰디브 리조트의 청록색 수영장",
+  "서정적인 바닷가 작은 카페",
+  "청순한 여름 원피스를 입은 소녀",
+  "쓸쓸한 가을 공원의 벤치",
+  "열정적인 록 콘서트 무대",
+  "포근한 이불 속의 나른한 아침",
+  "눈부신 설원의 스키 리조트",
+  "힙한 브루클린 로프트 인테리어",
+  "평화로운 시골의 황금빛 밀밭",
+  "정갈한 일본식 찻집",
+  "활기찬 한강 공원의 주말 오후",
+  "감각적인 블랙 앤 화이트 패션 화보",
+  "따스한 벽난로 앞에 웅크린 고양이",
+  "화사한 꽃들이 만개한 정원",
+  "운치 있는 유럽풍 카페 테라스",
 ] as const;
+
+// Pick N random prompts without mutating the source array.
+function pickExamples(n: number): string[] {
+  const pool = [...EXAMPLE_PROMPTS];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, n);
+}
 
 // ── Component ──
 
 export default function StudioPage() {
   const router = useRouter();
+
+  // Randomize example chips per mount so repeat visitors see variety.
+  const exampleChips = useMemo(() => pickExamples(4), []);
 
   // Wizard step (1=입력, 2=조정, 3=결과)
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -508,7 +574,7 @@ export default function StudioPage() {
               <span className="text-[12px] text-[var(--angel-text-faint)] mr-1">
                 처음이라면?
               </span>
-              {EXAMPLE_PROMPTS.map((ex) => (
+              {exampleChips.map((ex) => (
                 <button
                   key={ex}
                   type="button"
