@@ -136,14 +136,16 @@ const EXAMPLE_PROMPTS: readonly string[] = [
   "운치 있는 유럽풍 카페 테라스",
 ] as const;
 
-// Pick N random prompts without mutating the source array.
+// Pick N random prompts. Filtered to short prompts (≤13 chars) so the chip
+// row fits in one line on desktop and wraps to ≤2 lines on mobile.
 function pickExamples(n: number): string[] {
-  const pool = [...EXAMPLE_PROMPTS];
-  for (let i = pool.length - 1; i > 0; i--) {
+  const pool = EXAMPLE_PROMPTS.filter((p) => p.length <= 13);
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return pool.slice(0, n);
+  return shuffled.slice(0, n);
 }
 
 // ── Component ──
@@ -568,10 +570,12 @@ export default function StudioPage() {
       {/* ═══ Step 1: Input ═══ */}
       {step === 1 && (
         <div className="space-y-4">
-          {/* Example prompt chips — tap to populate input; triggers weak-span highlights. */}
+          {/* Example prompt chips — tap to populate input; triggers weak-span highlights.
+              Desktop: single row (filtered to short prompts so all 4 fit in one line).
+              Mobile: wraps naturally to at most 2 lines. */}
           {!prompt && (
-            <div className="flex flex-wrap items-center justify-center gap-1.5">
-              <span className="text-[12px] text-[var(--angel-text-faint)] mr-1">
+            <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1.5 md:flex-nowrap">
+              <span className="text-[11.5px] text-[var(--angel-text-faint)] mr-0.5 shrink-0">
                 처음이라면?
               </span>
               {exampleChips.map((ex) => (
@@ -579,7 +583,7 @@ export default function StudioPage() {
                   key={ex}
                   type="button"
                   onClick={() => setPrompt(ex)}
-                  className="rounded-full border border-[var(--angel-border)] bg-white/60 px-3 py-1 text-[12px] text-[var(--angel-text-soft)] transition-colors hover:border-[var(--angel-blue)]/40 hover:bg-[var(--angel-blue)]/5 hover:text-[var(--angel-blue)]"
+                  className="whitespace-nowrap rounded-full border border-[var(--angel-border)] bg-white/60 px-2.5 py-1 text-[11.5px] text-[var(--angel-text-soft)] transition-colors hover:border-[var(--angel-blue)]/40 hover:bg-[var(--angel-blue)]/5 hover:text-[var(--angel-blue)]"
                 >
                   {ex}
                 </button>
@@ -637,7 +641,7 @@ export default function StudioPage() {
           </div>
 
           {/* Premium Toggle */}
-          <div className="flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-1.5">
             <div className="group relative">
               <button
                 type="button"
@@ -656,11 +660,16 @@ export default function StudioPage() {
                   {premium ? "ON" : "OFF"}
                 </span>
               </button>
-              <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-xl bg-[#1a1a2e]/90 backdrop-blur-sm px-4 py-3 text-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 z-30">
+              {/* Desktop-only hover tooltip (mobile uses the caption below). */}
+              <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-xl bg-[#1a1a2e]/90 backdrop-blur-sm px-4 py-3 text-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 z-30 hidden md:block">
                 <p className="text-[13px] leading-[1.7] text-white/90">고해상도 2K 이미지를 생성해요.<br />더 선명하고 디테일한 결과물!</p>
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rotate-45 bg-[#1a1a2e]/90" />
               </div>
             </div>
+            {/* Mobile caption — hover is unreliable on touch, so surface the hint here. */}
+            <p className="text-[11px] text-[var(--angel-text-faint)] md:hidden">
+              고해상도 2K, 더 선명한 결과물
+            </p>
           </div>
 
           {/* Next: Analyze */}
