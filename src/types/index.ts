@@ -105,12 +105,18 @@ export interface ObjectAttribute {
   category: AttributeCategory;
 }
 
+export interface ScenePosition {
+  x: number; // 0-100, left edge percent
+  y: number; // 0-100, top edge percent
+}
+
 export interface SceneObject {
   id: string;
   role: ObjectRole;
   label: string;        // Korean display name (e.g. "피사체", "배경")
   description: string;  // User's original text for this element
   attributes: ObjectAttribute[];
+  position?: ScenePosition; // Canvas position (only for positional roles)
 }
 
 // ============================================================
@@ -125,11 +131,20 @@ export interface EnhancementSuggestion {
   reasoning: string;    // Brief explanation
 }
 
+export type WeakSpanReason =
+  | "too_abstract"
+  | "missing_visual"
+  | "vague_intensifier"
+  | "low_density"
+  | "ok";
+
 export interface WeakSpan {
   start: number;
   end: number;
   text: string;         // The weak/abstract expression
-  reason: string;       // Why it's weak (Korean)
+  reason: string;       // Why it's weak (Korean, human readable)
+  reasonCode?: WeakSpanReason;  // Machine-readable classification
+  densityScore?: number; // 0-1 information density
   alternatives: EnhancementSuggestion[];
 }
 

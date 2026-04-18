@@ -1,5 +1,6 @@
 import { genai } from "./gemini";
 import type { WeakSpan } from "@/types";
+import { scoreSpan } from "./information-density";
 
 const SYSTEM_PROMPT = `이미지 생성 프롬프트의 각 의미 단어를 더 구체적으로 만들 수 있는 대안을 제시해.
 조사/접속사는 제외하고 의미 단어만 추출해.
@@ -50,5 +51,22 @@ export async function detectWeakSpans(
     }
   }
 
-  return spans.filter((s) => s.start !== s.end);
+  // Annotate each span with information-density metrics.
+  // LLM-picked spans that already score high get filtered out — they're
+  // not actually weak, just possibly-enrichable. This reduces false positives.
+  const annotated: WeakSpan[] = [];
+  for (const span of spans) {
+    if (span.start === span.end) continue;
+    const density = scoreSpan(span.text);
+    span.densityScore = density.score;
+    span.reasonCode = density.reason;
+    // Prefer the density-based reason when LLM gave a generic one.
+    if (!span.reason || span.reason.length < 4) {
+      span.reason = density.reasonKo;
+    }
+    // Drop spans that scored clearly concrete unless LLM gave confident alternatives.
+    if (!density.weak && density.score >= 0.55) continue;
+    annotated.push(span);
+  }
+  return annotated;
 }

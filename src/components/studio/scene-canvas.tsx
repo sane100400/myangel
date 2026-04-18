@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { SceneObject, ObjectAttribute } from "@/types";
 import { AttributeSlider } from "./attribute-slider";
+import { detectConflicts } from "@/lib/conflict-matrix";
 
 const REFRESH_DEBOUNCE = 800; // ms after typing stops
 
@@ -68,77 +69,6 @@ const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
 };
 
 const MAX_SUBJECTS = 3;
-
-// ── Conflict detection (client-side, no API call) ──
-
-const CONFLICT_PAIRS: [string, string][] = [
-  ["warmth", "coldness"],
-  ["warm", "cold"],
-  ["brightness", "darkness"],
-  ["bright", "dark"],
-  ["realism", "abstraction"],
-  ["realistic", "abstract"],
-  ["minimal", "maximalist"],
-  ["soft", "harsh"],
-  ["calm", "intense"],
-  ["vintage", "modern"],
-  ["natural", "artificial"],
-  ["warm tone", "cool tone"],
-  ["warm lighting", "cool lighting"],
-];
-
-interface Conflict {
-  objA: string; // object label
-  attrA: string; // attribute name
-  objB: string;
-  attrB: string;
-  message: string;
-}
-
-function detectConflicts(objects: SceneObject[]): Conflict[] {
-  const conflicts: Conflict[] = [];
-  const HIGH_THRESHOLD = 65;
-
-  // Collect all high-value attributes across objects
-  const highAttrs: { obj: SceneObject; attr: { nameEn: string; name: string; value: number } }[] = [];
-  for (const obj of objects) {
-    for (const attr of obj.attributes) {
-      if (attr.value >= HIGH_THRESHOLD) {
-        highAttrs.push({ obj, attr });
-      }
-    }
-  }
-
-  // Check pairs
-  for (let i = 0; i < highAttrs.length; i++) {
-    for (let j = i + 1; j < highAttrs.length; j++) {
-      const a = highAttrs[i];
-      const b = highAttrs[j];
-      if (a.obj.id === b.obj.id) continue; // same object, skip
-
-      const aEn = a.attr.nameEn.toLowerCase();
-      const bEn = b.attr.nameEn.toLowerCase();
-
-      for (const [x, y] of CONFLICT_PAIRS) {
-        if (
-          (aEn.includes(x) && bEn.includes(y)) ||
-          (aEn.includes(y) && bEn.includes(x))
-        ) {
-          conflicts.push({
-            objA: a.obj.label,
-            attrA: a.attr.name,
-            objB: b.obj.label,
-            attrB: b.attr.name,
-            message: `${a.obj.label}의 "${a.attr.name}"(${a.attr.value})과 ${b.obj.label}의 "${b.attr.name}"(${b.attr.value})이 충돌할 수 있어요`,
-          });
-          break;
-        }
-      }
-    }
-  }
-
-  return conflicts;
-}
 
 // ── Types ──
 
@@ -233,6 +163,7 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
   );
 
   // ── Initial layout (canvas objects only) ──
+  // Priority: obj.position (committed) > local positions state > default layout
 
   useEffect(() => {
     setPositions((prev) => {
@@ -241,6 +172,11 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
       let changed = false;
 
       for (const obj of canvasObjects) {
+        if (obj.position && (!next[obj.id] || next[obj.id].x !== obj.position.x || next[obj.id].y !== obj.position.y)) {
+          next[obj.id] = { x: obj.position.x, y: obj.position.y };
+          changed = true;
+          continue;
+        }
         if (!next[obj.id]) {
           const count = roleCounts[obj.role] || 0;
           roleCounts[obj.role] = count + 1;
@@ -324,11 +260,25 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
       setSelectedId((prev) => (prev === drag.id ? null : drag.id));
     } else {
       setSelectedId(null);
+      // Commit the final position to the object so prompt composition picks it up.
+      const finalPos = positions[drag.id];
+      const target = objects.find((o) => o.id === drag.id);
+      if (finalPos && target && (
+        !target.position ||
+        target.position.x !== finalPos.x ||
+        target.position.y !== finalPos.y
+      )) {
+        onChange(
+          objects.map((o) =>
+            o.id === drag.id ? { ...o, position: { ...finalPos } } : o
+          )
+        );
+      }
     }
 
     dragRef.current = null;
     setDraggingId(null);
-  }, []);
+  }, [positions, objects, onChange]);
 
   useEffect(() => {
     document.addEventListener("pointermove", handlePointerMove);
@@ -802,31 +752,43 @@ export function SceneCanvas({ objects, onChange }: SceneCanvasProps) {
       {/* ── Conflict warnings ── */}
       {conflicts.length > 0 && (
         <div className="mt-3 space-y-2">
-          {conflicts.map((c, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-2.5 rounded-xl border border-amber-200/60 bg-amber-50/50 px-3.5 py-2.5"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#b45309"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="shrink-0 mt-0.5"
+          {conflicts.map((c, i) => {
+            const isHard = c.severity === "hard";
+            const boxClass = isHard
+              ? "border-red-200/70 bg-red-50/60"
+              : "border-amber-200/60 bg-amber-50/50";
+            const stroke = isHard ? "#b91c1c" : "#b45309";
+            const textClass = isHard ? "text-red-800" : "text-amber-800";
+            return (
+              <div
+                key={i}
+                className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-2.5 ${boxClass}`}
               >
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-              <p className="text-[13px] leading-[1.6] text-amber-800">
-                {c.message}
-              </p>
-            </div>
-          ))}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={stroke}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="shrink-0 mt-0.5"
+                >
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <div className={`flex-1 text-[13px] leading-[1.6] ${textClass}`}>
+                  <p className="font-medium">
+                    {isHard ? "강한 충돌" : "약한 충돌"} · {c.axisId}
+                  </p>
+                  <p className="mt-0.5 opacity-90">{c.message}</p>
+                  <p className="mt-0.5 opacity-70">{c.reason}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

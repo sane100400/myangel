@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { InlineEnhancer } from "@/components/studio/inline-enhancer";
 import { SceneCanvas } from "@/components/studio/scene-canvas";
 import { PromptComparison } from "@/components/studio/prompt-comparison";
+import { ContributionBadges } from "@/components/studio/contribution-badges";
 import type { SceneObject } from "@/types";
 
 // ── Reference image types ──
@@ -69,9 +70,17 @@ const EST_PREMIUM = 35;
 
 const STEPS = [
   { num: 1, label: "입력" },
-  { num: 2, label: "분석" },
-  { num: 3, label: "비교" },
-  { num: 4, label: "생성" },
+  { num: 2, label: "조정" },
+  { num: 3, label: "결과" },
+] as const;
+
+// ── Example prompts — chosen to contain weak spans so the enhancer hints fire. ──
+
+const EXAMPLE_PROMPTS = [
+  "예쁜 카페의 감성적인 분위기",
+  "몽환적인 방에 하얀 침대",
+  "고양이가 노는 공원",
+  "해질녘 거리의 소녀",
 ] as const;
 
 // ── Component ──
@@ -79,18 +88,18 @@ const STEPS = [
 export default function StudioPage() {
   const router = useRouter();
 
-  // Wizard step
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  // Wizard step (1=입력, 2=조정, 3=결과)
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Step 1: Input
   const [prompt, setPrompt] = useState("");
   const [premium, setPremium] = useState(false);
 
-  // Step 2: Analyze
+  // Step 2: Scene adjustment
   const [sceneObjects, setSceneObjects] = useState<SceneObject[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Step 3: Compare
+  // Step 3: Compose + Generate (merged)
   const [isComposing, setIsComposing] = useState(false);
   const [composedPromptKo, setComposedPromptKo] = useState("");
   const [composedPromptEn, setComposedPromptEn] = useState("");
@@ -99,7 +108,6 @@ export default function StudioPage() {
   const prefetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefetchedFor = useRef<string>(""); // serialized objects snapshot
 
-  // Step 4: Generate
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<{ image: string; promptUsed: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -263,57 +271,62 @@ export default function StudioPage() {
     }
   };
 
-  const handleGoToStep3 = async () => {
+  // Step 2 → Step 3: compose (if not prefetched) then generate in sequence.
+  // The compose result feeds into generate as enhancedPromptEn, and both show
+  // up on the same Result page — composition on top, image below.
+  const handleGenerate = async () => {
     if (sceneObjects.length === 0) return;
     setStep(3);
-
-    // Check if prefetch result is still valid
-    const currentSnapshot = JSON.stringify(sceneObjects);
-    if (prefetchedFor.current === currentSnapshot && composedPromptKo && composedPromptEn) {
-      // Prefetch hit — skip API call, instant transition
-      setIsComposing(false);
-      return;
-    }
-
-    setIsComposing(true);
-    try {
-      const res = await fetch("/api/compose-prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          objects: sceneObjects,
-          selectedAlternatives: {},
-        }),
-      });
-      if (!res.ok) throw new Error("조합 실패");
-      const data = await res.json();
-      setComposedPromptKo(data.promptKo);
-      setComposedPromptEn(data.promptEn);
-      prefetchedFor.current = currentSnapshot;
-    } catch {
-      toast.error("프롬프트 조합에 실패했어요.");
-      setStep(2);
-    } finally {
-      setIsComposing(false);
-    }
-  };
-
-  const handleGoToStep4 = async () => {
-    setStep(4);
-    setIsGenerating(true);
     setError(null);
     setResult(null);
     setIsSaved(false);
     setIsShared(false);
-    startTimer();
 
+    // Phase 1: compose
+    const currentSnapshot = JSON.stringify(sceneObjects);
+    let promptEn = composedPromptEn;
+    let promptKo = composedPromptKo;
+    const prefetchHit =
+      prefetchedFor.current === currentSnapshot && promptEn && promptKo;
+
+    if (!prefetchHit) {
+      setIsComposing(true);
+      try {
+        const res = await fetch("/api/compose-prompt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            objects: sceneObjects,
+            selectedAlternatives: {},
+          }),
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        promptEn = data.promptEn;
+        promptKo = data.promptKo;
+        setComposedPromptEn(promptEn);
+        setComposedPromptKo(promptKo);
+        prefetchedFor.current = currentSnapshot;
+      } catch {
+        // Fall back to original prompt.
+        toast.error("프롬프트 최적화 실패 — 원본으로 생성합니다.");
+        promptEn = "";
+        promptKo = "";
+      } finally {
+        setIsComposing(false);
+      }
+    }
+
+    // Phase 2: generate
+    setIsGenerating(true);
+    startTimer();
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: prompt.trim(),
-          enhancedPromptEn: composedPromptEn || undefined,
+          enhancedPromptEn: promptEn || undefined,
           premium,
           referenceImages: refImages.map((img) => ({
             base64: img.base64,
@@ -339,8 +352,7 @@ export default function StudioPage() {
 
   const handleBack = () => {
     if (step === 2) setStep(1);
-    else if (step === 3) setStep(2);
-    else if (step === 4 && !isGenerating && !result) setStep(3);
+    else if (step === 3 && !isComposing && !isGenerating && !result) setStep(2);
   };
 
   const handleDownload = () => {
@@ -448,7 +460,7 @@ export default function StudioPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (s.num < step && !isGenerating) setStep(s.num as 1 | 2 | 3 | 4);
+                  if (s.num < step && !isGenerating && !isComposing) setStep(s.num as 1 | 2 | 3);
                 }}
                 disabled={s.num >= step || isGenerating}
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-medium transition-all md:h-9 md:w-9 md:text-[15px] ${
@@ -490,6 +502,25 @@ export default function StudioPage() {
       {/* ═══ Step 1: Input ═══ */}
       {step === 1 && (
         <div className="space-y-4">
+          {/* Example prompt chips — tap to populate input; triggers weak-span highlights. */}
+          {!prompt && (
+            <div className="flex flex-wrap items-center justify-center gap-1.5">
+              <span className="text-[12px] text-[var(--angel-text-faint)] mr-1">
+                처음이라면?
+              </span>
+              {EXAMPLE_PROMPTS.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => setPrompt(ex)}
+                  className="rounded-full border border-[var(--angel-border)] bg-white/60 px-3 py-1 text-[12px] text-[var(--angel-text-soft)] transition-colors hover:border-[var(--angel-blue)]/40 hover:bg-[var(--angel-blue)]/5 hover:text-[var(--angel-blue)]"
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
+          )}
+
           <InlineEnhancer
             value={prompt}
             onChange={setPrompt}
@@ -607,16 +638,39 @@ export default function StudioPage() {
             </div>
           ) : (
             <>
-              <div className="glass-card rounded-xl px-4 py-3 mb-2">
+              {/* Value surfacing: tell users this step actually affects the image */}
+              <div className="rounded-xl border border-[var(--angel-blue)]/20 bg-gradient-to-br from-[var(--angel-blue)]/[0.04] to-[var(--angel-lavender)]/[0.04] px-4 py-3">
+                <p className="text-[13px] font-medium text-[var(--angel-text)] text-center mb-2.5">
+                  여기서 조정한 것은 <span className="text-[var(--angel-blue)]">실제 이미지에 반영</span>됩니다
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    <span className="text-[16px]">🎯</span>
+                    <span className="text-[11px] leading-tight text-[var(--angel-text-soft)]">
+                      드래그로<br />구도 지정
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    <span className="text-[16px]">🎚️</span>
+                    <span className="text-[11px] leading-tight text-[var(--angel-text-soft)]">
+                      슬라이더로<br />강도 조절
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1 text-center">
+                    <span className="text-[16px]">⚠️</span>
+                    <span className="text-[11px] leading-tight text-[var(--angel-text-soft)]">
+                      속성 충돌<br />자동 감지
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="glass-card rounded-xl px-4 py-3">
                 <p className="text-[13px] text-[var(--angel-text-faint)] mb-1">입력한 프롬프트</p>
                 <p className="text-[15px] text-[var(--angel-text)] leading-relaxed">{prompt}</p>
               </div>
 
               <SceneCanvas objects={sceneObjects} onChange={setSceneObjects} />
-
-              <p className="text-[12px] text-[var(--angel-text-faint)] text-center">
-                피사체를 드래그로 배치하고, 우측 패널에서 조명·분위기 등을 조절할 수 있어요
-              </p>
             </>
           )}
 
@@ -630,77 +684,9 @@ export default function StudioPage() {
                 이전
               </button>
               <button
-                onClick={handleGoToStep3}
+                onClick={handleGenerate}
                 disabled={sceneObjects.length === 0}
                 className="flex-1 angel-btn angel-btn-primary py-2.5 text-[15px] disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                다음: 프롬프트 조합
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ═══ Step 3: Compare ═══ */}
-      {step === 3 && (
-        <div className="space-y-4">
-          {isComposing ? (
-            <div>
-              <div className="mb-3">
-                <h3 className="text-[15px] font-medium text-[var(--angel-text)]">프롬프트 비교</h3>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="animate-pulse rounded-xl border border-[var(--angel-border)] bg-white/50 p-4">
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <div className="h-2 w-2 rounded-full bg-[var(--angel-text-faint)]/30" />
-                    <div className="h-2.5 w-12 rounded bg-[var(--angel-text-faint)]/20" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 w-full rounded bg-[var(--angel-blue)]/8" />
-                    <div className="h-3 w-4/5 rounded bg-[var(--angel-blue)]/6" />
-                    <div className="h-3 w-2/3 rounded bg-[var(--angel-blue)]/5" />
-                  </div>
-                </div>
-                <div className="animate-pulse rounded-xl border border-[var(--angel-blue)]/20 bg-[var(--angel-blue)]/3 p-4">
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <div className="h-2 w-2 rounded-full bg-[var(--angel-blue)]/30" />
-                    <div className="h-2.5 w-16 rounded bg-[var(--angel-blue)]/15" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 w-full rounded bg-[var(--angel-blue)]/10" />
-                    <div className="h-3 w-5/6 rounded bg-[var(--angel-blue)]/8" />
-                    <div className="h-3 w-3/4 rounded bg-[var(--angel-blue)]/6" />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 flex flex-col items-center gap-2">
-                <span className="twinkle text-[var(--angel-lavender)]">✦</span>
-                <p className="text-[14px] text-[var(--angel-text-soft)]">최적화된 프롬프트를 만들고 있어요...</p>
-              </div>
-            </div>
-          ) : (
-            <PromptComparison
-              originalPrompt={prompt}
-              enhancedPromptKo={composedPromptKo}
-              enhancedPromptEn={composedPromptEn}
-            />
-          )}
-
-          {/* Navigation */}
-          {!isComposing && (
-            <div className="flex gap-3 pt-2">
-              <button onClick={handleBack} className="angel-btn angel-btn-secondary py-2.5 text-[14px]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-                이전
-              </button>
-              <button
-                onClick={handleGoToStep4}
-                className="flex-1 angel-btn angel-btn-primary py-2.5 text-[15px]"
               >
                 <span className="text-[12px]">✦</span>
                 이미지 생성하기
@@ -710,9 +696,56 @@ export default function StudioPage() {
         </div>
       )}
 
-      {/* ═══ Step 4: Generate ═══ */}
-      {step === 4 && (
+      {/* ═══ Step 3: Result (compose + generate merged) ═══ */}
+      {step === 3 && (
         <>
+          {/* Prompt comparison — shown on top while/after composing */}
+          {(isComposing || composedPromptKo || composedPromptEn) && (
+            <div className="mb-6">
+              {isComposing ? (
+                <div>
+                  <div className="mb-3">
+                    <h3 className="text-[15px] font-medium text-[var(--angel-text)]">프롬프트 비교</h3>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="animate-pulse rounded-xl border border-[var(--angel-border)] bg-white/50 p-4">
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <div className="h-2 w-2 rounded-full bg-[var(--angel-text-faint)]/30" />
+                        <div className="h-2.5 w-12 rounded bg-[var(--angel-text-faint)]/20" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 w-full rounded bg-[var(--angel-blue)]/8" />
+                        <div className="h-3 w-4/5 rounded bg-[var(--angel-blue)]/6" />
+                        <div className="h-3 w-2/3 rounded bg-[var(--angel-blue)]/5" />
+                      </div>
+                    </div>
+                    <div className="animate-pulse rounded-xl border border-[var(--angel-blue)]/20 bg-[var(--angel-blue)]/3 p-4">
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <div className="h-2 w-2 rounded-full bg-[var(--angel-blue)]/30" />
+                        <div className="h-2.5 w-16 rounded bg-[var(--angel-blue)]/15" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 w-full rounded bg-[var(--angel-blue)]/10" />
+                        <div className="h-3 w-5/6 rounded bg-[var(--angel-blue)]/8" />
+                        <div className="h-3 w-3/4 rounded bg-[var(--angel-blue)]/6" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-col items-center gap-2">
+                    <span className="twinkle text-[var(--angel-lavender)]">✦</span>
+                    <p className="text-[13px] text-[var(--angel-text-soft)]">최적화된 프롬프트를 만들고 있어요...</p>
+                  </div>
+                </div>
+              ) : (
+                <PromptComparison
+                  originalPrompt={prompt}
+                  enhancedPromptKo={composedPromptKo}
+                  enhancedPromptEn={composedPromptEn}
+                />
+              )}
+            </div>
+          )}
+
           {/* Loading — Progress Bar */}
           {isGenerating && (
             <div className="mt-4 mx-auto max-w-md md:mt-8">
@@ -796,6 +829,9 @@ export default function StudioPage() {
                     {composedPromptKo || prompt}
                   </p>
                 </div>
+
+                {/* Contribution badges — visual evidence of user control */}
+                <ContributionBadges objects={sceneObjects} />
 
                 {/* Action buttons */}
                 <div className="mt-4 flex flex-wrap justify-center gap-2 md:mt-5 md:gap-3">
