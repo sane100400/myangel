@@ -79,12 +79,11 @@ export function InlineEnhancer({
         }
       }
 
-      if (newVal.trim().length >= 2) {
-        const needsAnalysis = !analyzedText || !newVal.includes(analyzedText) && !analyzedText.includes(newVal);
-        if (needsAnalysis) {
-          if (debounceRef.current) clearTimeout(debounceRef.current);
-          debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 700);
-        }
+      // Always re-analyze 1s after user stops typing, unless the text is
+      // unchanged from the last analysis (avoid redundant calls).
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (newVal.trim().length >= 2 && newVal !== analyzedText) {
+        debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 1000);
       }
     },
     [onChange, triggerAnalysis, analyzedText]
