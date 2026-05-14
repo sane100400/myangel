@@ -1,36 +1,54 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { AngelLogo } from "@/components/ui/angel-logo";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState(process.env.NEXT_PUBLIC_JUDGE_EMAIL ?? "");
+  const [password, setPassword] = useState("");
+  const [isEmailSigningIn, setIsEmailSigningIn] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
   const handleGoogleLogin = async () => {
     const supabase = createClient();
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || window.location.origin;
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${siteUrl}/auth/callback`,
       },
     });
   };
 
-  const handleKakaoLogin = async () => {
+  const handleEmailLogin = async () => {
+    if (!email.trim() || !password || isEmailSigningIn) return;
+    setIsEmailSigningIn(true);
+    setEmailError(null);
     const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "kakao",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
     });
+    setIsEmailSigningIn(false);
+    if (error) {
+      setEmailError("이메일 또는 비밀번호를 확인해주세요.");
+      return;
+    }
+    router.push("/generate");
+    router.refresh();
   };
 
   return (
-    <div className="flex min-h-[70vh] items-center justify-center px-5 pt-10">
-      <div className="w-full max-w-sm rounded-2xl border border-[#d0d8e8] bg-white/80 backdrop-blur-sm p-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+    <div className="flex min-h-[70dvh] items-center justify-center px-5 pt-10 pb-10">
+      <div className="surface-panel w-full max-w-sm p-8">
         {/* Logo */}
         <div className="text-center mb-8">
           <AngelLogo size={48} className="mx-auto mb-4" />
-          <h1 className="font-heading text-2xl tracking-[0.08em] text-[var(--angel-text)]">
+          <h1 lang="en" className="font-heading text-2xl text-[var(--angel-text)]">
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </h1>
           <p className="mt-2 text-[15px] text-[var(--angel-text-soft)]">
@@ -40,9 +58,49 @@ export default function LoginPage() {
 
         {/* Login Buttons */}
         <div className="space-y-3">
+          <div className="rounded-lg border border-[var(--angel-border)] bg-[var(--angel-surface-muted)] p-3">
+            <p className="mb-3 text-[13px] font-bold text-[var(--angel-text)]">
+              심사용 계정
+            </p>
+            <div className="space-y-2">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="이메일"
+                className="h-11 w-full rounded-lg border border-[var(--angel-border)] bg-white px-3 text-[14px] outline-none focus:border-[var(--angel-blue)]"
+                autoComplete="email"
+              />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void handleEmailLogin();
+                }}
+                placeholder="비밀번호"
+                className="h-11 w-full rounded-lg border border-[var(--angel-border)] bg-white px-3 text-[14px] outline-none focus:border-[var(--angel-blue)]"
+                autoComplete="current-password"
+              />
+              {emailError && (
+                <p className="text-[12px] font-medium text-red-500">{emailError}</p>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  void handleEmailLogin();
+                }}
+                disabled={!email.trim() || !password || isEmailSigningIn}
+                className="primary-action min-h-11 w-full disabled:opacity-45"
+              >
+                {isEmailSigningIn ? "로그인 중..." : "이메일로 로그인"}
+              </button>
+            </div>
+          </div>
+
           <button
             onClick={handleGoogleLogin}
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white border border-[#d0d8e8] py-3 text-[15px] text-[var(--angel-text)] transition-all hover:bg-[#f8f9fc] hover:shadow-sm"
+            className="secondary-action min-h-12 w-full gap-3 text-[15px] text-[var(--angel-text)]"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -53,23 +111,15 @@ export default function LoginPage() {
             Google로 계속하기
           </button>
 
-          <button
-            onClick={handleKakaoLogin}
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#FEE500] border border-[#FEE500] py-3 text-[15px] text-[#3C1E1E] transition-all hover:bg-[#FFEB3B] hover:shadow-sm"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
-              <path
-                fill="#3C1E1E"
-                d="M12 3C6.477 3 2 6.463 2 10.691c0 2.72 1.804 5.106 4.516 6.467l-1.147 4.243a.37.37 0 0 0 .56.398l4.89-3.225a13.17 13.17 0 0 0 1.181.052c5.523 0 10-3.463 10-7.735S17.523 3 12 3z"
-              />
-            </svg>
-            카카오로 계속하기
-          </button>
         </div>
 
         {/* Footer */}
         <p className="mt-6 text-center text-[13px] text-[var(--angel-text-soft)]">
-          계속 진행하면 이용약관에 동의하는 것으로 간주합니다
+          계속 진행하면{" "}
+          <Link href="/terms" className="font-bold text-[var(--angel-blue)] hover:underline">
+            이용약관
+          </Link>
+          에 동의하는 것으로 간주합니다
         </p>
       </div>
     </div>
