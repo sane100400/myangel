@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyAngel 3분 데모 발표</title>
+  <style>
+    :root {
+      --bg: #e6f3ff;
+      --surface: #fbfdff;
+      --surface-muted: #f2f9ff;
+      --ink: #20324a;
+      --soft: #3f5f82;
+      --faint: #7590ad;
+      --blue: #5b9bd5;
+      --blue-strong: #3f86c5;
+      --lavender: #8f78d8;
+      --pink: #c88ab8;
+      --border: #c8def4;
+      --shadow: 0 24px 70px -44px rgba(53, 111, 165, 0.54);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(91, 155, 213, 0.22), transparent 36%),
+        linear-gradient(315deg, rgba(143, 120, 216, 0.16), transparent 42%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+      letter-spacing: 0;
+      overflow: hidden;
+    }
+
+    .deck {
+      display: grid;
+      height: 100vh;
+      padding: 28px;
+    }
+
+    .slide {
+      display: none;
+      min-height: calc(100vh - 56px);
+      border: 1px solid rgba(200, 222, 244, 0.86);
+      border-radius: var(--radius);
+      background: rgba(251, 253, 255, 0.92);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .slide.active {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 24px 30px 0;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      color: var(--blue-strong);
+    }
+
+    .mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1px solid rgba(91, 155, 213, 0.26);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--blue);
+      box-shadow: 0 8px 20px -16px rgba(53, 111, 165, 0.5);
+    }
+
+    .meta {
+      color: var(--faint);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.84fr);
+      gap: 28px;
+      padding: 34px 30px 22px;
+      align-items: center;
+    }
+
+    .content.full {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--blue-strong);
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    h1, h2 {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.08;
+      word-break: keep-all;
+    }
+
+    h1 { font-size: clamp(44px, 5vw, 74px); }
+    h2 { font-size: clamp(34px, 4vw, 56px); }
+
+    .lead {
+      max-width: 760px;
+      margin: 18px 0 0;
+      color: var(--soft);
+      font-size: clamp(19px, 2vw, 25px);
+      line-height: 1.55;
+      font-weight: 650;
+    }
+
+    .points {
+      display: grid;
+      gap: 12px;
+      margin: 26px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .points li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      color: var(--soft);
+      font-size: 21px;
+      line-height: 1.4;
+      font-weight: 720;
+    }
+
+    .dot {
+      flex: 0 0 auto;
+      width: 11px;
+      height: 11px;
+      margin-top: 9px;
+      border-radius: 999px;
+      background: var(--blue);
+      box-shadow: 0 0 0 5px rgba(91, 155, 213, 0.14);
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-muted);
+      padding: 18px;
+    }
+
+    .hero-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .shot {
+      position: relative;
+      min-height: 280px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--blue-strong);
+      border: 1px solid rgba(91, 155, 213, 0.28);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .shot .tag {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .step {
+      min-height: 138px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+      padding: 16px;
+    }
+
+    .step b {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--blue-strong);
+      font-size: 16px;
+    }
+
+    .step span {
+      color: var(--soft);
+      font-size: 18px;
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .metric {
+      min-height: 150px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--ink);
+      font-size: 26px;
+      line-height: 1.2;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 10px;
+      color: var(--soft);
+      font-size: 17px;
+      line-height: 1.42;
+      font-weight: 650;
+    }
+
+    .script {
+      margin: 0;
+      padding: 16px 18px;
+      border-top: 1px solid rgba(200, 222, 244, 0.78);
+      color: var(--faint);
+      font-size: 15px;
+      line-height: 1.5;
+      background: rgba(242, 249, 255, 0.72);
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 30px 22px;
+      color: var(--faint);
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .progress {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bar {
+      width: 120px;
+      height: 6px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(91, 155, 213, 0.16);
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: var(--p);
+      background: var(--blue);
+    }
+
+    kbd {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: #ffffff;
+      padding: 2px 6px;
+      color: var(--soft);
+      font-family: inherit;
+      font-size: 12px;
+    }
+
+    @media (max-width: 860px) {
+      body { overflow: auto; }
+      .deck { height: auto; padding: 12px; }
+      .slide { min-height: calc(100vh - 24px); }
+      .content { grid-template-columns: 1fr; padding: 24px 18px 16px; }
+      header, footer { padding-left: 18px; padding-right: 18px; }
+      .flow, .compare, .hero-visual { grid-template-columns: 1fr; }
+      .shot { min-height: 210px; }
+      h1 { font-size: 40px; }
+      h2 { font-size: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-label="MyAngel 3분 데모 발표자료">
+    <section class="slide active" data-title="오프닝">
+      <header>
+        <div class="brand"><span class="mark">✦</span> MyAngel</div>
+        <div class="meta">3분 데모 발표</div>
+      </header>
+      <div class="content">
+        <div>
+          <p class="eyebrow">AI 이미지 생성·편집·공유</p>
+          <h1>원하는 이미지를 더 적은 시행착오로</h1>
+          <p class="lead">한국어 프롬프트 강화, 멀티모델 생성, 마커 정밀 편집, 크레딧 운영을 하나의 제품 흐름으로 연결했습니다.</p>
+        </div>
+        <div class="panel hero-visual">
+          <div class="shot">
+            <img src="../public/demo/same-base-before.webp" alt="편집 전 데모 이미지" />
+            <span class="tag">Before</span>
+          </div>
+          <div class="shot">
+            <img src="../public/demo/same-mix-after.webp" alt="마커 편집 후 데모 이미지" />
+            <span class="tag">After</span>
+          </div>
+        </div>
+      </div>
+      <p class="script">0:00-0:20 | MyAngel은 한국어 사용자에게 맞춘 AI 이미지 생성·편집 스튜디오입니다. 핵심은 프롬프트 강화, 멀티모델, 마커 편집, 크레딧 운영입니다.</p>
+      <footer><span>https://ku-myangel.site</span><span class="progress">1/6 <span class="bar" style="--p:16.6%"><span></span></span></span></footer>
+    </section>
+
+    <section class="slide" data-title="문제">
+      <header>
+        <div class="brand"><span class="mark">✦</span> MyAngel</div>
+        <div class="meta">문제 정의</div>
+      </header>
+      <div class="content">
+        <div>
+          <p class="eyebrow">Problem</p>
+          <h2>프롬프트는 애매하고, 부분 편집은 위치가 흔들립니다</h2>
+          <ul class="points">
+            <li><span class="dot"></span><span>"예쁜", "감성적인" 같은 표현은 결과를 예측하기 어렵습니다.</span></li>
+            <li><span class="dot"></span><span>자연어만으로 "그 의자"를 바꾸면 모델마다 참조 영역이 달라집니다.</span></li>
+            <li><span class="dot"></span><span>생성 결과를 저장·공유·비용 관리까지 이어주는 흐름이 필요합니다.</span></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="metric"><strong>핵심 과제</strong><span>표현의 애매함과 편집 위치의 불확실성을 줄여야 합니다.</span></div>
+          <div style="height:12px"></div>
+          <div class="metric"><strong>데모 목표</strong><span>생성부터 정밀 편집, 저장과 공유까지 3분 안에 한 번에 보여줍니다.</span></div>
+        </div>
+      </div>
+      <p class="script">0:20-0:45 | 일반 생성 도구의 문제는 애매한 표현과 위치 불확실성입니다. 데모는 이 두 문제를 줄이는 흐름에 집중합니다.</p>
+      <footer><span>Problem</span><span class="progress">2/6 <span class="bar" style="--p:33.3%"><span></span></span></span></footer>
+    </section>
+
+    <section class="slide" data-title="생성">
+      <header>
+        <div class="brand"><span class="mark">✦</span> MyAngel</div>
+        <div class="meta">생성 플로우</div>
+      </header>
+      <div class="content full">
+        <div>
+          <p class="eyebrow">Generate</p>
+          <h2>한국어 프롬프트를 더 시각적인 지시문으로 바꿉니다</h2>
+          <div class="flow">
+            <div class="step"><b>1. 입력</b><span>예쁜 카페의 감성적인 분위기</span></div>
+            <div class="step"><b>2. 강화</b><span>약한 표현 감지와 추천 표현 제안</span></div>
+            <div class="step"><b>3. 선택</b><span>GPT Image 2 또는 Nano Banana Pro</span></div>
+            <div class="step"><b>4. 생성</b><span>화질·개수·크레딧을 보고 실행</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="script">0:45-1:15 | /generate에서 약한 표현을 잡고 추천 표현으로 바꾼 뒤 다듬기까지 합니다. 그 다음 모델, 화질, 장수를 선택해 생성합니다.</p>
+      <footer><span>/generate</span><span class="progress">3/6 <span class="bar" style="--p:50%"><span></span></span></span></footer>
+    </section>
+
+    <section class="slide" data-title="편집">
+      <header>
+        <div class="brand"><span class="mark">✦</span> MyAngel</div>
+        <div class="meta">마커 정밀 편집</div>
+      </header>
+      <div class="content">
+        <div>
+          <p class="eyebrow">Marker Edit</p>
+          <h2>말로만 설명하지 않고, 바꿀 영역을 직접 지정합니다</h2>
+          <ul class="points">
+            <li><span class="dot"></span><span>교체·추가·삭제 마커를 이미지 위에 배치합니다.</span></li>
+            <li><span class="dot"></span><span>레퍼런스 이미지는 현재 마커에 바로 연결됩니다.</span></li>
+            <li><span class="dot"></span><span>모델별로 그레이스케일 마스크와 알파 마스크를 분리합니다.</span></li>
+          </ul>
+        </div>
+        <div class="panel hero-visual">
+          <div class="shot">
+            <img src="../public/demo/same-replace-after.webp" alt="교체 편집 결과" />
+            <span class="tag">교체</span>
+          </div>
+          <div class="shot">
+            <img src="../public/demo/same-add-after.webp" alt="추가 편집 결과" />
+            <span class="tag">추가</span>
+          </div>
+        </div>
+      </div>
+      <p class="script">1:15-2:05 | /edit에서 원형 마커를 놓고 레퍼런스를 연결합니다. 사용자는 단순히 찍지만, 내부에서는 모델별 입력 계약을 맞춰 안정적으로 편집합니다.</p>
+      <footer><span>/edit</span><span class="progress">4/6 <span class="bar" style="--p:66.6%"><span></span></span></span></footer>
+    </section>
+
+    <section class="slide" data-title="운영">
+      <header>
+        <div class="brand"><span class="mark">✦</span> MyAngel</div>
+        <div class="meta">운영과 신뢰성</div>
+      </header>
+      <div class="content full">
+        <div>
+          <p class="eyebrow">Production Surface</p>
+          <h2>데모가 아니라 서비스로 굴러가는 구조입니다</h2>
+          <div class="compare">
+            <div class="metric"><strong>크레딧</strong><span>생성·편집 전 차감, 전체 실패 시 자동 환불, 단가표는 DB에서 관리</span></div>
+            <div class="metric"><strong>저장·공유</strong><span>결과는 `/boards`에 저장, 선택한 이미지는 Discover에 공개 공유</span></div>
+            <div class="metric"><strong>보안</strong><span>RLS, Origin 검증, 매직 바이트 검증, SSRF 방어, rate limit</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="script">2:05-2:35 | 비용, 저장, 공유, 보안을 서비스 흐름에 넣었습니다. 생성 결과가 휘발되지 않고 개인 보관함과 공개 갤러리로 이어집니다.</p>
+      <footer><span>/boards · /discover</span><span class="progress">5/6 <span class="bar" style="--p:83.3%"><span></span></span></span></footer>
+    </section>
+
+    <section class="slide" data-title="마무리">
+      <header>
+        <div class="brand"><span class="mark">✦</span> MyAngel</div>
+        <div class="meta">Closing</div>
+      </header>
+      <div class="content">
+        <div>
+          <p class="eyebrow">Takeaway</p>
+          <h2>단순 API 호출보다 중요한 것은 워크플로우입니다</h2>
+          <p class="lead">MyAngel은 프롬프트의 애매함과 부분 편집의 위치 불확실성을 줄여주는 한국어 AI 이미지 스튜디오입니다.</p>
+        </div>
+        <div class="panel">
+          <div class="metric"><strong>4가지 핵심</strong><span>프롬프트 강화 · 멀티모델 생성 · 마커 정밀 편집 · 크레딧 기반 운영</span></div>
+          <div style="height:12px"></div>
+          <div class="metric"><strong>라이브 데모 준비</strong><span>https://ku-myangel.site</span></div>
+        </div>
+      </div>
+      <p class="script">2:35-3:00 | 멀티모델, 프롬프트 강화, 마커 편집, 운영 시스템이 하나의 제품으로 연결된 점이 핵심입니다. 감사합니다.</p>
+      <footer><span>Use <kbd>←</kbd> <kbd>→</kbd></span><span class="progress">6/6 <span class="bar" style="--p:100%"><span></span></span></span></footer>
+    </section>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    let index = Number(new URLSearchParams(location.search).get("slide") || 0);
+    index = Number.isFinite(index) ? Math.max(0, Math.min(slides.length - 1, index)) : 0;
+
+    function show(next) {
+      index = Math.max(0, Math.min(slides.length - 1, next));
+      slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
+      history.replaceState(null, "", `?slide=${index}`);
+    }
+
+    addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") show(index + 1);
+      if (event.key === "ArrowLeft" || event.key === "PageUp") show(index - 1);
+      if (event.key === "Home") show(0);
+      if (event.key === "End") show(slides.length - 1);
+    });
+
+    show(index);
+  </script>
+</body>
+</html>

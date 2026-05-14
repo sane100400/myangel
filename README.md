@@ -1,139 +1,162 @@
 # MyAngel
 
-**한국어로 상상한 이미지를 AI가 최적화된 프롬프트로 변환해 생성해주는 인터랙티브 이미지 스튜디오.**
+한국어 사용자에 최적화된 AI 이미지 생성·부분 편집·저장·공유 웹 앱입니다.
 
-"몽환적인 하얀 침대방" 같은 추상적인 표현을 입력하면, AI가 장면을 오브젝트 단위로 분해하고 각 요소를 정밀하게 조정할 수 있는 편집 인터페이스를 제공합니다. 복잡한 프롬프트 문법 없이도 원하는 이미지에 가까운 결과를 얻을 수 있습니다.
+라이브: https://ku-myangel.site
 
-🔗 **[myangel.studio](http://34.56.233.158)**
+## 현재 기능
 
----
+### 이미지 생성
 
-## 핵심 기능
+`/generate`에서 텍스트 프롬프트와 최대 3장의 레퍼런스 이미지로 결과를 생성합니다.
 
-### 1. Grammarly-style 인라인 프롬프트 강화
+| 모델 | 용도 | 화질 옵션 |
+|---|---|---|
+| GPT Image 2 (`gpt-image-2`) | 빠른 기본 생성, 텍스트·로고·라벨 표현 | 1K / 2K |
+| Nano Banana Pro (`gemini-3-pro-image-preview`) | 스타일 표현과 고해상도 생성 | 1K / 2K / 4K |
 
-입력창에서 실시간으로 약한 표현을 감지하고 구체적인 대안을 제시합니다.
+- GPT Image 2는 4K를 지원하지 않으므로 UI와 API 검증에서 `GPT Image 2 + 4K` 조합을 차단합니다.
+- GPT Image 2 요청에는 `quality` 파라미터를 보내지 않습니다. 앱의 1K/2K 선택은 결과 파일의 후처리 해상도와 크레딧 계산에 사용됩니다.
+- Nano Banana Pro는 `imageConfig.imageSize`에 1K/2K/4K를 전달합니다.
+- GPT Image 2 결과는 선택한 비율과 화질에 맞게 서버에서 `sharp`로 정규화합니다.
 
-- 입력 1초 후 자동으로 **추상 표현 감지** → 물결 밑줄 표시
-- 밑줄 클릭 → AI 제안 버블 즉시 노출 및 원클릭 교체
-- 4가지 정보 밀도 메트릭(구체성 · 시각 토큰 적중률 · 명사 특이성 · 길이)으로 오탐 필터링
-- 55개 예시 프롬프트 풀에서 매 방문마다 랜덤 4개 노출
+### 프롬프트 강화
 
-### 2. Scene Canvas — 오브젝트 기반 편집
+`/generate`의 인라인 강화 UI는 약한 표현을 감지하고 더 구체적인 대안을 제안합니다. 선택한 대안은 `/api/rewrite-prompt`를 통해 자연스러운 한국어 문장으로 다시 정리할 수 있습니다.
 
-프롬프트를 Gemini가 분석해 장면 구성 요소(SceneObject)로 분해합니다.
+### 마커 기반 편집
 
-```
-"몽환적인 하얀 침대방"
-    ↓ Gemini 파싱
-[피사체: 하얀 침대]  [배경: 방]  [분위기: 몽환적]  [조명: 자연광]  [색감: 화이트 톤]
-```
+`/edit`에서 베이스 이미지 위에 원형 마커를 놓고 부분 편집을 실행합니다.
 
-- **8개 Role × 6개 Category** 정식 스키마 + 카테고리별 표준 어휘 정규화
-- **위치 조정** — 캔버스 드래그 → 3×3 그리드 공간 구문 자동 변환 (`upper-left of the frame`)
-- **강도 슬라이더** (0–100) → 6단계 밴드로 부사·가중치·반복 자동 결정
-  - 61–80 "strong" → `(token:1.3)`
-  - 81–100 "dominant" → SD 스타일 가중치 + 반복 강화
-- **충돌 감지** — 색 온도·조명 강도·사실성·시간대 등 12개 축 기반 hard/soft 충돌 탐지 및 해결 제안
+지원 op:
 
-### 3. 결과 비교 & 이미지 생성
+- `replace`: 선택 영역 교체
+- `add`: 선택 영역 주변에 새 요소 추가
+- `remove`: 선택 영역 제거 후 배경 복원
 
-- 원본 vs 강화 프롬프트 나란히 비교
-- OpenAI 이미지 모델로 실제 이미지 생성
-- **Contribution Badges** — 위치·강한 속성 Top3·속성 일관성·자동 보완 개수 시각화
-- Discover 갤러리 공유 / 로컬 저장
+전역 분위기·조명 변경은 마커 op가 아니라 `globalAdjust` 필드로 처리합니다. 마커 없이도 Mood, Lighting, Note만으로 전체 이미지를 조정할 수 있습니다.
 
----
+모델별 편집 경로:
 
-## 파이프라인
+- Nano Banana Pro: 원본, 마커 가이드, 그레이스케일 마스크, 레퍼런스 이미지를 함께 전달
+- GPT Image 2: 원본, 알파 마스크, 레퍼런스 이미지를 OpenAI 이미지 편집 API에 전달
 
-```
-한국어 프롬프트
-    │
-    │ analyzePrompt (Gemini + 스키마 주입 + 정규화)
-    ▼
-SceneObject[]   role × category × attributes (+ optional position)
-    │
-    │ detectSlots → augmentSlots → composeFromSlots
-    ▼
-구조화된 영어 프롬프트
-    subject → style → medium → lighting → composition → quality
-    │
-    │ OpenAI image model
-    ▼
-최종 이미지
-```
+자세한 내용은 [docs/MARKER_PROTOCOL.md](./docs/MARKER_PROTOCOL.md)를 참고하세요.
 
-각 시각 슬롯이 비어 있으면 기본 어휘(`cinematic`, `soft natural light`, `balanced composition` 등)를 자동 주입합니다. LLM과 결정론 로직의 하이브리드로 최종 프롬프트를 조립합니다.
+### 저장·공유
 
----
+- 생성/편집 성공 결과는 클라이언트에서 `/api/saved-images`로 자동 저장합니다.
+- `/boards`에서 저장 이미지를 확인, 삭제, 재편집, Discover 공유할 수 있습니다.
+- `/discover`는 공개 공유 이미지 갤러리입니다.
+- `/discover/[id]`는 공유 결과 상세 페이지입니다.
 
-## 기타 페이지
+### 크레딧
 
-| 페이지 | 설명 |
-|--------|------|
-| `/discover` | 큐레이팅 무드 이미지 + 커뮤니티 공유 갤러리. 태그 필터, 무한 스크롤 |
-| `/boards` | 내가 생성·저장한 이미지 관리. 공유 이미지 제목 수정·삭제 (로그인 필요) |
+- 인증 사용자만 생성·편집·저장·공유 API를 사용할 수 있습니다.
+- 생성/편집 요청 전에 Supabase RPC로 크레딧을 차감합니다.
+- 전체 실패 시 차감 내역을 환불합니다.
+- 일부 성공/일부 실패는 현재 전액 환불하지 않습니다.
+- 단가표는 `pricing_config`에서 관리하며 `/api/credits/balance`가 잔액과 단가를 반환합니다.
 
----
+## 주요 라우트
+
+| 경로 | 설명 |
+|---|---|
+| `/` | 제품 소개 |
+| `/generate` | 이미지 생성 |
+| `/edit` | 마커 기반 편집 |
+| `/boards` | 내 저장 이미지 |
+| `/discover` | 공개 갤러리 |
+| `/discover/[id]` | 공개 이미지 상세 |
+| `/auth/login` | 이메일/Google 로그인 |
+| `/terms` | 이용약관 |
+
+## API 라우트
+
+| 경로 | 설명 |
+|---|---|
+| `/api/generate` | 이미지 생성 SSE |
+| `/api/edit` | 이미지 편집 SSE |
+| `/api/enhance-prompt` | 약한 표현 감지 |
+| `/api/rewrite-prompt` | 프롬프트 문장 다듬기 |
+| `/api/saved-images` | 저장 이미지 목록/생성 |
+| `/api/saved-images/[id]` | 저장 이미지 삭제 |
+| `/api/discover/images` | Discover 목록 |
+| `/api/discover/images/[id]` | Discover 상세 |
+| `/api/share` | 저장 이미지를 Discover에 공유 |
+| `/api/share/[id]` | 공유 이미지 상세/수정/삭제 |
+| `/api/credits/balance` | 크레딧 잔액과 단가 |
+| `/api/log-error` | 클라이언트 오류 기록 |
 
 ## 기술 스택
 
-| 영역 | 기술 |
-|------|------|
-| Frontend | Next.js 16 (Turbopack) · React 19 · Tailwind CSS v4 |
-| Backend | Next.js API Routes · Sharp (이미지 처리) |
-| AI — 프롬프트 | Google Gemini (분석 · 강화 · 조합 · 다듬기 · 제목/태그 생성) |
-| AI — 이미지 생성 | OpenAI |
-| 인증 | Supabase Auth (Google, Kakao OAuth) |
-| 데이터베이스 | Supabase (PostgreSQL) |
-| 배포 | GCP Compute Engine (e2-small, Debian 12) · systemd |
+- Next.js 16 App Router, React 19, Tailwind CSS v4
+- Supabase Auth, Postgres, Storage, RLS
+- OpenAI Node SDK
+- Google GenAI SDK
+- `sharp` 이미지 후처리와 마스크 렌더링
+- Vitest 단위 테스트
+- GCP Compute Engine, nginx, systemd
 
----
+## 주요 모듈
 
-## 주요 모듈 (`src/lib`)
+```text
+src/
+├── app/
+│   ├── generate/                 # 생성 화면
+│   ├── edit/                     # 편집 화면
+│   ├── boards/                   # 저장 이미지
+│   ├── discover/                 # 공개 갤러리
+│   ├── terms/                    # 이용약관
+│   └── api/                      # Next.js API routes
+├── components/
+│   ├── studio/                   # 생성/편집 공용 UI
+│   ├── board/                    # 저장 이미지 UI
+│   ├── discover/                 # Discover UI
+│   └── layout/                   # Navbar/Footer
+└── lib/
+    ├── image-models.ts           # 모델/화질/비율 계약
+    ├── image-output.ts           # 서버 이미지 후처리
+    ├── openai-image-requests.ts  # GPT Image 2 요청 payload 제한
+    ├── marker-protocol.ts        # 편집 요청 검증
+    ├── marker-renderer.ts        # 마스크/미리보기 렌더링
+    ├── marker-prompt.ts          # 편집 prompt builder
+    ├── edit-client.ts            # 편집 모델 호출
+    ├── credits.ts                # 크레딧 RPC wrapper
+    ├── saved-images.ts           # 저장 이미지 클라이언트
+    └── api-guard.ts              # Origin, rate limit, SSRF, 이미지 검증
+```
 
-| 파일 | 역할 |
-|------|------|
-| `scene-schema.ts` | ROLE_SPEC · CATEGORY_SPEC · 어휘 정렬 · 검증 · LLM 스키마 브리핑 |
-| `intensity-mapping.ts` | 0–100 → 6밴드 × 카테고리별 부사·가중치·반복 매핑 |
-| `conflict-matrix.ts` | 12축 기반 hard/soft 충돌 탐지 + 해결 제안 |
-| `information-density.ts` | 구체성·시각 토큰·명사 특이성·길이 → weak reason 분류 |
-| `visual-augmentation.ts` | 6슬롯 3단계 파이프라인 (감지 → 증강 → 조립) |
-| `prompt-analyzer.ts` | 프롬프트 → SceneObject[] (Gemini) |
-| `prompt-enhancer.ts` | 약한 표현 감지 (Gemini + 밀도 메트릭) |
-| `prompt-composer.ts` | SceneObject[] → 최종 영어 프롬프트 (Gemini) |
+## 보안
 
----
-
-## 성능 최적화
-
-- 반응형 이미지 서빙 (200 / 400px / 원본) — 모바일 대역폭 절약
-- `srcSet` · `sizes` 기반 브라우저 자동 이미지 선택
-- LCP 이미지 eager 로드 + `fetchPriority="high"`
-- 상세 페이지 썸네일 blur placeholder → 풀 이미지 점진 전환
-- WebP + 서버 캐시 (seed 7일, shared 1일)
-- Step 2 편집 종료 후 composer prefetch — Step 3 체감 대기 단축
-
----
+주요 mutating endpoint는 Origin 검증, Supabase 인증, RLS, 매직 바이트 검증, rate limit, SSRF 방어를 사용합니다. 자세한 내용은 [docs/SECURITY.md](./docs/SECURITY.md)를 참고하세요.
 
 ## 로컬 개발
 
 ```bash
 npm install
 npm run dev
-# http://localhost:3000
 ```
 
-### 환경변수 (`.env.local`)
+필수 환경변수:
 
-```env
+```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SITE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+GOOGLE_AI_API_KEY=
 OPENAI_API_KEY=
-GOOGLE_GENERATIVE_AI_API_KEY=
 ```
 
-### 배포
+검증:
 
-배포 절차는 [`CLAUDE.md`](./CLAUDE.md) 참고.
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+## 배포
+
+운영 서버는 GCP VM에서 nginx가 80/443을 받고 Next.js standalone 서버가 `localhost:3000`에서 실행됩니다. 현재 표준 배포 절차는 tar 기반이며 [CLAUDE.md](./CLAUDE.md)에 정리되어 있습니다.
