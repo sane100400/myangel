@@ -5,9 +5,10 @@ import {
   useRef,
   useCallback,
   useEffect,
-  useMemo,
 } from "react";
 import type { WeakSpan, EnhancementSuggestion } from "@/types";
+import { Check, Loader2, WandSparkles } from "lucide-react";
+import { toast } from "sonner";
 
 interface InlineEnhancerProps {
   value: string;
@@ -23,17 +24,12 @@ export function InlineEnhancer({
   placeholder = "원하는 이미지를 설명해주세요",
 }: InlineEnhancerProps) {
   const [spans, setSpans] = useState<WeakSpan[]>([]);
-  const [activeSpan, setActiveSpan] = useState<WeakSpan | null>(null);
-  const [bubblePos, setBubblePos] = useState<{ top: number; left: number } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzedText, setAnalyzedText] = useState("");
   const [replacedWords, setReplacedWords] = useState<Record<string, string>>({});
   const [isRewriting, setIsRewriting] = useState(false);
   const [originalInput, setOriginalInput] = useState("");
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
-  const bubbleRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounced analysis
@@ -51,12 +47,18 @@ export function InlineEnhancer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: text }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "프롬프트 강화에 실패했어요.");
+      }
       const data = await res.json();
       setSpans(data.weakSpans || []);
       setAnalyzedText(text);
-    } catch {
-      // Silent fail
+      if (!data.weakSpans?.length) {
+        toast.info("구체화할 약한 표현을 찾지 못했어요.");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "프롬프트 강화에 실패했어요.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -66,8 +68,6 @@ export function InlineEnhancer({
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newVal = e.target.value;
       onChange(newVal);
-      setActiveSpan(null);
-      setBubblePos(null);
 
       if (analyzedText && newVal !== analyzedText) {
         const noOverlap = !newVal.includes(analyzedText) && !analyzedText.includes(newVal);
@@ -79,14 +79,10 @@ export function InlineEnhancer({
         }
       }
 
-      // Always re-analyze 1s after user stops typing, unless the text is
-      // unchanged from the last analysis (avoid redundant calls).
+      // Auto-debounced analysis disabled — user must click "프롬프트 강화" manually.
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      if (newVal.trim().length >= 2 && newVal !== analyzedText) {
-        debounceRef.current = setTimeout(() => triggerAnalysis(newVal), 1000);
-      }
     },
-    [onChange, triggerAnalysis, analyzedText]
+    [onChange, analyzedText]
   );
 
   const handleManualAnalyze = useCallback(() => {
@@ -95,44 +91,24 @@ export function InlineEnhancer({
   }, [value, triggerAnalysis]);
 
   useEffect(() => {
+    const timeout = debounceRef.current;
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (timeout) clearTimeout(timeout);
     };
   }, []);
 
-  // Close bubble on outside click
+  // Reset analysis when value changes from outside (e.g. template chip click).
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (bubbleRef.current && !bubbleRef.current.contains(e.target as Node)) {
-        setActiveSpan(null);
-        setBubblePos(null);
+    if (analyzedText && value !== analyzedText) {
+      const noOverlap = !value.includes(analyzedText) && !analyzedText.includes(value);
+      if (noOverlap) {
+        setSpans([]);
+        setAnalyzedText("");
+        setReplacedWords({});
+        setOriginalInput("");
       }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  // Handle highlighted word click — show bubble
-  const handleWordClick = useCallback(
-    (span: WeakSpan, e: React.MouseEvent) => {
-      const el = e.currentTarget as HTMLElement;
-      const containerRect = containerRef.current?.getBoundingClientRect();
-      if (!containerRect) return;
-
-      const elRect = el.getBoundingClientRect();
-      const isMobile = containerRect.width < 400;
-      const bubbleWidth = isMobile ? containerRect.width : 288;
-      setBubblePos({
-        top: elRect.bottom - containerRect.top + 8,
-        left: isMobile ? 0 : Math.max(0, Math.min(
-          elRect.left - containerRect.left,
-          containerRect.width - bubbleWidth
-        )),
-      });
-      setActiveSpan(span);
-    },
-    []
-  );
+    }
+  }, [value, analyzedText]);
 
   // Manual rewrite
   const handleRewrite = useCallback(async () => {
@@ -144,7 +120,10 @@ export function InlineEnhancer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ original: originalInput, modified: value }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "문장 다듬기에 실패했어요.");
+      }
       const data = await res.json();
       if (data.rewritten && data.rewritten !== value) {
         onChange(data.rewritten);
@@ -152,9 +131,14 @@ export function InlineEnhancer({
         setAnalyzedText("");
         setOriginalInput("");
         setReplacedWords({});
+      } else {
+        // Even if model returned identical text, treat the polish as accepted
+        // and clear replacements so the button hides.
+        setReplacedWords({});
+        setOriginalInput("");
       }
-    } catch {
-      // Keep raw replacement
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "문장 다듬기에 실패했어요.");
     } finally {
       setIsRewriting(false);
     }
@@ -162,16 +146,10 @@ export function InlineEnhancer({
 
   // Select alternative
   const handleSelect = useCallback(
-    (suggestion: EnhancementSuggestion) => {
-      if (!activeSpan) return;
-
-      const currentText = activeSpan.text;
+    (span: WeakSpan, suggestion: EnhancementSuggestion) => {
+      const currentText = span.text;
       const idx = value.indexOf(currentText);
-      if (idx === -1) {
-        setActiveSpan(null);
-        setBubblePos(null);
-        return;
-      }
+      if (idx === -1) return;
 
       if (!originalInput) setOriginalInput(value);
 
@@ -198,11 +176,8 @@ export function InlineEnhancer({
         })
       );
       setAnalyzedText(newValue);
-
-      setActiveSpan(null);
-      setBubblePos(null);
     },
-    [activeSpan, value, onChange, originalInput]
+    [value, onChange, originalInput]
   );
 
   const hasReplacements = Object.keys(replacedWords).length > 0;
@@ -212,62 +187,25 @@ export function InlineEnhancer({
     (s) => value.includes(s.text) && s.alternatives && s.alternatives.length > 0
   );
 
-  const unresolvedCount = validSpans.filter(
+  const unresolvedSpans = validSpans.filter(
     (s) => !replacedWords[s.text] && !Object.values(replacedWords).includes(s.text)
-  ).length;
-
-  // ── Build highlighted text preview ──
-  const highlightedPreview = useMemo(() => {
-    if (validSpans.length === 0 || !value) return null;
-
-    // Sort spans by position in text
-    const sorted = [...validSpans]
-      .map((s) => ({ ...s, idx: value.indexOf(s.text) }))
-      .filter((s) => s.idx !== -1)
-      .sort((a, b) => a.idx - b.idx);
-
-    if (sorted.length === 0) return null;
-
-    const parts: { text: string; span: WeakSpan | null; isReplaced: boolean }[] = [];
-    let cursor = 0;
-
-    for (const s of sorted) {
-      if (s.idx < cursor) continue; // overlapping span
-      if (s.idx > cursor) {
-        parts.push({ text: value.slice(cursor, s.idx), span: null, isReplaced: false });
-      }
-      const isReplaced = !!replacedWords[s.text] || Object.values(replacedWords).includes(s.text);
-      parts.push({ text: s.text, span: s, isReplaced });
-      cursor = s.idx + s.text.length;
-    }
-    if (cursor < value.length) {
-      parts.push({ text: value.slice(cursor), span: null, isReplaced: false });
-    }
-
-    return parts;
-  }, [value, validSpans, replacedWords]);
+  );
+  const unresolvedCount = unresolvedSpans.length;
 
   const showSuccessHint =
     !isAnalyzing && !isRewriting && validSpans.length === 0 && !!analyzedText;
-  const showManualBtn =
+  const canAnalyze =
     value.trim().length >= 2 && !isRewriting && !isAnalyzing;
 
   return (
-    <div ref={containerRef} className="relative">
+    <div className="relative">
       {/* ══ Editor card — Grammarly-style writing surface ══ */}
-      <div className="group relative overflow-hidden rounded-2xl border border-[var(--angel-blue)]/25 bg-white shadow-[0_1px_2px_rgba(30,58,95,0.04),0_16px_40px_-20px_rgba(91,155,213,0.45)] transition-all duration-300 focus-within:border-[var(--angel-blue)]/55 focus-within:shadow-[0_1px_2px_rgba(30,58,95,0.04),0_24px_56px_-22px_rgba(91,155,213,0.55),0_0_0_4px_rgba(91,155,213,0.1)]">
-        {/* Top lavender hairline */}
-        <div className="h-[2px] bg-gradient-to-r from-transparent via-[var(--angel-lavender)]/55 to-transparent" />
-
+      <div className="group relative overflow-hidden rounded-lg border border-[var(--angel-border)] bg-[var(--angel-surface)] shadow-[var(--angel-shadow-soft)] transition-all duration-200 focus-within:border-[var(--angel-blue)]/55 focus-within:shadow-[var(--angel-focus)]">
         {/* Header toolbar */}
         <div className="flex items-center justify-between px-5 pt-3 pb-1.5">
-          <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.24em] text-[var(--angel-text-faint)]">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M20 3 Q 14 4, 9 9 Q 4 14, 3 21 Q 10 20, 15 15 Q 20 10, 20 3 Z" />
-              <path d="M3 21 L 10 14" />
-            </svg>
+          <div className="flex items-center gap-2 text-[12px] font-bold text-[var(--angel-text-faint)]">
+            <WandSparkles size={14} />
             <span>Prompt</span>
-            <span className="text-[var(--angel-lavender)]/75 twinkle">✦</span>
           </div>
           <div className="flex items-center gap-1.5 tabular-nums text-[11px] text-[var(--angel-text-faint)]">
             <span className="text-[var(--angel-text-soft)]/80">{value.length}</span>
@@ -277,68 +215,21 @@ export function InlineEnhancer({
 
         {/* Input surface */}
         <div className="relative">
-          {highlightedPreview ? (
-            <>
-              {/* textarea sits BEHIND the highlight layer (z-0, opacity-0) so
-                  that span clicks reach the preview. Preview is on top with
-                  pointer-events-none on non-span text — clicks on empty text
-                  fall through to the textarea below. */}
-              <textarea
-                value={value}
-                onChange={handleChange}
-                disabled={disabled}
-                placeholder={placeholder}
-                rows={4}
-                className="absolute inset-0 z-0 h-full w-full cursor-text resize-none bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] opacity-0 outline-none"
-                style={{ caretColor: "var(--angel-text)" }}
-              />
-              <div
-                ref={previewRef}
-                className="pointer-events-none relative z-10 min-h-[128px] w-full bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] text-[var(--angel-text)]"
-              >
-                {highlightedPreview.map((part, i) =>
-                  part.span ? (
-                    <span
-                      key={i}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleWordClick(part.span!, e);
-                      }}
-                      className={`pointer-events-auto relative cursor-pointer transition-all ${
-                        part.isReplaced
-                          ? "text-sky-700 bg-sky-50 rounded px-0.5 decoration-sky-400 underline decoration-2 underline-offset-[3px]"
-                          : activeSpan?.text === part.text
-                          ? "text-amber-800 bg-amber-100 rounded px-0.5 decoration-amber-500 underline decoration-wavy decoration-2 underline-offset-[3px]"
-                          : "text-amber-800 bg-amber-50/80 rounded px-0.5 decoration-amber-400 underline decoration-wavy decoration-2 underline-offset-[3px] hover:bg-amber-100 hover:decoration-amber-500"
-                      }`}
-                    >
-                      {part.text}
-                    </span>
-                  ) : (
-                    <span key={i}>{part.text}</span>
-                  )
-                )}
-              </div>
-            </>
-          ) : (
-            <textarea
-              value={value}
-              onChange={handleChange}
-              disabled={disabled}
-              placeholder={placeholder}
-              rows={4}
-              className="min-h-[128px] w-full resize-none border-0 bg-transparent px-5 pb-4 pt-1 text-[15px] leading-[1.85] text-[var(--angel-text)] outline-none placeholder:text-[var(--angel-text-faint)]/55"
-            />
-          )}
+          <textarea
+            value={value}
+            onChange={handleChange}
+            disabled={disabled}
+            placeholder={placeholder}
+            rows={4}
+            className="h-[144px] w-full resize-none overflow-y-auto border-0 bg-transparent px-5 pb-4 pt-1 text-[16px] leading-[1.8] text-[var(--angel-text)] outline-none placeholder:text-[var(--angel-text-faint)]/55 md:h-[132px] md:text-[15px] md:leading-[1.85]"
+          />
 
           {/* Rewriting overlay — rewrite *does* need to block editing, because
               it replaces the entire sentence. Analysis does not. */}
           {isRewriting && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[2px]">
-              <div className="flex items-center gap-2.5 rounded-full border border-[var(--angel-blue)]/25 bg-[var(--angel-blue)]/12 px-5 py-2.5 shadow-sm">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                </svg>
+              <div className="flex items-center gap-2.5 rounded-lg border border-[var(--angel-blue)]/25 bg-[var(--angel-blue-pale)] px-5 py-2.5 shadow-sm">
+                <Loader2 size={16} className="animate-spin text-[var(--angel-blue)]" />
                 <span className="text-[14px] font-medium text-[var(--angel-blue)]">
                   문장을 다듬고 있어요...
                 </span>
@@ -348,42 +239,50 @@ export function InlineEnhancer({
         </div>
 
         {/* Footer status bar */}
-        <div className="flex items-center justify-between gap-3 border-t border-[var(--angel-blue)]/12 bg-gradient-to-b from-white to-[rgba(91,155,213,0.035)] px-5 py-2.5">
-          {isAnalyzing ? (
-            <span className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--angel-lavender)]">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              약한 표현을 찾고 있어요
-            </span>
-          ) : showSuccessHint ? (
-            <span className="flex items-center gap-1.5 text-[12px] font-medium text-sky-600">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                <polyline points="3 8 7 12 13 4" />
-              </svg>
-              프롬프트가 이미 구체적이에요
-            </span>
-          ) : (
-            <span className="flex items-center gap-1.5 text-[11px] text-[var(--angel-text-faint)]">
-              <span className="text-[var(--angel-lavender)]/75 twinkle">✦</span>
-              <span>약한 표현은 AI가 자동으로 찾아드려요</span>
-            </span>
-          )}
-          {showManualBtn && (
+        <div className="grid min-h-[44px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t border-[var(--angel-border)] bg-[var(--angel-surface-muted)] px-4 py-1.5 sm:px-5">
+          <div className="min-w-0">
+            {isAnalyzing ? (
+              <span className="flex min-w-0 items-center gap-1.5 text-[12px] font-medium leading-4 text-[var(--angel-lavender)]">
+                <Loader2 size={12} className="shrink-0 animate-spin" />
+                <span className="min-w-0 truncate">약한 표현을 찾고 있어요</span>
+              </span>
+            ) : showSuccessHint ? (
+              <span className="flex min-w-0 items-center gap-1.5 text-[12px] font-medium leading-4 text-sky-600">
+                <Check size={12} className="shrink-0" />
+                <span className="min-w-0 truncate">프롬프트가 이미 구체적이에요</span>
+              </span>
+            ) : (
+              <span className="flex min-w-0 items-center gap-1.5 text-[12px] leading-4 text-[var(--angel-text-faint)]">
+                <WandSparkles size={12} className="shrink-0" />
+                <span className="min-w-0 truncate">약한 표현을 AI가 더 구체적으로 다듬어드려요</span>
+              </span>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5">
             <button
               onClick={handleManualAnalyze}
-              disabled={isAnalyzing || disabled}
-              className="shrink-0 rounded-full border border-[var(--angel-blue)]/20 bg-white px-3 py-1 text-[11px] font-medium tracking-wide text-[var(--angel-blue)] transition-all hover:border-[var(--angel-blue)]/45 hover:bg-[var(--angel-blue)]/8 disabled:opacity-40"
+              disabled={!canAnalyze || disabled}
+              className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-md bg-[var(--angel-blue)] px-2 text-[11.5px] font-bold leading-none text-white shadow-[0_1px_0_rgba(53,111,165,0.16)] transition-colors hover:bg-[var(--angel-blue-strong)] disabled:opacity-40"
             >
-              다시 분석
+              <WandSparkles size={11} />
+              {analyzedText ? "다시 강화" : "프롬프트 강화"}
             </button>
-          )}
+            <button
+              onClick={handleRewrite}
+              disabled={!hasReplacements || isRewriting || disabled}
+              className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-md border border-[var(--angel-border)] bg-white/80 px-2 text-[11.5px] font-bold leading-none text-[var(--angel-text-soft)] transition-colors hover:border-[var(--angel-blue)]/45 hover:text-[var(--angel-blue)] disabled:opacity-40"
+            >
+              <WandSparkles size={11} />
+              다듬기
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ── Issue counter badge (Grammarly-style) ── */}
-      {validSpans.length > 0 && !isAnalyzing && (
-        <div className="mt-3 flex items-center gap-3">
+      <div className="mt-3 flex min-h-10 items-center gap-3">
+        {validSpans.length > 0 && !isAnalyzing ? (
+          <>
           <div className={`flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium ${
             unresolvedCount > 0
               ? "bg-amber-50 border border-amber-200/60 text-amber-800"
@@ -404,93 +303,43 @@ export function InlineEnhancer({
             )}
           </div>
           <span className="text-[12px] text-[var(--angel-text-faint)]">
-            밑줄 친 단어를 클릭하세요
+            아래 추천 표현을 선택하세요
           </span>
-        </div>
-      )}
+          </>
+        ) : (
+          <span aria-hidden="true" className="invisible text-[13px]">상태 자리</span>
+        )}
+      </div>
 
-      {/* ── Speech bubble (popup on click) ── */}
-      {activeSpan && bubblePos && (
-        <div
-          ref={bubbleRef}
-          className="absolute z-50 w-full md:w-80"
-          style={{ top: bubblePos.top, left: bubblePos.left }}
-        >
-          {/* Arrow */}
-          <div className="ml-6 h-2.5 w-2.5 rotate-45 bg-white border-l border-t border-[var(--angel-border)] -mb-1.5 relative z-10" />
-
-          {/* Bubble body */}
-          <div className="rounded-xl border border-[var(--angel-border)] bg-white shadow-xl overflow-hidden">
-            {/* Header — strikethrough original */}
-            <div className="px-4 pt-3.5 pb-2.5 border-b border-[var(--angel-border)]/50 bg-gradient-to-r from-amber-50/80 to-transparent">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-[10px] font-bold text-white">!</span>
-                  <span className="text-[15px] font-semibold text-amber-800">
-                    &ldquo;{activeSpan.text}&rdquo;
-                  </span>
-                </div>
-                <button
-                  onClick={() => { setActiveSpan(null); setBubblePos(null); }}
-                  className="text-[var(--angel-text-faint)] hover:text-[var(--angel-text-soft)] transition-colors p-1"
-                >
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                    <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
+      {unresolvedSpans.length > 0 && !isAnalyzing && (
+        <div className="grid gap-2">
+          {unresolvedSpans.map((span) => (
+            <div
+              key={`${span.start}-${span.end}-${span.text}`}
+              className="rounded-lg border border-amber-200/70 bg-amber-50/45 p-3"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-md bg-white/80 px-2 py-1 text-[12px] font-bold text-amber-800">
+                  {span.text}
+                </span>
+                <span className="text-[12px] leading-5 text-amber-700/80">
+                  {span.reason}
+                </span>
               </div>
-              <p className="text-[13px] text-amber-700/70 mt-1 leading-snug">
-                {activeSpan.reason}
-              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {span.alternatives.slice(0, 3).map((alt) => (
+                  <button
+                    key={alt.id}
+                    type="button"
+                    onClick={() => handleSelect(span, alt)}
+                    className="rounded-md border border-sky-200/70 bg-white px-2.5 py-1.5 text-[12px] font-bold text-sky-700 transition-colors hover:border-sky-300 hover:bg-sky-50"
+                  >
+                    {alt.text}
+                  </button>
+                ))}
+              </div>
             </div>
-
-            {/* Alternatives */}
-            <div className="p-2 max-h-64 overflow-y-auto">
-              <p className="px-2 py-1 text-[11px] text-[var(--angel-text-faint)] uppercase tracking-wider font-medium">
-                추천 대안
-              </p>
-              {activeSpan.alternatives.map((alt) => (
-                <button
-                  key={alt.id}
-                  onClick={() => handleSelect(alt)}
-                  className="w-full rounded-lg px-3 py-2.5 text-left transition-all hover:bg-sky-50 group border border-transparent hover:border-sky-200/60"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 8 7 12 13 4" /></svg>
-                      </span>
-                      <span className="text-[15px] font-medium text-[var(--angel-text)] group-hover:text-sky-700">
-                        {alt.text}
-                      </span>
-                    </div>
-                    <span className="shrink-0 text-[11px] text-[var(--angel-text-faint)] tabular-nums bg-[var(--angel-bg-soft)] rounded-full px-2 py-0.5">
-                      {Math.round(alt.confidence * 100)}%
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[12px] text-[var(--angel-text-soft)] leading-snug pl-5">
-                    {alt.reasoning}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Rewrite button */}
-      {hasReplacements && !isRewriting && (
-        <div className="mt-3">
-          <button
-            onClick={handleRewrite}
-            className="w-full rounded-xl border border-[var(--angel-blue)]/30 bg-[var(--angel-blue)]/6 py-2.5 text-[14px] font-medium text-[var(--angel-blue)] transition-all hover:bg-[var(--angel-blue)]/12 hover:border-[var(--angel-blue)]/50"
-          >
-            <span className="text-[12px]">✦</span>
-            {" "}문장 다듬기
-          </button>
-          <p className="mt-1 text-center text-[12px] text-[var(--angel-text-faint)]">
-            선택한 표현을 반영하여 문장을 자연스럽게 다듬어요
-          </p>
+          ))}
         </div>
       )}
 

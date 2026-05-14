@@ -1,17 +1,152 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, Fragment } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveImage } from "@/lib/saved-images";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { InlineEnhancer } from "@/components/studio/inline-enhancer";
-import { SceneCanvas } from "@/components/studio/scene-canvas";
-import { PromptComparison } from "@/components/studio/prompt-comparison";
-import { ContributionBadges } from "@/components/studio/contribution-badges";
-import type { SceneObject } from "@/types";
+import { GenerationProgress, initialProgress, type ProgressState } from "@/components/studio/generation-progress";
+import { ResultImageModal } from "@/components/studio/result-image-modal";
+import { QualityInfoTooltip } from "@/components/studio/quality-info-tooltip";
+import { StudioStepArrow, StudioStepDot } from "@/components/studio/studio-step-indicator";
+import { postSSE } from "@/lib/sse-client";
+import { buildImageTitle } from "@/lib/image-title";
+import { saveEditorTransfer } from "@/lib/editor-transfer";
+import {
+  normalizeImageQualityForModel,
+  supportsImageQuality,
+  unsupportedQualityMessage,
+  type AspectRatio,
+  type ImageModelChoice as ModelChoice,
+  type ImageQuality as Quality,
+} from "@/lib/image-models";
+import {
+  Coins,
+  Download,
+  ImagePlus,
+  PenLine,
+  Share2,
+  Sparkles,
+} from "lucide-react";
 
-// ── Reference image types ──
+interface ExamplePrompt {
+  label: string;
+  prompt: string;
+}
+
+const EXAMPLE_PROMPTS: readonly ExamplePrompt[] = [
+  {
+    label: "자연광 제품 사진",
+    prompt:
+      "자연광이 들어오는 밝은 책상 위에 무광 세라믹 텀블러를 놓은 제품 사진.\n흰 배경, 부드러운 그림자, 깨끗한 상업용 촬영 느낌, 고해상도.",
+  },
+  {
+    label: "밝은 작업 공간",
+    prompt:
+      "오전 햇살이 들어오는 정돈된 작업 공간, 노트북과 메모지, 작은 식물이 놓인 장면.\n밝고 차분한 색감, 생산적인 분위기, 실제 사무실 사진처럼 자연스럽게.",
+  },
+  {
+    label: "미니멀 거실",
+    prompt:
+      "따뜻한 소파와 낮은 원목 테이블이 있는 미니멀 거실 인테리어.\n부드러운 자연광, 정돈된 소품, 잡지 화보 같은 균형 잡힌 구도.",
+  },
+  {
+    label: "스튜디오 인물 사진",
+    prompt:
+      "밝은 스튜디오에서 촬영한 인물 프로필 사진, 자연스러운 표정과 깔끔한 의상.\n부드러운 키라이트, 얕은 심도, 포트폴리오에 어울리는 고급스러운 톤.",
+  },
+  {
+    label: "흰 배경 제품 컷",
+    prompt:
+      "흰 배경 위에 신제품 패키지를 중앙에 세운 깨끗한 제품 컷.\n선명한 윤곽, 자연스러운 바닥 그림자, 온라인 스토어 썸네일에 맞는 상업 사진.",
+  },
+  {
+    label: "도시 야경 포스터",
+    prompt:
+      "비가 그친 밤의 도심 거리와 네온사인이 반사되는 시네마틱 포스터 이미지.\n깊은 대비, 선명한 빛 번짐, 영화 홍보물처럼 강한 분위기.",
+  },
+  {
+    label: "차분한 북카페",
+    prompt:
+      "나무 책장과 창가 좌석이 있는 조용한 북카페, 커피잔과 펼쳐진 책이 놓인 장면.\n따뜻한 실내 조명, 차분한 색감, 오후의 아늑한 분위기.",
+  },
+  {
+    label: "모던한 앱 목업",
+    prompt:
+      "스마트폰 화면에 모던한 생산성 앱 UI가 보이는 깔끔한 목업 이미지.\n밝은 배경, 실제 제품 발표 자료 같은 정돈된 구도, 선명한 인터페이스.",
+  },
+  {
+    label: "따뜻한 주방 풍경",
+    prompt:
+      "아침 햇살이 들어오는 따뜻한 주방, 원목 식탁 위에 빵과 커피가 놓인 장면.\n생활감은 적당히 남기고 전체는 깔끔하게, 부드럽고 편안한 광고 사진 느낌.",
+  },
+  {
+    label: "파란 하늘 여행 사진",
+    prompt:
+      "파란 하늘 아래 해변 산책로를 따라 여행 가방이 놓인 밝은 여행 사진.\n청량한 색감, 넓은 여백, 여행 브랜드 캠페인에 어울리는 생동감.",
+  },
+  {
+    label: "컬러풀한 패키지",
+    prompt:
+      "선명한 컬러의 음료 패키지 여러 개가 리듬감 있게 놓인 브랜드 이미지.\n깨끗한 배경, 팝한 조명, SNS 광고에 어울리는 밝고 에너지 있는 스타일.",
+  },
+  {
+    label: "깔끔한 책상 위 소품",
+    prompt:
+      "정리된 책상 위에 펜, 노트, 작은 오브제가 균형 있게 배치된 플랫레이 사진.\n은은한 자연광, 부드러운 그림자, 미니멀한 라이프스타일 매거진 톤.",
+  },
+  {
+    label: "브랜드 캠페인 컷",
+    prompt:
+      "신규 라이프스타일 브랜드의 메인 캠페인 컷, 제품과 인물이 자연스럽게 어우러진 장면.\n세련된 색 보정, 넉넉한 여백, 웹사이트 첫 화면에 쓰기 좋은 구성.",
+  },
+  {
+    label: "실내 식물과 의자",
+    prompt:
+      "밝은 창가 옆 라운지 체어와 큰 실내 식물이 함께 놓인 인테리어 사진.\n깨끗한 벽면, 부드러운 그림자, 편안하고 세련된 홈스타일링 분위기.",
+  },
+  {
+    label: "부드러운 조명 사진",
+    prompt:
+      "은은한 조명이 피사체를 감싸는 부드러운 분위기의 감성 사진.\n낮은 대비, 자연스러운 피부톤과 질감, 차분한 브랜드 룩북에 어울리는 톤.",
+  },
+  {
+    label: "감각적인 썸네일",
+    prompt:
+      "콘텐츠 주제가 한눈에 보이는 감각적인 썸네일 이미지, 중앙 오브젝트와 강한 시선 흐름.\n명확한 대비, 읽기 쉬운 여백, 클릭하고 싶게 만드는 시각적 임팩트.",
+  },
+  {
+    label: "커뮤니티 공유 이미지",
+    prompt:
+      "온라인 커뮤니티에 공유하기 좋은 밝고 친근한 이미지, 핵심 오브젝트가 중앙에 보이는 구성.\n따뜻한 색감, 부담 없는 분위기, 작은 화면에서도 잘 보이는 선명한 디테일.",
+  },
+  {
+    label: "레퍼런스 기반 이미지",
+    prompt:
+      "업로드한 레퍼런스의 구도와 분위기를 유지하면서 더 완성도 높은 이미지로 재해석.\n원본의 핵심 특징은 살리고, 조명과 질감은 자연스럽게 정리한 결과.",
+  },
+] as const;
+
+const DEFAULT_EXAMPLE_CHIPS = EXAMPLE_PROMPTS.filter((example) => example.label.length <= 13).slice(0, 4);
+
+function pickExamples(n: number): ExamplePrompt[] {
+  const pool = EXAMPLE_PROMPTS.filter((example) => example.label.length <= 13);
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, n);
+}
+
+function createClientId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 interface RefImage {
   id: string;
@@ -20,8 +155,28 @@ interface RefImage {
   mimeType: string;
 }
 
-const MAX_IMAGES = 3;
+interface GeneratedResult {
+  id: string;
+  src: string;
+  savedId: string | null;
+  saveStatus: "saving" | "saved" | "failed";
+  saveError: string | null;
+  sharedId: string | null;
+  isSharing: boolean;
+}
+
+const MODEL_LABEL: Record<ModelChoice, string> = {
+  "nano-banana-pro": "Nano Banana Pro",
+  "gpt-image-2": "GPT Image 2",
+};
+const MODEL_HINT: Record<ModelChoice, string> = {
+  "gpt-image-2": "OpenAI · 빠른 기본 생성",
+  "nano-banana-pro": "Google · 스타일 강함, 더 오래 걸릴 수 있음",
+};
+
+const MAX_REFS = 3;
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
+const SHARE_TITLE_MAX = 32;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
 type AllowedType = (typeof ALLOWED_TYPES)[number];
 
@@ -38,14 +193,12 @@ function detectMimeFromBytes(header: Uint8Array): AllowedType | null {
   return null;
 }
 
-async function validateAndReadFile(
+async function readFile(
   file: File
 ): Promise<{ base64: string; mimeType: AllowedType }> {
   const headerBuf = await file.slice(0, 16).arrayBuffer();
-  const header = new Uint8Array(headerBuf);
-  const realMime = detectMimeFromBytes(header);
+  const realMime = detectMimeFromBytes(new Uint8Array(headerBuf));
   if (!realMime) throw new Error("지원하지 않는 이미지 형식입니다.");
-
   const base64 = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -57,209 +210,203 @@ async function validateAndReadFile(
     reader.onerror = () => reject(new Error("파일을 읽을 수 없습니다."));
     reader.readAsDataURL(file);
   });
-
   return { base64, mimeType: realMime };
 }
 
-// ── Progress bar ──
+function getClipboardImageFiles(event: ClipboardEvent): File[] {
+  const data = event.clipboardData;
+  if (!data) return [];
 
-const EST_STANDARD = 20;
-const EST_PREMIUM = 35;
+  const files = Array.from(data.files ?? []).filter((file) =>
+    file.type.startsWith("image/")
+  );
+  if (files.length > 0) return files;
 
-// ── Step indicator ──
-
-const STEPS = [
-  { num: 1, label: "입력" },
-  { num: 2, label: "조정" },
-  { num: 3, label: "결과" },
-] as const;
-
-// ── Example prompts — chosen to contain weak spans so the enhancer hints fire. ──
-// Pool of 50+ prompts; a random subset is shown on each mount (see pickExamples).
-
-const EXAMPLE_PROMPTS: readonly string[] = [
-  "예쁜 카페의 감성적인 분위기",
-  "몽환적인 방에 하얀 침대",
-  "고양이가 노는 평화로운 공원",
-  "해질녘 거리의 소녀",
-  "따뜻한 햇살이 비추는 거실",
-  "비 내리는 도쿄 골목길의 야경",
-  "눈 내리는 유럽 시골 마을",
-  "아늑한 북유럽 스타일 서재",
-  "귀여운 강아지가 창밖을 보는 장면",
-  "신비로운 숲속 작은 오두막",
-  "낭만적인 파리의 밤거리",
-  "잔잔한 호수 위의 작은 보트",
-  "빈티지한 레코드 가게 내부",
-  "세련된 미니멀 인테리어 거실",
-  "화려한 벚꽃이 만개한 일본 정원",
-  "차가운 겨울 바다와 외딴 등대",
-  "고즈넉한 한옥의 마당",
-  "환상적인 오로라가 펼쳐진 밤하늘",
-  "몽글몽글한 구름 위의 성",
-  "러프한 갈색 가죽 소파가 있는 거실",
-  "부드러운 조명의 북카페",
-  "쓸쓸한 새벽의 기차역 플랫폼",
-  "활기찬 재래시장의 풍경",
-  "우아한 발레리나의 연습실",
-  "푸릇푸릇한 봄날의 언덕",
-  "청량한 여름 계곡의 오후",
-  "풍성한 가을 단풍이 물든 숲길",
-  "아기자기한 작은 꽃집의 쇼윈도",
-  "모던한 고층 빌딩의 라운지",
-  "빈티지 자전거가 있는 유럽 골목",
-  "동화 속 마녀의 다락방",
-  "은은한 달빛이 비추는 서재",
-  "사이버펑크 스타일의 홍콩 야경",
-  "레트로한 다이너에서 커피 마시는 소녀",
-  "잔디밭에서 책 읽는 여자",
-  "비 오는 창가의 따뜻한 차 한 잔",
-  "음산한 안개 낀 중세 성곽",
-  "반짝이는 크리스마스 마켓",
-  "고요한 새벽 안개의 호수",
-  "귀여운 토끼가 뛰노는 들판",
-  "정교한 시계 장인의 작업실",
-  "몰디브 리조트의 청록색 수영장",
-  "서정적인 바닷가 작은 카페",
-  "청순한 여름 원피스를 입은 소녀",
-  "쓸쓸한 가을 공원의 벤치",
-  "열정적인 록 콘서트 무대",
-  "포근한 이불 속의 나른한 아침",
-  "눈부신 설원의 스키 리조트",
-  "힙한 브루클린 로프트 인테리어",
-  "평화로운 시골의 황금빛 밀밭",
-  "정갈한 일본식 찻집",
-  "활기찬 한강 공원의 주말 오후",
-  "감각적인 블랙 앤 화이트 패션 화보",
-  "따스한 벽난로 앞에 웅크린 고양이",
-  "화사한 꽃들이 만개한 정원",
-  "운치 있는 유럽풍 카페 테라스",
-] as const;
-
-// Pick N random prompts. Filtered to short prompts (≤13 chars) so the chip
-// row fits in one line on desktop and wraps to ≤2 lines on mobile.
-function pickExamples(n: number): string[] {
-  const pool = EXAMPLE_PROMPTS.filter((p) => p.length <= 13);
-  const shuffled = [...pool];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled.slice(0, n);
+  return Array.from(data.items ?? [])
+    .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+    .map((item) => item.getAsFile())
+    .filter((file): file is File => Boolean(file));
 }
 
-// ── Component ──
+function dataUrlToRefImage(dataUrl: string): Omit<RefImage, "id"> | null {
+  const match = dataUrl.match(/^data:(image\/(?:png|jpeg|webp));base64,(.+)$/);
+  if (!match) return null;
+  const mimeType = match[1] as AllowedType;
+  const base64 = match[2];
+  if (!ALLOWED_TYPES.includes(mimeType)) return null;
+  if (!base64 || base64.length > 6 * 1024 * 1024) return null;
+  return { preview: dataUrl, base64, mimeType };
+}
 
-export default function StudioPage() {
+const QUALITY_LABEL: Record<Quality, string> = {
+  "1K": "표준",
+  "2K": "고화질",
+  "4K": "초고화질",
+};
+const ASPECT_OPTIONS: Array<{
+  value: AspectRatio;
+  label: string;
+  useCase: string;
+  frameClass: string;
+}> = [
+  {
+    value: "1:1",
+    label: "정방형",
+    useCase: "제품 · 피드",
+    frameClass: "h-12 w-12",
+  },
+  {
+    value: "4:3",
+    label: "가로형",
+    useCase: "사진 · 썸네일 · 배너",
+    frameClass: "h-10 w-[54px]",
+  },
+  {
+    value: "3:4",
+    label: "세로형",
+    useCase: "카드 · 포스터 · 스토리",
+    frameClass: "h-[54px] w-10",
+  },
+];
+
+const aspectLabel = (value: AspectRatio): string =>
+  ASPECT_OPTIONS.find((option) => option.value === value)?.label ?? "정방형";
+
+export default function GeneratePage() {
   const router = useRouter();
 
-  // Randomize example chips per mount so repeat visitors see variety.
-  const exampleChips = useMemo(() => pickExamples(4), []);
+  const [exampleChips, setExampleChips] = useState<ExamplePrompt[]>(DEFAULT_EXAMPLE_CHIPS);
 
-  // Wizard step (1=입력, 2=조정, 3=결과)
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  useEffect(() => {
+    setExampleChips(pickExamples(4));
+  }, []);
 
-  // Step 1: Input
   const [prompt, setPrompt] = useState("");
-  const [premium, setPremium] = useState(false);
-
-  // Step 2: Scene adjustment
-  const [sceneObjects, setSceneObjects] = useState<SceneObject[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  // Step 3: Compose + Generate (merged)
-  const [isComposing, setIsComposing] = useState(false);
-  const [composedPromptKo, setComposedPromptKo] = useState("");
-  const [composedPromptEn, setComposedPromptEn] = useState("");
-
-  // Prefetch: background compose when user stops editing in Step 2
-  const prefetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const prefetchedFor = useRef<string>(""); // serialized objects snapshot
-
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [result, setResult] = useState<{ image: string; promptUsed: string } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isSaved, setIsSaved] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
-  const [isShared, setIsShared] = useState(false);
-
-  // Reference images
+  const promptEditorRef = useRef<HTMLDivElement>(null);
+  const [model, setModel] = useState<ModelChoice>("gpt-image-2");
+  const [quality, setQuality] = useState<Quality>("1K");
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("1:1");
+  const [count, setCount] = useState(1);
   const [refImages, setRefImages] = useState<RefImage[]>([]);
   const [refError, setRefError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Progress bar
-  const [elapsed, setElapsed] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const estimatedTime = premium ? EST_PREMIUM : EST_STANDARD;
-  const progress = Math.min(95, (elapsed / estimatedTime) * 90);
-  const remaining = Math.max(0, Math.ceil(estimatedTime - elapsed));
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [results, setResults] = useState<GeneratedResult[]>([]);
+  const [previewResult, setPreviewResult] = useState<GeneratedResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<ProgressState>(initialProgress);
+  const savePromisesRef = useRef<Map<string, Promise<string | null>>>(new Map());
 
-  // ── Background prefetch compose-prompt when editing stops in Step 2 ──
-  useEffect(() => {
-    if (step !== 2 || sceneObjects.length === 0) return;
+  const [authed, setAuthed] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [pricing, setPricing] = useState<Record<Quality, number> | null>(null);
 
-    if (prefetchTimer.current) clearTimeout(prefetchTimer.current);
-
-    prefetchTimer.current = setTimeout(async () => {
-      const snapshot = JSON.stringify(sceneObjects);
-      if (snapshot === prefetchedFor.current) return; // already prefetched
-
-      try {
-        const res = await fetch("/api/compose-prompt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ objects: sceneObjects, selectedAlternatives: {} }),
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        // Only cache if objects haven't changed during fetch
-        prefetchedFor.current = snapshot;
-        setComposedPromptKo(data.promptKo);
-        setComposedPromptEn(data.promptEn);
-      } catch {
-        // silent — will retry on Step 3
-      }
-    }, 2000);
-
-    return () => {
-      if (prefetchTimer.current) clearTimeout(prefetchTimer.current);
-    };
-  }, [step, sceneObjects]);
-
-  const startTimer = useCallback(() => {
-    setElapsed(0);
-    timerRef.current = setInterval(() => setElapsed((p) => p + 0.5), 500);
+  const refreshBalance = useCallback(async () => {
+    try {
+      const r = await fetch("/api/credits/balance", { cache: "no-store" });
+      const d = await r.json();
+      setAuthed(Boolean(d.authed));
+      setBalance(typeof d.balance === "number" ? d.balance : 0);
+      if (d.pricing?.generate) setPricing(d.pricing.generate);
+    } catch {}
   }, []);
 
-  const stopTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/credits/balance", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setAuthed(Boolean(d.authed));
+        setBalance(typeof d.balance === "number" ? d.balance : 0);
+        if (d.pricing?.generate) setPricing(d.pricing.generate);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const cost = pricing ? pricing[quality] * count : count;
+  const hasInsufficientCredits = authed && balance !== null && balance < cost;
+  const isQualitySupported = supportsImageQuality(model, quality);
+  const canGenerate =
+    Boolean(prompt.trim()) && !isGenerating && !hasInsufficientCredits && isQualitySupported;
+
+  useEffect(() => {
+    if (!isQualitySupported) {
+      setQuality(normalizeImageQualityForModel(model, quality));
+    }
+  }, [isQualitySupported, model, quality]);
+
+  const handleQualitySelect = (nextQuality: Quality) => {
+    if (!supportsImageQuality(model, nextQuality)) return;
+    setQuality(nextQuality);
+  };
+
+  const applyExamplePrompt = useCallback((nextPrompt: string) => {
+    setPrompt(nextPrompt);
+    window.requestAnimationFrame(() => {
+      const editor = promptEditorRef.current;
+      editor?.scrollIntoView({ behavior: "smooth", block: "center" });
+      editor?.querySelector("textarea")?.focus({ preventScroll: true });
+    });
+  }, []);
+
+  // 최신 refImages를 ref에 보관 — unmount 시점에 모든 blob URL 해제
+  const refImagesRef = useRef<RefImage[]>([]);
+
+  useEffect(() => {
+    refImagesRef.current = refImages;
+  }, [refImages]);
+
+  useEffect(() => {
+    return () => {
+      refImagesRef.current.forEach((img) => {
+        if (img.preview.startsWith("blob:")) URL.revokeObjectURL(img.preview);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const promptParam = params.get("prompt");
+    if (promptParam) setPrompt(promptParam);
+
+    const rawRef = sessionStorage.getItem("generate:reference");
+    if (!rawRef) return;
+    sessionStorage.removeItem("generate:reference");
+    try {
+      const parsed = JSON.parse(rawRef) as { dataUrl?: unknown; prompt?: unknown };
+      const storedPrompt = typeof parsed.prompt === "string" ? parsed.prompt.trim() : "";
+      if (storedPrompt) {
+        setPrompt((cur) => cur || storedPrompt);
+      }
+      if (typeof parsed.dataUrl !== "string") throw new Error("missing data url");
+      const ref = dataUrlToRefImage(parsed.dataUrl);
+      if (!ref) throw new Error("invalid reference image");
+      setRefImages((prev) => [
+        ...prev.slice(0, MAX_REFS - 1),
+        { id: `discover-${Date.now()}`, ...ref },
+      ]);
+      toast.success("Discover 이미지를 레퍼런스로 추가했어요.");
+    } catch {
+      toast.error("Discover 이미지를 레퍼런스로 불러오지 못했어요.");
     }
   }, []);
 
-  useEffect(() => {
-    return () => {
-      stopTimer();
-      refImages.forEach((img) => URL.revokeObjectURL(img.preview));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stopTimer]);
-
-  // ── Reference image handlers ──
-
-  const refImagesCountRef = useRef(refImages.length);
-  refImagesCountRef.current = refImages.length;
-
-  const addRefFiles = useCallback(async (files: File[]) => {
-    const available = MAX_IMAGES - refImagesCountRef.current;
-    if (available <= 0) return;
-    const toProcess = files.slice(0, available);
-
-    for (const file of toProcess) {
+  const addFiles = useCallback(async (files: File[], source: "upload" | "paste" = "upload") => {
+    const available = MAX_REFS - refImages.length;
+    if (available <= 0) {
+      toast.error(`레퍼런스는 최대 ${MAX_REFS}장까지 가능해요.`);
+      return false;
+    }
+    let addedCount = 0;
+    setRefError(null);
+    for (const file of files.slice(0, available)) {
       if (!ALLOWED_TYPES.includes(file.type as AllowedType)) {
-        setRefError("PNG, JPEG, WebP 이미지만 업로드할 수 있어요.");
+        setRefError("PNG, JPEG, WebP만 가능해요.");
         continue;
       }
       if (file.size > MAX_FILE_SIZE) {
@@ -267,677 +414,730 @@ export default function StudioPage() {
         continue;
       }
       try {
-        const { base64, mimeType } = await validateAndReadFile(file);
+        const { base64, mimeType } = await readFile(file);
         const preview = URL.createObjectURL(file);
         setRefImages((prev) => [
           ...prev,
           { id: `${Date.now()}-${Math.random()}`, preview, base64, mimeType },
         ]);
+        addedCount += 1;
       } catch {
         setRefError("이미지를 읽는 중 오류가 발생했어요.");
       }
     }
-  }, []);
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    await addRefFiles(Array.from(files));
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+    if (source === "paste" && addedCount > 0) {
+      toast.success("클립보드 이미지를 레퍼런스로 추가했어요.");
+    }
+    if (files.length > available) {
+      toast.error(`레퍼런스는 최대 ${MAX_REFS}장까지만 추가돼요.`);
+    }
+    return addedCount > 0;
+  }, [refImages.length]);
 
   useEffect(() => {
-    const handlePaste = (e: ClipboardEvent) => {
-      if (isGenerating || step !== 1) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      const allowedSet = new Set<string>(ALLOWED_TYPES);
-      const imageFiles: File[] = [];
-      for (const item of items) {
-        if (allowedSet.has(item.type)) {
-          const file = item.getAsFile();
-          if (file) imageFiles.push(file);
-        }
-      }
-      if (imageFiles.length > 0) {
-        e.preventDefault();
-        addRefFiles(imageFiles);
-      }
+    const onPaste = async (event: ClipboardEvent) => {
+      const files = getClipboardImageFiles(event);
+      if (files.length === 0) return;
+      event.preventDefault();
+      await addFiles(files, "paste");
     };
-    document.addEventListener("paste", handlePaste);
-    return () => document.removeEventListener("paste", handlePaste);
-  }, [addRefFiles, isGenerating, step]);
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [addFiles]);
 
-  const removeRefImage = (id: string) => {
+  const removeRef = (id: string) => {
     setRefImages((prev) => {
-      const target = prev.find((img) => img.id === id);
-      if (target) URL.revokeObjectURL(target.preview);
-      return prev.filter((img) => img.id !== id);
+      const target = prev.find((i) => i.id === id);
+      if (target?.preview.startsWith("blob:")) URL.revokeObjectURL(target.preview);
+      return prev.filter((i) => i.id !== id);
     });
   };
 
-  // ── Step transition handlers ──
-
-  const handleGoToStep2 = async () => {
-    if (!prompt.trim()) return;
-    setStep(2);
-    setIsAnalyzing(true);
-    try {
-      const res = await fetch("/api/analyze-prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: prompt.trim() }),
-      });
-      if (!res.ok) throw new Error("분석 실패");
-      const data = await res.json();
-      setSceneObjects(data.objects);
-    } catch {
-      toast.error("프롬프트 분석에 실패했어요. 다시 시도해주세요.");
-      setStep(1);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  // Step 2 → Step 3: compose (if not prefetched) then generate in sequence.
-  // The compose result feeds into generate as enhancedPromptEn, and both show
-  // up on the same Result page — composition on top, image below.
   const handleGenerate = async () => {
-    if (sceneObjects.length === 0) return;
-    setStep(3);
+    if (!prompt.trim() || isGenerating) return;
+    if (!authed) {
+      toast.error("로그인이 필요해요.");
+      router.push("/auth/login");
+      return;
+    }
+    if (!supportsImageQuality(model, quality)) {
+      setQuality(normalizeImageQualityForModel(model, quality));
+      return;
+    }
     setError(null);
-    setResult(null);
-    setIsSaved(false);
-    setIsShared(false);
-
-    // Phase 1: compose
-    const currentSnapshot = JSON.stringify(sceneObjects);
-    let promptEn = composedPromptEn;
-    let promptKo = composedPromptKo;
-    const prefetchHit =
-      prefetchedFor.current === currentSnapshot && promptEn && promptKo;
-
-    if (!prefetchHit) {
-      setIsComposing(true);
-      try {
-        const res = await fetch("/api/compose-prompt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            objects: sceneObjects,
-            selectedAlternatives: {},
-          }),
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        promptEn = data.promptEn;
-        promptKo = data.promptKo;
-        setComposedPromptEn(promptEn);
-        setComposedPromptKo(promptKo);
-        prefetchedFor.current = currentSnapshot;
-      } catch {
-        // Fall back to original prompt.
-        toast.error("프롬프트 최적화 실패 — 원본으로 생성합니다.");
-        promptEn = "";
-        promptKo = "";
-      } finally {
-        setIsComposing(false);
-      }
-    }
-
-    // Phase 2: generate
+    setResults([]);
+    savePromisesRef.current.clear();
     setIsGenerating(true);
-    startTimer();
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: prompt.trim(),
-          enhancedPromptEn: promptEn || undefined,
-          premium,
-          referenceImages: refImages.map((img) => ({
-            base64: img.base64,
-            mimeType: img.mimeType,
-          })),
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "이미지 생성에 실패했습니다.");
+    setProgress({
+      active: true,
+      total: count,
+      completed: 0,
+      failed: 0,
+      startedAt: Date.now(),
+      message: "요청 보내는 중",
+    });
+
+    const newImages: string[] = [];
+    const promptText = prompt.trim();
+    let streamErr: string | null = null;
+    const idempotencyKey =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    await postSSE(
+      "/api/generate",
+      {
+        prompt: promptText,
+        model,
+        quality,
+        aspectRatio,
+        count,
+        referenceImages: refImages.map((i) => ({
+          base64: i.base64,
+          mimeType: i.mimeType,
+        })),
+      },
+      {
+        headers: { "Idempotency-Key": idempotencyKey },
+        onMessage: (msg) => {
+          const data = msg.data as Record<string, unknown>;
+          if (msg.event === "stage") {
+            setProgress((p) => ({
+              ...p,
+              total: typeof data.total === "number" ? data.total : p.total,
+              message: typeof data.message === "string" ? data.message : p.message,
+            }));
+          } else if (msg.event === "image") {
+            const img = data.image as string;
+            const resultId = createClientId();
+            newImages.push(img);
+            setResults((prev) => [
+              ...prev,
+              {
+                id: resultId,
+                src: img,
+                savedId: null,
+                saveStatus: "saving",
+                saveError: null,
+                sharedId: null,
+                isSharing: false,
+              },
+            ]);
+            setProgress((p) => ({ ...p, completed: p.completed + 1 }));
+            // 백그라운드로 마이페이지 저장
+            const savePromise = saveImage({
+              prompt: promptText,
+              image: img,
+              source: "generate",
+              meta: { model, quality, count, aspectRatio },
+            }).then((r) => {
+              if (!r.ok) {
+                toast.error(`마이페이지 저장 실패: ${r.error}`);
+                setResults((prev) =>
+                  prev.map((item) =>
+                    item.id === resultId
+                      ? { ...item, saveStatus: "failed", saveError: r.error }
+                      : item
+                  )
+                );
+                return null;
+              }
+              setResults((prev) =>
+                prev.map((item) =>
+                  item.id === resultId
+                    ? { ...item, savedId: r.item.id, saveStatus: "saved", saveError: null }
+                    : item
+                )
+              );
+              return r.item.id;
+            }).finally(() => {
+              savePromisesRef.current.delete(resultId);
+            });
+            savePromisesRef.current.set(resultId, savePromise);
+          } else if (msg.event === "image_failed") {
+            setProgress((p) => ({ ...p, failed: p.failed + 1 }));
+          } else if (msg.event === "done") {
+            const succ = typeof data.count === "number" ? data.count : newImages.length;
+            if (succ > 0) toast.success(`${succ}장 생성 완료`);
+            refreshBalance();
+          } else if (msg.event === "error") {
+            streamErr = typeof data.message === "string" ? data.message : "생성 실패";
+          }
+        },
+        onError: (e) => {
+          streamErr = e.message;
+        },
+        onClose: () => {
+          setProgress((p) => ({ ...p, active: false }));
+          setIsGenerating(false);
+          if (streamErr) setError(streamErr);
+        },
       }
-      const data = await res.json();
-      setResult({ image: data.image, promptUsed: data.promptUsed });
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
-      );
-    } finally {
-      stopTimer();
-      setIsGenerating(false);
-    }
+    );
   };
 
-  const handleBack = () => {
-    if (step === 2) setStep(1);
-    else if (step === 3 && !isComposing && !isGenerating && !result) setStep(2);
-  };
-
-  const handleDownload = () => {
-    if (!result?.image) return;
+  const downloadImage = (src: string, idx: number) => {
     const link = document.createElement("a");
-    link.href = result.image;
-    link.download = `myangel-${Date.now()}.png`;
+    link.href = src;
+    link.download = `myangel-${idx + 1}.png`;
     link.click();
   };
 
-  const handleSave = () => {
-    if (!result?.image || isSaved) return;
-    saveImage({
-      prompt: prompt.trim(),
-      style: null,
-      image: result.image,
-      style_tags: [],
-    });
-    setIsSaved(true);
+  const sendToEditor = async (src: string) => {
+    try {
+      const transferId = await saveEditorTransfer({
+        base: src,
+        quality,
+        model,
+        sourcePrompt: prompt.trim() || undefined,
+      });
+      router.push(transferId ? `/edit?transfer=${encodeURIComponent(transferId)}` : "/edit");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "편집기로 보내지 못했어요.");
+    }
   };
 
-  const handleShare = async () => {
-    if (!result?.image || isSharing || isShared) return;
+  const handleShare = async (item: GeneratedResult) => {
+    if (item.isSharing) return;
+    if (item.sharedId) {
+      toast.info("이미 Discover에 공유된 이미지예요.");
+      return;
+    }
+
+    const toastId = `share-${item.id}`;
+    setResults((prev) =>
+      prev.map((result) =>
+        result.id === item.id ? { ...result, isSharing: true } : result
+      )
+    );
+
     const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      toast.error("Discover에 공유하려면 로그인이 필요해요.");
+      toast.error("Discover에 공유하려면 로그인이 필요해요.", { id: toastId });
+      setResults((prev) =>
+        prev.map((result) =>
+          result.id === item.id ? { ...result, isSharing: false } : result
+        )
+      );
       router.push("/auth/login");
       return;
     }
-    setIsSharing(true);
     try {
+      let savedId = item.savedId;
+      if (!savedId) {
+        savedId = (await savePromisesRef.current.get(item.id)) ?? null;
+      }
+      if (!savedId) {
+        toast.error("마이페이지 저장이 끝난 뒤 다시 공유해주세요.", { id: toastId });
+        return;
+      }
+
+      const defaultTitle = buildImageTitle(prompt.trim(), "AI 생성 이미지", SHARE_TITLE_MAX);
+      const enteredTitle = window.prompt(
+        `Discover에 표시할 제목을 입력해주세요. (최대 ${SHARE_TITLE_MAX}자)`,
+        defaultTitle
+      );
+      if (enteredTitle === null) return;
+      const shareTitle = enteredTitle.trim().slice(0, SHARE_TITLE_MAX) || "공유 이미지";
+
+      toast.loading("Discover에 공유하는 중...", { id: toastId });
+
       const res = await fetch("/api/share", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          image: result.image,
-          title: prompt.trim().slice(0, 50) || "AI 생성 이미지",
+          title: shareTitle,
           tags: [],
           prompt: prompt.trim(),
+          sourceGenerationId: savedId,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        if (res.status === 401) {
-          toast.error("로그인이 필요해요.");
-          router.push("/auth/login");
-          return;
-        }
-        toast.error(data.error || "공유에 실패했어요.");
+        toast.error(data.error || "공유에 실패했어요.", { id: toastId });
         return;
       }
-      setIsShared(true);
-      toast.success("Discover에 공유되었어요!");
+      setResults((prev) =>
+        prev.map((result) =>
+          result.id === item.id
+            ? {
+                ...result,
+                savedId,
+                sharedId: typeof data.id === "string" ? data.id : result.sharedId,
+              }
+            : result
+        )
+      );
+      if (data.alreadyShared) {
+        toast.info(data.message || "이미 Discover에 공유된 이미지예요.", {
+          id: toastId,
+          description: "Discover에서 확인할 수 있어요.",
+        });
+      } else {
+        toast.success(data.message || "Discover에 공유했어요.", {
+          id: toastId,
+          description: "공유 탭에서 바로 확인할 수 있어요.",
+        });
+      }
     } catch {
-      toast.error("공유 중 오류가 발생했어요.");
+      toast.error("공유 중 오류가 발생했어요.", { id: toastId });
     } finally {
-      setIsSharing(false);
+      setResults((prev) =>
+        prev.map((result) =>
+          result.id === item.id ? { ...result, isSharing: false } : result
+        )
+      );
     }
   };
 
-  const handleReset = () => {
-    setStep(1);
-    setResult(null);
-    setPrompt("");
-    setError(null);
-    setIsSaved(false);
-    setIsShared(false);
-    setSceneObjects([]);
-    setComposedPromptKo("");
-    setComposedPromptEn("");
-    refImages.forEach((img) => URL.revokeObjectURL(img.preview));
-    setRefImages([]);
-  };
-
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-6 pb-16 md:px-5 md:pt-24">
-      {/* Header */}
-      <div className="mb-4 text-center md:mb-6">
-        <h1 className="font-heading text-2xl font-medium tracking-[0.08em] text-[var(--angel-text)] md:text-3xl">
-          Studio
-        </h1>
-        <p className="mt-1.5 text-[14px] text-[var(--angel-text-soft)] md:mt-2 md:text-[15px]">
-          프롬프트를 입력하고, AI가 분석하고 최적화해요
-        </p>
-      </div>
-
-      {/* Step Indicator */}
-      <div className="mb-6 md:mb-8">
-        {/* Circles + Lines row */}
-        <div className="flex items-center justify-center gap-0">
-          {STEPS.map((s, i) => (
-            <Fragment key={s.num}>
-              {i > 0 && (
-                <div
-                  className={`h-0.5 w-6 md:w-10 transition-colors ${
-                    step > s.num - 1
-                      ? "bg-[var(--angel-blue)]"
-                      : "bg-[var(--angel-border)]"
-                  }`}
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  if (s.num < step && !isGenerating && !isComposing) setStep(s.num as 1 | 2 | 3);
-                }}
-                disabled={s.num >= step || isGenerating}
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-medium transition-all md:h-9 md:w-9 md:text-[15px] ${
-                  s.num < step
-                    ? "bg-[var(--angel-blue)] text-white"
-                    : s.num === step
-                    ? "bg-[var(--angel-blue)]/15 text-[var(--angel-blue)] ring-2 ring-[var(--angel-blue)]/30"
-                    : "bg-white/60 text-[var(--angel-text-faint)] border border-[var(--angel-border)]"
-                } ${s.num < step && !isGenerating ? "cursor-pointer" : "cursor-default"}`}
-              >
-                {s.num < step ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : (
-                  s.num
-                )}
-              </button>
-            </Fragment>
-          ))}
-        </div>
-        {/* Labels row */}
-        <div className="hidden md:flex items-center justify-center gap-0 mt-1.5">
-          {STEPS.map((s, i) => (
-            <Fragment key={s.num}>
-              {i > 0 && <div className="w-6 md:w-10" />}
-              <span className={`w-8 md:w-9 text-center text-[12px] ${
-                s.num === step
-                  ? "text-[var(--angel-blue)] font-medium"
-                  : "text-[var(--angel-text-faint)]"
-              }`}>
-                {s.label}
-              </span>
-            </Fragment>
-          ))}
-        </div>
-      </div>
-
-      {/* ═══ Step 1: Input ═══ */}
-      {step === 1 && (
-        <div className="space-y-4">
-          {/* Example prompt chips — tap to populate input; triggers weak-span highlights.
-              Desktop: single row (filtered to short prompts so all 4 fit in one line).
-              Mobile: wraps naturally to at most 2 lines. */}
-          {!prompt && (
-            <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1.5 md:flex-nowrap">
-              <span className="text-[11.5px] text-[var(--angel-text-faint)] mr-0.5 shrink-0">
-                처음이라면?
-              </span>
-              {exampleChips.map((ex) => (
-                <button
-                  key={ex}
-                  type="button"
-                  onClick={() => setPrompt(ex)}
-                  className="whitespace-nowrap rounded-full border border-[var(--angel-border)] bg-white/60 px-2.5 py-1 text-[11.5px] text-[var(--angel-text-soft)] transition-colors hover:border-[var(--angel-blue)]/40 hover:bg-[var(--angel-blue)]/5 hover:text-[var(--angel-blue)]"
-                >
-                  {ex}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <InlineEnhancer
-            value={prompt}
-            onChange={setPrompt}
-            disabled={false}
-            placeholder={"원하는 이미지를 설명해주세요\n예: 하얀 침대가 있는 몽환적인 방, 창문으로 들어오는 부드러운 햇살"}
-          />
-
-          {/* Reference images */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-2 md:gap-2">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--angel-text-soft)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 md:[width:14px] md:[height:14px]">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-              <span className="text-[13px] text-[var(--angel-text-soft)] md:text-[14px]">
-                레퍼런스 이미지{" "}
-                <span className="text-[12px] text-[var(--angel-text-faint)] hidden md:inline">(붙여넣기 가능)</span>
-              </span>
-              <span className="text-[12px] text-[var(--angel-text-faint)]">
-                ({refImages.length}/{MAX_IMAGES})
-              </span>
-            </div>
-            <div className="flex items-start gap-2 flex-wrap">
-              {refImages.map((img) => (
-                <div key={img.id} className="relative group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.preview} alt="레퍼런스" className="h-16 w-16 rounded-lg object-cover border border-[var(--angel-border)] md:h-20 md:w-20" />
-                  <button type="button" onClick={() => removeRefImage(img.id)} className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#1a1a2e]/80 text-white opacity-0 transition-opacity group-hover:opacity-100" aria-label="삭제">
-                    <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                  </button>
-                </div>
-              ))}
-              {refImages.length < MAX_IMAGES && (
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[var(--angel-border)] bg-white/50 text-[var(--angel-text-faint)] transition-all hover:border-[var(--angel-blue)]/50 hover:bg-white/80 hover:text-[var(--angel-blue)] md:h-20 md:w-20">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                  <span className="text-[11px]">추가</span>
-                </button>
-              )}
-              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={handleFileSelect} className="hidden" />
-            </div>
-            {refError && <p className="mt-1.5 text-[12px] text-red-500">{refError}</p>}
-            {refImages.length > 0 && (
-              <p className="mt-1.5 text-[12px] text-[var(--angel-text-faint)]">
-                레퍼런스 이미지의 스타일과 분위기를 참고하여 새 이미지를 생성해요
-              </p>
-            )}
-          </div>
-
-          {/* Premium Toggle */}
-          <div className="flex flex-col items-center justify-center gap-1.5">
-            <div className="group relative">
-              <button
-                type="button"
-                onClick={() => setPremium((v) => !v)}
-                className={`glass-card flex items-center gap-2 rounded-full px-4 py-2 text-[14px] font-medium transition-all ${
-                  premium
-                    ? "bg-[#ffd700]/12 border border-[#ffd700]/30 text-[#b8860b] shadow-[0_0_12px_rgba(255,215,0,0.15)]"
-                    : "border border-[var(--angel-border)] text-[var(--angel-text-soft)]"
-                }`}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" fill={premium ? "#ffd700" : "none"} stroke={premium ? "#b8860b" : "currentColor"} strokeWidth="1.5" />
-                </svg>
-                프리미엄
-                <span className={`text-[11px] rounded-full px-1.5 py-0.5 transition-colors ${premium ? "bg-[#ffd700]/25 text-[#b8860b]" : "bg-[var(--angel-bg-soft)] text-[var(--angel-text-faint)]"}`}>
-                  {premium ? "ON" : "OFF"}
-                </span>
-              </button>
-              {/* Desktop-only hover tooltip (mobile uses the caption below). */}
-              <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-xl bg-[#1a1a2e]/90 backdrop-blur-sm px-4 py-3 text-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 z-30 hidden md:block">
-                <p className="text-[13px] leading-[1.7] text-white/90">고해상도 2K 이미지를 생성해요.<br />더 선명하고 디테일한 결과물!</p>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rotate-45 bg-[#1a1a2e]/90" />
-              </div>
-            </div>
-            {/* Mobile caption — hover is unreliable on touch, so surface the hint here. */}
-            <p className="text-[11px] text-[var(--angel-text-faint)] md:hidden">
-              고해상도 2K, 더 선명한 결과물
-            </p>
-          </div>
-
-          {/* Next: Analyze */}
-          <button
-            onClick={handleGoToStep2}
-            disabled={!prompt.trim()}
-            className="w-full angel-btn angel-btn-primary py-3 text-[15px] disabled:opacity-40 disabled:cursor-not-allowed"
+    <div className="studio-shell">
+      {/* ─── Top utility bar: tabs + balance ─── */}
+      <div className="mb-8 flex items-center justify-between gap-3">
+        <div className="app-tabs">
+          <Link
+            href="/generate"
+            prefetch={false}
+            className="app-tab app-tab-active"
           >
-            다음: 장면 분석
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
+            생성
+          </Link>
+          <Link
+            href="/edit"
+            prefetch={false}
+            className="app-tab"
+          >
+            편집
+          </Link>
         </div>
-      )}
 
-      {/* ═══ Step 2: Analyze ═══ */}
-      {step === 2 && (
-        <div className="space-y-4">
-          {isAnalyzing ? (
-            <div>
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-[15px] font-medium text-[var(--angel-text)]">장면 구성 요소</h3>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="animate-pulse rounded-xl border border-[var(--angel-border)] bg-white/50 p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="h-6 w-6 rounded-full bg-[var(--angel-blue)]/10" />
-                      <div className="h-3 w-16 rounded bg-[var(--angel-blue)]/10" />
-                    </div>
-                    <div className="h-3 w-full rounded bg-[var(--angel-blue)]/8 mb-2" />
-                    <div className="h-3 w-2/3 rounded bg-[var(--angel-blue)]/6" />
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 flex flex-col items-center gap-2">
-                <span className="twinkle text-[var(--angel-lavender)]">✦</span>
-                <p className="text-[14px] text-[var(--angel-text-soft)]">프롬프트를 분석하고 있어요...</p>
-              </div>
+        <div className="credit-pill">
+          <Coins size={15} className="text-[var(--angel-blue)]" />
+          <span className="text-[14px] font-bold tabular-nums text-[var(--angel-blue)]">
+            {balance ?? "—"}
+          </span>
+          <span>크레딧</span>
+        </div>
+      </div>
+
+      {/* ─── Hero header — claims this is the studio ─── */}
+      <div className="page-header">
+        <div>
+          <p className="page-kicker">AI Image Studio</p>
+          <h1 lang="en" className="page-title page-title-en">
+            Gener<span className="shimmer-text">ate</span>
+          </h1>
+          <p className="page-lead">
+            한 줄 프롬프트를 다듬고, 모델과 화질을 고른 뒤 바로 결과를 생성합니다.
+          </p>
+        </div>
+
+        {/* Mini step indicator — reinforces the flow */}
+        <div className="flex w-fit items-center gap-2.5 text-[12px] font-medium text-[var(--angel-text-soft)] md:justify-self-end md:gap-3 md:text-[13px]">
+          <StudioStepDot n="1" label="입력" active />
+          <StudioStepArrow />
+          <StudioStepDot n="2" label="강화" />
+          <StudioStepArrow />
+          <StudioStepDot n="3" label="생성" />
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* ─── Prompt — the centerpiece ─── */}
+        <div className="surface-panel">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <label className="field-label md:text-[16px]">
+              어떤 이미지를 만들어볼까요?
+            </label>
+          </div>
+
+          <div className="mb-3 min-h-[64px]">
+            <div className="mb-1.5 text-[12px] text-[var(--angel-text-faint)]">
+              예시 프롬프트
             </div>
-          ) : (
-            <>
-              {/* Value surfacing: tell users this step actually affects the image */}
-              <div className="rounded-xl border border-[var(--angel-blue)]/20 bg-gradient-to-br from-[var(--angel-blue)]/[0.04] to-[var(--angel-lavender)]/[0.04] px-4 py-3">
-                <p className="text-[13px] font-medium text-[var(--angel-text)] text-center mb-2.5">
-                  여기서 조정한 것은 <span className="text-[var(--angel-blue)]">실제 이미지에 반영</span>됩니다
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="flex flex-col items-center gap-1 text-center">
-                    <span className="text-[16px]">🎯</span>
-                    <span className="text-[11px] leading-tight text-[var(--angel-text-soft)]">
-                      드래그로<br />구도 지정
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1 text-center">
-                    <span className="text-[16px]">🎚️</span>
-                    <span className="text-[11px] leading-tight text-[var(--angel-text-soft)]">
-                      슬라이더로<br />강도 조절
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1 text-center">
-                    <span className="text-[16px]">⚠️</span>
-                    <span className="text-[11px] leading-tight text-[var(--angel-text-soft)]">
-                      속성 충돌<br />자동 감지
-                    </span>
-                  </div>
-                </div>
+            <div className="flex flex-wrap gap-1.5">
+              {exampleChips.map((example) => (
+                <button
+                  key={example.label}
+                  type="button"
+                  onClick={() => applyExamplePrompt(example.prompt)}
+                  className="quiet-chip whitespace-nowrap"
+                >
+                  {example.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div ref={promptEditorRef}>
+            <InlineEnhancer
+              value={prompt}
+              onChange={setPrompt}
+              placeholder={"원하는 이미지를 묘사해주세요\n예: 자연광이 들어오는 책상 위 제품 사진, 흰 배경, 부드러운 그림자"}
+            />
+          </div>
+        </div>
+
+        {/* Reference images */}
+        <div className="surface-panel">
+          <div className="mb-2.5 flex items-center gap-2 text-[15px] font-bold text-[var(--angel-text)] md:text-[16px]">
+            <span>레퍼런스 이미지</span>
+            <span className="text-[12.5px] font-normal text-[var(--angel-text-faint)]">
+              ({refImages.length}/{MAX_REFS}) · 업로드 또는 붙여넣기
+            </span>
+          </div>
+          <div className="flex flex-wrap items-start gap-2">
+            {refImages.map((img) => (
+              <div key={img.id} className="relative group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img.preview}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-16 w-16 rounded-lg border border-[var(--angel-border)] object-cover md:h-20 md:w-20"
+                />
+                <button
+                  onClick={() => removeRef(img.id)}
+                  aria-label="레퍼런스 이미지 삭제"
+                  className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-[#1a1a2e]/85 text-white text-[14px] leading-none shadow-md transition-opacity md:opacity-0 md:group-hover:opacity-100"
+                >
+                  ×
+                </button>
               </div>
-
-              <div className="glass-card rounded-xl px-4 py-3">
-                <p className="text-[13px] text-[var(--angel-text-faint)] mb-1">입력한 프롬프트</p>
-                <p className="text-[15px] text-[var(--angel-text)] leading-relaxed">{prompt}</p>
-              </div>
-
-              <SceneCanvas objects={sceneObjects} onChange={setSceneObjects} />
-            </>
-          )}
-
-          {/* Navigation */}
-          {!isAnalyzing && (
-            <div className="flex gap-3 pt-2">
-              <button onClick={handleBack} className="angel-btn angel-btn-secondary py-2.5 text-[14px]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-                이전
-              </button>
+            ))}
+            {refImages.length < MAX_REFS && (
               <button
-                onClick={handleGenerate}
-                disabled={sceneObjects.length === 0}
-                className="flex-1 angel-btn angel-btn-primary py-2.5 text-[15px] disabled:opacity-40 disabled:cursor-not-allowed"
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-[var(--angel-border)] bg-[var(--angel-surface-muted)] text-[var(--angel-text-faint)] hover:border-[var(--angel-blue)]/50 hover:text-[var(--angel-blue)] md:h-20 md:w-20"
+                aria-label="레퍼런스 이미지 추가"
               >
-                <span className="text-[12px]">✦</span>
-                이미지 생성하기
+                <ImagePlus size={18} />
               </button>
-            </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              multiple
+              onChange={(e) => {
+                if (e.target.files) addFiles(Array.from(e.target.files));
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }}
+              className="hidden"
+            />
+          </div>
+          {refError && (
+            <p className="mt-1.5 text-[12px] text-red-500">{refError}</p>
           )}
         </div>
-      )}
 
-      {/* ═══ Step 3: Result (compose + generate merged) ═══ */}
-      {step === 3 && (
-        <>
-          {/* Prompt comparison — shown on top while/after composing */}
-          {(isComposing || composedPromptKo || composedPromptEn) && (
-            <div className="mb-6">
-              {isComposing ? (
-                <div>
-                  <div className="mb-3">
-                    <h3 className="text-[15px] font-medium text-[var(--angel-text)]">프롬프트 비교</h3>
+        {/* Model picker */}
+        <div className="surface-panel">
+          <label className="field-label md:text-[16px]">
+            모델
+          </label>
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            {(["gpt-image-2", "nano-banana-pro"] as const).map((m) => {
+              const active = model === m;
+              const disabled = !supportsImageQuality(m, quality);
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => {
+                    if (!disabled) setModel(m);
+                  }}
+                  disabled={disabled}
+                  title={disabled ? unsupportedQualityMessage(m, quality) : MODEL_LABEL[m]}
+                  className={`min-w-0 rounded-lg border px-4 py-3 text-left transition-all ${
+                    active
+                      ? "border-[var(--angel-blue)] bg-[var(--angel-blue-pale)]"
+                      : "border-[var(--angel-border)] bg-[var(--angel-surface-muted)] hover:border-[var(--angel-blue)]/35"
+                  } ${disabled ? "cursor-not-allowed opacity-45 hover:border-[var(--angel-border)]" : ""}`}
+                >
+                  <div className={`text-[14.5px] font-semibold ${active ? "text-[var(--angel-blue)]" : "text-[var(--angel-text)]"}`}>
+                    {MODEL_LABEL[m]}
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="animate-pulse rounded-xl border border-[var(--angel-border)] bg-white/50 p-4">
-                      <div className="flex items-center gap-1.5 mb-3">
-                        <div className="h-2 w-2 rounded-full bg-[var(--angel-text-faint)]/30" />
-                        <div className="h-2.5 w-12 rounded bg-[var(--angel-text-faint)]/20" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 w-full rounded bg-[var(--angel-blue)]/8" />
-                        <div className="h-3 w-4/5 rounded bg-[var(--angel-blue)]/6" />
-                        <div className="h-3 w-2/3 rounded bg-[var(--angel-blue)]/5" />
-                      </div>
-                    </div>
-                    <div className="animate-pulse rounded-xl border border-[var(--angel-blue)]/20 bg-[var(--angel-blue)]/3 p-4">
-                      <div className="flex items-center gap-1.5 mb-3">
-                        <div className="h-2 w-2 rounded-full bg-[var(--angel-blue)]/30" />
-                        <div className="h-2.5 w-16 rounded bg-[var(--angel-blue)]/15" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 w-full rounded bg-[var(--angel-blue)]/10" />
-                        <div className="h-3 w-5/6 rounded bg-[var(--angel-blue)]/8" />
-                        <div className="h-3 w-3/4 rounded bg-[var(--angel-blue)]/6" />
-                      </div>
-                    </div>
+                  <div className="mt-1 text-[12px] leading-5 text-[var(--angel-text-faint)] [word-break:keep-all]">
+                    {disabled ? "4K는 Nano Banana Pro 전용" : MODEL_HINT[m]}
                   </div>
-                  <div className="mt-4 flex flex-col items-center gap-2">
-                    <span className="twinkle text-[var(--angel-lavender)]">✦</span>
-                    <p className="text-[13px] text-[var(--angel-text-soft)]">최적화된 프롬프트를 만들고 있어요...</p>
-                  </div>
-                </div>
-              ) : (
-                <PromptComparison
-                  originalPrompt={prompt}
-                  enhancedPromptKo={composedPromptKo}
-                  enhancedPromptEn={composedPromptEn}
-                />
-              )}
-            </div>
-          )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-          {/* Loading — Progress Bar */}
-          {isGenerating && (
-            <div className="mt-4 mx-auto max-w-md md:mt-8">
-              <div className="relative h-2 w-full overflow-hidden rounded-full bg-[var(--angel-blue)]/10">
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[var(--angel-blue)] to-[var(--angel-lavender)] transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  style={{ width: `${progress}%`, animation: "shimmer 1.5s infinite" }}
-                />
-              </div>
-              <div className="mt-3 flex items-center justify-between text-[13px] text-[var(--angel-text-soft)]">
-                <span>{Math.floor(elapsed)}초 경과</span>
-                <span>{remaining > 0 ? `약 ${remaining}초 남음` : "거의 완성..."}</span>
-              </div>
-              <div className="mt-5 flex flex-col items-center gap-3">
-                <div className="relative h-24 w-24">
-                  <div className="absolute inset-0 rounded-2xl bg-[var(--angel-blue)]/5 pulse-glow" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-2xl twinkle">✦</div>
-                  </div>
+        {/* Options card — quality (left) + count (right), cost row */}
+        <div className="surface-panel">
+          <fieldset className="mb-5">
+            <legend className="sr-only">캔버스 비율</legend>
+            <div className="mb-3 flex flex-col items-start gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
+              <div>
+                <div className="text-[12.5px] font-bold text-[var(--angel-text-soft)]">
+                  캔버스 비율
                 </div>
-                <p className="text-[14px] text-[var(--angel-text-soft)]">
-                  {elapsed < 3
-                    ? "최적화된 프롬프트로 준비 중..."
-                    : elapsed < estimatedTime * 0.5
-                    ? "이미지를 그리고 있어요..."
-                    : elapsed < estimatedTime * 0.8
-                    ? "디테일을 다듬고 있어요..."
-                    : "거의 다 됐어요! 조금만 기다려주세요..."}
+                <p className="mt-1 text-[12px] leading-5 text-[var(--angel-text-faint)]">
+                  결과를 어디에 쓸지 기준으로 골라요.
                 </p>
-                {premium && (
-                  <div className="flex items-center gap-1.5 rounded-full bg-[#ffd700]/10 px-3 py-1">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="#ffd700" stroke="#b8860b" strokeWidth="1"><path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" /></svg>
-                    <span className="text-[12px] text-[#b8860b]">2K 고해상도로 생성 중</span>
+              </div>
+              <span className="shrink-0 rounded-md border border-[var(--angel-border)] bg-white px-2.5 py-1 font-en text-[11px] font-bold text-[var(--angel-blue)]">
+                {aspectLabel(aspectRatio)}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              {ASPECT_OPTIONS.map(({ value, label, useCase, frameClass }) => {
+                const active = aspectRatio === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setAspectRatio(value)}
+                    aria-pressed={active}
+                    title={`${label} - ${useCase}`}
+                    className={`group flex min-h-[92px] min-w-0 flex-col rounded-lg border p-2.5 text-left transition-[border-color,box-shadow,background-color,color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--angel-blue)]/25 sm:min-h-[112px] sm:p-3 ${
+                      active
+                        ? "border-[var(--angel-blue)] bg-[var(--angel-blue-pale)] text-[var(--angel-blue)] shadow-[0_8px_22px_rgba(53,111,165,0.12)]"
+                        : "border-[var(--angel-border)] bg-[var(--angel-surface-muted)] text-[var(--angel-text-soft)] hover:-translate-y-0.5 hover:border-[var(--angel-blue)]/40 hover:bg-white hover:text-[var(--angel-blue)]"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-[50px] w-full shrink-0 items-center justify-center rounded-lg border sm:h-[66px] ${
+                        active
+                          ? "border-[var(--angel-blue)]/35 bg-white"
+                          : "border-[var(--angel-border)] bg-white/80"
+                      }`}
+                    >
+                      <span
+                        className={`${frameClass} rounded-[5px] border-2 transition-transform duration-200 group-hover:scale-[1.03] ${
+                          active
+                            ? "border-[var(--angel-blue)] bg-[var(--angel-blue)]/10 shadow-[inset_0_0_0_1px_rgba(53,111,165,0.08)]"
+                            : "border-[var(--angel-text-faint)]/45 bg-[var(--angel-surface-muted)]"
+                        }`}
+                      />
+                    </span>
+                    <span className="mt-2 flex w-full min-w-0 items-center justify-between gap-2">
+                      <span className="min-w-0 truncate text-[13px] font-bold leading-tight">
+                        {label}
+                      </span>
+                    </span>
+                    <span className="mt-1 block w-full truncate text-[11.5px] leading-4 opacity-70">
+                      {useCase}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          <div className="flex flex-wrap items-start justify-between gap-y-5 gap-x-6 border-t border-[var(--angel-border)]/60 pt-5">
+            {/* Quality */}
+            <div className="min-w-0">
+              <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <label className="block text-[12.5px] font-bold text-[var(--angel-text-soft)]">
+                  Quality
+                </label>
+                <QualityInfoTooltip />
+                <span className="text-[11.5px] leading-4 text-[var(--angel-text-faint)]">
+                  4K는 Nano Banana Pro 전용
+                </span>
+              </div>
+              <div className="inline-flex gap-1 rounded-lg bg-[var(--angel-bg-soft)] p-1">
+                {(["1K", "2K", "4K"] as const).map((q) => {
+                  const active = quality === q;
+                  const disabled = !supportsImageQuality(model, q);
+                  return (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => handleQualitySelect(q)}
+                      disabled={disabled}
+                      title={disabled ? unsupportedQualityMessage(model, q) : QUALITY_LABEL[q]}
+                      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
+                        active
+                          ? "bg-[var(--angel-surface)] text-[var(--angel-blue)] shadow-[0_1px_0_rgba(53,111,165,0.08)]"
+                          : "text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)]"
+                      } ${disabled ? "cursor-not-allowed opacity-45 hover:text-[var(--angel-text-soft)]" : ""}`}
+                    >
+                      <span className="text-[14px] font-semibold">{QUALITY_LABEL[q]}</span>
+                      <span className="text-[11.5px] opacity-65">{q}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Count */}
+            <div className="w-full max-w-[220px] sm:w-[200px]">
+              <div className="mb-2 flex items-baseline justify-between">
+                <label className="text-[12.5px] font-bold text-[var(--angel-text-soft)]">
+                  Count
+                </label>
+                <span className="text-[17px] font-bold tabular-nums text-[var(--angel-blue)] leading-none">
+                  {count}<span className="text-[12px] font-normal text-[var(--angel-text-faint)] ml-0.5">장</span>
+                </span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={4}
+                step={1}
+                value={count}
+                onChange={(e) => setCount(Number(e.target.value))}
+                className="compact-range"
+              />
+              <div className="flex justify-between text-[10px] text-[var(--angel-text-faint)] mt-1">
+                <span>1</span><span>2</span><span>3</span><span>4</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-[var(--angel-border)]/60 flex items-center justify-between text-[14px]">
+            <span className="text-[var(--angel-text-soft)] font-medium">예상 비용</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Coins size={16} className="text-[var(--angel-blue)]" />
+              <span className="font-bold tabular-nums text-[var(--angel-blue)] text-[18px]">{cost}</span>
+              <span className="text-[13px] text-[var(--angel-text-faint)]">크레딧</span>
+              {hasInsufficientCredits && (
+                <span className="ml-2 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-500">잔액 부족</span>
+              )}
+            </span>
+          </div>
+        </div>
+
+        {/* Hero CTA — primary navy, large */}
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={
+            !canGenerate
+          }
+          className="primary-action w-full min-h-[56px] text-[16px] md:min-h-[64px] md:text-[18px]"
+        >
+          {isGenerating ? (
+            <span className="inline-flex items-center gap-2.5">
+              <Sparkles size={18} className="animate-pulse" />
+              생성 중입니다…
+            </span>
+          ) : (
+            <span className="inline-flex flex-nowrap items-center justify-center gap-2 md:gap-3 whitespace-nowrap">
+              <Sparkles size={18} />
+              이미지 생성하기
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-white/20 bg-white/10 px-2.5 py-0.5 text-[12px] font-medium text-white/85 md:px-3 md:py-1 md:text-[13px]">
+                <Coins size={12} />
+                <span className="tabular-nums">{cost}</span>
+              </span>
+            </span>
+          )}
+        </button>
+
+        <GenerationProgress state={progress} />
+
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-[14.5px] text-red-600">
+            {error}
+          </div>
+        )}
+
+        {/* Results */}
+        {results.length > 0 && (
+          <div className="pt-6">
+            <h2 className="font-ko-display mb-4 text-[28px] text-[var(--angel-text)] md:text-[34px]">
+              결과 <span className="text-[var(--angel-text-faint)] font-normal">({results.length}장)</span>
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {results.map((item, i) => (
+                <div
+                  key={item.id}
+                  className="result-card p-2"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setPreviewResult(item)}
+                    className="block w-full overflow-hidden rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--angel-blue)]/45"
+                    aria-label="결과 이미지 크게 보기"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.src}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full rounded-md transition-transform duration-200 hover:scale-[1.01]"
+                    />
+                  </button>
+                  <div className="mt-2 flex justify-center">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium ${
+                        item.saveStatus === "saved"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : item.saveStatus === "failed"
+                          ? "bg-rose-50 text-rose-600"
+                          : "bg-sky-50 text-sky-700"
+                      }`}
+                      title={item.saveError ?? undefined}
+                    >
+                      {item.saveStatus === "saving" ? (
+                        <Sparkles size={11} className="animate-pulse" />
+                      ) : (
+                        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                          {item.saveStatus === "failed" ? (
+                            <path d="M4 4l8 8M12 4l-8 8" />
+                          ) : (
+                            <polyline points="3 8 7 12 13 4" />
+                          )}
+                        </svg>
+                      )}
+                      {item.saveStatus === "saved"
+                        ? "Mypage 저장됨"
+                        : item.saveStatus === "failed"
+                        ? "저장 실패"
+                        : "Mypage 저장 중"}
+                    </span>
                   </div>
-                )}
-              </div>
+	                  <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
+	                    <button
+	                      onClick={() => void sendToEditor(item.src)}
+	                      className="secondary-action bg-[var(--angel-blue)] text-white hover:text-white"
+                    >
+                      <PenLine size={13} />
+                      편집
+	                    </button>
+	                    <button
+	                      onClick={() => downloadImage(item.src, i)}
+	                      className="secondary-action"
+                    >
+                      <Download size={13} />
+                      다운로드
+	                    </button>
+	                    <button
+	                      onClick={() => handleShare(item)}
+	                      disabled={item.isSharing || Boolean(item.sharedId)}
+	                      className="secondary-action disabled:opacity-55"
+	                    >
+	                      <Share2 size={13} />
+	                      {item.sharedId ? "공유됨" : item.isSharing ? "공유 중..." : "공유"}
+	                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+        )}
+      </div>
 
-          {/* Error */}
-          {error && (
-            <div className="mt-6 space-y-3">
-              <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 text-[15px] text-red-600 text-center">
-                {error}
-              </div>
-              <button onClick={handleBack} className="w-full angel-btn angel-btn-secondary py-2.5 text-[14px]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-                이전 단계로 돌아가기
-              </button>
-            </div>
-          )}
-
-          {/* Result */}
-          {result && (
-            <div className="mt-2 space-y-8">
-              <div className="text-center">
-                <div className="celestial-divider mb-6">
-                  <span className="text-[12px] tracking-[0.3em] text-[var(--angel-lavender)]">RESULT</span>
-                </div>
-                <div className="glass-card rounded-2xl p-3 inline-block relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={result.image} alt="생성된 이미지" className="max-w-full rounded-xl" style={{ maxHeight: "512px" }} />
-                  {premium && (
-                    <div className="absolute top-5 right-5 flex items-center gap-1.5 rounded-full bg-[#ffd700]/90 px-2.5 py-1 shadow-md">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" stroke="#b8860b" strokeWidth="1"><path d="M3 18h18V8l-4 4-5-6-5 6-4-4v10z" /></svg>
-                      <span className="text-[12px] font-medium text-white">2K</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Prompt used */}
-                <div className="mt-4 mx-auto max-w-md">
-                  <p className="text-[12px] text-[var(--angel-text-faint)] mb-1">사용된 프롬프트</p>
-                  <p className="glass-card rounded-lg px-3 py-2 text-[13px] leading-relaxed text-[var(--angel-text-soft)] text-left">
-                    {composedPromptKo || prompt}
-                  </p>
-                </div>
-
-                {/* Contribution badges — visual evidence of user control */}
-                <ContributionBadges objects={sceneObjects} />
-
-                {/* Action buttons */}
-                <div className="mt-4 flex flex-wrap justify-center gap-2 md:mt-5 md:gap-3">
-                  <button onClick={handleDownload} className="angel-btn angel-btn-secondary text-[14px]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                    다운로드
-                  </button>
-                  <button onClick={handleSave} disabled={isSaved} className={`angel-btn text-[14px] ${isSaved ? "angel-btn-primary" : "angel-btn-secondary"}`}>
-                    {isSaved ? (
-                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>저장됨</>
-                    ) : (
-                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>저장하기</>
-                    )}
-                  </button>
-                  <button onClick={handleShare} disabled={isSharing || isShared} className={`angel-btn text-[14px] ${isShared ? "angel-btn-primary" : "angel-btn-secondary"}`}>
-                    {isShared ? (
-                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>공유됨</>
-                    ) : isSharing ? (
-                      <span className="flex items-center gap-1.5"><span className="twinkle text-[12px]">✦</span>공유 중...</span>
-                    ) : (
-                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>Discover에 공유</>
-                    )}
-                  </button>
-                  <button onClick={handleReset} className="angel-btn angel-btn-secondary text-[14px]">
-                    새로 만들기
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
+      {previewResult && (
+        <ResultImageModal
+          src={previewResult.src}
+          alt={prompt}
+          title="생성 결과"
+          onClose={() => setPreviewResult(null)}
+        />
       )}
     </div>
   );
