@@ -14,7 +14,7 @@ export function QualityInfoTooltip() {
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-1/2 top-7 z-40 w-[min(280px,calc(100vw-2rem))] -translate-x-1/2 rounded-lg border border-[var(--angel-border)] bg-white px-3 py-2.5 text-left text-[11.5px] font-normal leading-5 text-[var(--angel-text-soft)] opacity-0 shadow-[0_14px_34px_rgba(30,41,59,0.14)] transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+        className="pointer-events-none absolute left-0 top-7 z-40 w-[min(280px,calc(100vw-2rem))] rounded-lg border border-[var(--angel-border)] bg-white px-3 py-2.5 text-left text-[11.5px] font-normal leading-5 text-[var(--angel-text-soft)] opacity-0 shadow-[0_14px_34px_rgba(30,41,59,0.14)] transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
       >
         <span className="block font-bold text-[var(--angel-text)]">화질 옵션 안내</span>
         <span className="mt-1 block">
