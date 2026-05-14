@@ -7,7 +7,7 @@ interface AngelLogoProps {
 
 // Original: 604×524 → ratio ≈ 1.153
 const ASPECT = 604 / 524;
-// logo-sm.webp: 184×160 (≤80px 표시용), logo.webp: 604×524 (원본)
+// logo-sm.webp: 138×120 (≤48px 표시용), logo.webp: 604×524 (원본)
 const SM_THRESHOLD = 48;
 
 export function AngelLogo({ size = 32, className = "", priority = false }: AngelLogoProps) {
@@ -17,7 +17,6 @@ export function AngelLogo({ size = 32, className = "", priority = false }: Angel
   return (
     <picture>
       {!useSmall && <source media="(max-width: 640px)" srcSet="/logo-sm.webp" type="image/webp" />}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={useSmall ? "/logo-sm.webp" : "/logo.webp"}
         alt="MyAngel"

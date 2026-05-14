@@ -1,485 +1,444 @@
+import Image from "next/image";
 import Link from "next/link";
-import { AngelLogo } from "@/components/ui/angel-logo";
-import { AsciiHearts } from "@/components/ui/ascii-hearts";
-import { StudioDemo } from "@/components/home/studio-demo";
 import {
-  OrnateCross,
-  LineHeart,
-  HaloRays,
-  Quill,
-  Hourglass,
-  Fleur,
-  RadiantEye,
-  Chalice,
-  Orb,
-} from "@/components/ui/ornaments";
+  ArrowRight,
+  CircleDot,
+  Eraser,
+  ImagePlus,
+  Layers3,
+  MousePointerClick,
+  PenLine,
+  RefreshCcw,
+  ScanLine,
+  Share2,
+  Sparkles,
+} from "lucide-react";
 
-/**
- * Landing page — 天使界隈 / lace-devotional aesthetic.
- *
- * Layout principle: ONE parchment ground runs end-to-end. Section variation
- * comes from local glow blobs and ribbon banner colors, not from different
- * background bases — so the page reads as one continuous illustrated book.
- */
-export default function HomePage() {
-  return (
-    <div className="parchment-ground">
-      {/* Page-wide watermark cross (subtle) */}
-      <div className="watermark-cross pointer-events-none fixed inset-0 opacity-60" />
-
-      <div className="relative">
-        {/* ════════════════════════════════════════════
-            ✟  HERO
-            ════════════════════════════════════════════ */}
-        <section className="relative flex flex-col items-center justify-center overflow-hidden px-4 pt-20 pb-24 text-center md:px-5 md:pt-28 md:pb-32">
-          <AsciiHearts />
-
-          {/* Soft localized glows */}
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-[10%] top-[16%] h-44 w-44 rounded-full bg-[var(--angel-blue)]/15 blur-[90px] md:h-60 md:w-60" />
-            <div className="absolute right-[12%] top-[12%] h-48 w-48 rounded-full bg-[var(--angel-lavender)]/15 blur-[90px] md:h-64 md:w-64" />
-            <div className="absolute bottom-[18%] left-[20%] h-36 w-36 rounded-full bg-[var(--angel-blue)]/12 blur-[80px] md:h-52 md:w-52" />
-          </div>
-
-          {/* Slowly rotating concentric circles */}
-          <div className="pointer-events-none">
-            <div className="absolute left-1/2 top-1/2 h-[min(540px,90vw)] w-[min(540px,90vw)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--angel-blue)]/22 rotate-slow md:h-[min(620px,68vw)] md:w-[min(620px,68vw)]" />
-            <div
-              className="absolute left-1/2 top-1/2 h-[min(600px,96vw)] w-[min(600px,96vw)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[var(--angel-lavender)]/22 md:h-[min(680px,76vw)] md:w-[min(680px,76vw)]"
-              style={{ animation: "rotate-slow 50s linear infinite reverse" }}
-            />
-          </div>
-
-          {/* Logo (no halo behind, no side wings — the logo itself is winged) */}
-          <div className="relative z-10 ascend ascend-d1 flex items-center justify-center">
-            <div className="relative float-gentle">
-              <AngelLogo size={92} priority />
-            </div>
-          </div>
-
-          {/* Main heading */}
-          <h1 className="relative z-10 ascend ascend-d2 mt-8 font-heading text-[52px] leading-[0.95] tracking-[0.02em] text-[var(--angel-text)] md:mt-10 md:text-[96px]">
-            My<span className="shimmer-text">Angel</span>
-          </h1>
-
-          {/* Uppercase subtitle (NO script font — keeps things calm) */}
-          <p className="relative z-10 ascend ascend-d3 mt-5 text-[11px] font-medium uppercase tracking-[0.32em] text-[var(--angel-text-soft)] md:mt-7 md:text-[13px]">
-            ✦ Interactive Prompt Optimization Studio ✦
-          </p>
-
-          {/* Ornament divider — echoes section-divider */}
-          <div className="relative z-10 ascend ascend-d3 mt-5 flex items-center gap-4 md:mt-7">
-            <span className="h-px w-16 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/60 md:w-20" />
-            <span className="text-[16px] text-[var(--angel-lavender)] twinkle">✦</span>
-            <span className="h-px w-16 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/60 md:w-20" />
-          </div>
-
-          {/* Korean lead body */}
-          <p className="relative z-10 ascend ascend-d4 mt-6 max-w-sm text-[14px] leading-[2] text-[var(--angel-text)] [word-break:keep-all] md:mt-8 md:max-w-md md:text-[16px]">
-            간단한 입력만으로{" "}
-            <strong className="font-semibold text-[var(--angel-lavender)]">
-              프롬프트를 최적화
-            </strong>
-            하고,
-            <br />
-            원하는 이미지를 정확하게 생성해보세요.
-          </p>
-
-          {/* CTA */}
-          <div className="relative z-10 ascend ascend-d5 mt-10 md:mt-12">
-            <Link href="/generate" className="winged-cta">
-              <OrnateCross size={13} className="text-[var(--angel-lavender)]" />
-              Studio 시작하기
-              <OrnateCross size={13} className="text-[var(--angel-lavender)]" />
-            </Link>
-          </div>
-        </section>
-
-        <div className="section-divider">
-          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
-        </div>
-
-        {/* ════════════════════════════════════════════
-            ✟  THE PROBLEM
-            ════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden px-4 pt-20 pb-24 md:px-5 md:pt-24 md:pb-28">
-          <div className="pointer-events-none absolute -top-12 left-1/2 h-72 w-[80vw] max-w-[640px] -translate-x-1/2 rounded-full bg-[var(--angel-blue)]/12 blur-[100px]" />
-
-          <div className="relative mx-auto max-w-2xl">
-            <SectionTitle eyebrow="Chapter I" title="The Problem" />
-
-            <p className="mt-12 text-center text-[16px] leading-[2] text-[var(--angel-text)] [word-break:keep-all] md:text-[18px]">
-              강력한 AI 이미지 모델 앞에서도,
-              <br />
-              우리는 여전히 <strong className="font-semibold text-[var(--angel-lavender)]">좋은 프롬프트</strong>가 필요합니다.
-            </p>
-
-            <p className="mx-auto mt-10 max-w-md text-center text-[14px] leading-[2] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
-              &ldquo;예쁜 방&rdquo;, &ldquo;감성적인 분위기&rdquo; 같은 표현은
-              <br />
-              AI가 이해하기엔 너무 추상적입니다.
-              <br />
-              결국 수십 번 수정하며 시간과 비용을 낭비하게 돼요.
-            </p>
-
-            <p className="mx-auto mt-12 max-w-md text-center text-[14px] leading-[2] text-[var(--angel-text)] [word-break:keep-all] md:text-[15px]">
-              MyAngel은 추상적인 입력을{" "}
-              <strong className="font-semibold text-[var(--angel-lavender)]">
-                구조화된 프롬프트
-              </strong>
-              로 바꾸고,
-              <br />
-              약한 표현을 자동으로 가려 고쳐드립니다.
-            </p>
-          </div>
-        </section>
-
-        <div className="section-divider">
-          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
-        </div>
-
-        {/* ════════════════════════════════════════════
-            ✟  FEATURE I — Prompt Enhancement
-            ════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden px-4 pt-20 pb-24 md:px-5 md:pt-24 md:pb-28">
-          <div className="pointer-events-none absolute -top-12 right-[10%] h-72 w-72 rounded-full bg-[var(--angel-blue)]/12 blur-[100px]" />
-          <div className="pointer-events-none absolute bottom-0 left-[8%] h-64 w-64 rounded-full bg-[var(--angel-lavender)]/10 blur-[90px]" />
-
-          <div className="relative mx-auto max-w-3xl">
-            <SectionTitle
-              eyebrow="Chapter II"
-              title="Prompt Enhancement"
-              subtitle="약한 표현을 가려, 더 구체적인 문장으로 다듬어드려요."
-            />
-            <div className="mb-12" />
-
-            <div className="devotional-frame rounded-sm">
-              <span className="corner-bl" />
-              <span className="corner-br" />
-
-              <div className="mb-1 flex items-center gap-2 text-[10px] tracking-[0.28em] uppercase text-[var(--angel-text-faint)]">
-                <Quill size={11} className="text-amber-500" />
-                Before
-              </div>
-              <div className="rounded-xl border border-[var(--angel-blue)]/30 bg-white px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] shadow-[0_0_0_3px_rgba(91,155,213,0.08)] md:text-[15px]">
-                하얀 침대가 있는{" "}
-                <span className="rounded px-0.5 bg-amber-50/80 text-amber-800 underline decoration-wavy decoration-2 decoration-amber-400 underline-offset-[3px]">
-                  예쁜
-                </span>{" "}
-                방,{" "}
-                <span className="rounded px-0.5 bg-amber-50/80 text-amber-800 underline decoration-wavy decoration-2 decoration-amber-400 underline-offset-[3px]">
-                  감성적인
-                </span>{" "}
-                분위기의 창문
-              </div>
-
-              <div className="mt-3 flex items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200/60 px-4 py-2 text-[13px] font-medium text-amber-800">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-[11px] font-bold text-white">
-                    2
-                  </span>
-                  개선할 수 있는 표현
-                </span>
-              </div>
-
-              <div className="my-5 flex items-center justify-center gap-3 text-[var(--angel-lavender)]/55">
-                <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/50" />
-                <OrnateCross size={12} />
-                <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/50" />
-              </div>
-
-              <div className="mb-1 flex items-center gap-2 text-[10px] tracking-[0.28em] uppercase text-[var(--angel-text-faint)]">
-                <Fleur size={11} className="text-sky-500" />
-                After
-              </div>
-              <div className="rounded-xl border border-[var(--angel-blue)]/30 bg-white px-4 py-3 text-[14px] leading-[1.8] text-[var(--angel-text)] shadow-[0_0_0_3px_rgba(91,155,213,0.08)] md:text-[15px]">
-                하얀 침대가 있는{" "}
-                <span className="rounded px-0.5 bg-sky-50 text-sky-700 underline decoration-2 decoration-sky-400 underline-offset-[3px]">
-                  아이보리 톤의 미니멀한
-                </span>{" "}
-                방,{" "}
-                <span className="rounded px-0.5 bg-sky-50 text-sky-700 underline decoration-2 decoration-sky-400 underline-offset-[3px]">
-                  부드러운 자연광이 들어오는 따뜻한
-                </span>{" "}
-                분위기의 창문
-              </div>
-
-              <div className="mt-3 flex items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 border border-sky-200/60 px-4 py-2 text-[13px] font-medium text-sky-700">
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <polyline points="3 8 7 12 13 4" />
-                  </svg>
-                  모든 표현이 개선되었어요
-                </span>
-              </div>
-
-              <p className="mt-5 text-center text-[12px] text-[var(--angel-text-faint)]">
-                — 밑줄 친 단어를 클릭하면 더 구체적인 표현이 추천돼요 —
-              </p>
-            </div>
-
-            <div className="mt-10 grid grid-cols-1 gap-4 md:mt-12 md:grid-cols-3 md:gap-5">
-              <BenefitCard
-                icon={<RadiantEye size={17} className="text-[var(--angel-lavender)]" />}
-                title="자동 감지"
-                desc="약한 표현을 AI가 찾아내요"
-              />
-              <BenefitCard
-                icon={<LineHeart size={17} className="text-[var(--angel-pink)]" />}
-                title="원클릭 개선"
-                desc="클릭 한 번으로 구체화"
-              />
-              <BenefitCard
-                icon={<Orb size={17} className="text-[var(--angel-blue)]" />}
-                title="자동 번역"
-                desc="한국어 → 영어 최적화"
-              />
-            </div>
-          </div>
-        </section>
-
-        <div className="section-divider">
-          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
-        </div>
-
-        {/* ════════════════════════════════════════════
-            ✟  FEATURE II — Object Studio
-            ════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden px-4 pt-20 pb-24 md:px-5 md:pt-24 md:pb-28">
-          <div className="pointer-events-none absolute top-0 left-[10%] h-72 w-72 rounded-full bg-[var(--angel-blue)]/10 blur-[100px]" />
-          <div className="pointer-events-none absolute bottom-0 right-[10%] h-72 w-72 rounded-full bg-[var(--angel-lavender)]/12 blur-[100px]" />
-
-          <div className="relative mx-auto max-w-3xl">
-            <SectionTitle
-              eyebrow="Chapter III"
-              title="Object Studio"
-              subtitle="장면을 구성 요소로 나누고, 각 요소를 독립적으로 다듬어요."
-            />
-            <div className="mb-12" />
-
-            <div className="devotional-frame rounded-sm">
-              <span className="corner-bl" />
-              <span className="corner-br" />
-              <StudioDemo />
-            </div>
-
-            <div className="mt-10 grid grid-cols-1 gap-4 md:mt-12 md:grid-cols-3 md:gap-5">
-              <BenefitCard
-                icon={<Fleur size={17} className="text-[var(--angel-lavender)]" />}
-                title="자동 분해"
-                desc="입력을 요소별로 분리"
-              />
-              <BenefitCard
-                icon={<Hourglass size={17} className="text-[var(--angel-pink)]" />}
-                title="속성 슬라이더"
-                desc="세밀한 강도 조절"
-              />
-              <BenefitCard
-                icon={<OrnateCross size={17} className="text-[var(--angel-blue)]" />}
-                title="충돌 감지"
-                desc="속성 간 모순을 경고"
-              />
-            </div>
-          </div>
-        </section>
-
-        <div className="section-divider">
-          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
-        </div>
-
-        {/* ════════════════════════════════════════════
-            ✟  MORE FEATURES
-            ════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden px-4 pt-20 pb-24 md:px-5 md:pt-24 md:pb-28">
-          <div className="pointer-events-none absolute top-0 right-[20%] h-64 w-64 rounded-full bg-[var(--angel-lavender)]/10 blur-[100px]" />
-
-          <div className="relative mx-auto max-w-2xl">
-            <SectionTitle
-              eyebrow="Chapter IV"
-              title="More"
-              subtitle="프롬프트 강화 외에도 작은 도움들이 있어요."
-            />
-            <div className="mb-12" />
-
-            <div className="space-y-5 md:space-y-6">
-              <DevotionalRow
-                icon={<Chalice size={18} className="text-[var(--angel-lavender)]" />}
-                title="프롬프트 비교"
-                body={
-                  <>
-                    원본 입력과 AI가 정제한 프롬프트를 <strong>나란히</strong> 비교할 수 있어요.
-                    한국어/영어 토글로 실제 이미지 생성에 쓰이는 영어 프롬프트도 확인 가능합니다.
-                  </>
-                }
-              />
-              <DevotionalRow
-                icon={<HaloRays size={20} className="text-[var(--angel-pink)]" />}
-                title="AI 이미지 생성"
-                body={
-                  <>
-                    최적화된 프롬프트로 바로 이미지를 생성해요.
-                    레퍼런스 이미지 업로드와 <strong>프리미엄 2K 고해상도</strong>까지 지원합니다.
-                  </>
-                }
-              />
-            </div>
-          </div>
-        </section>
-
-        <div className="section-divider">
-          <span className="text-[20px] text-[var(--angel-lavender)] twinkle">✦</span>
-        </div>
-
-        {/* ════════════════════════════════════════════
-            ✟  HOW IT WORKS
-            ════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden px-4 pt-20 pb-28 md:px-5 md:pt-24 md:pb-32">
-          <div className="pointer-events-none absolute -top-12 left-1/2 h-80 w-[80vw] max-w-[700px] -translate-x-1/2 rounded-full bg-[var(--angel-lavender)]/12 blur-[110px]" />
-
-          <div className="relative mx-auto max-w-5xl">
-            <SectionTitle
-              eyebrow="Chapter V"
-              title="How it works"
-              subtitle="한 줄의 입력에서 완성된 이미지까지, 다섯 단계."
-            />
-            <div className="mb-16 md:mb-20" />
-
-            <div className="grid grid-cols-1 gap-12 md:grid-cols-5 md:gap-4">
-              {STEPS.map((step, i) => (
-                <div key={step.num} className="relative flex flex-col items-center text-center">
-                  {i < STEPS.length - 1 && (
-                    <span className="absolute left-[calc(50%+36px)] right-[calc(-50%+36px)] top-[32px] hidden h-px bg-gradient-to-r from-[var(--angel-lavender)]/40 via-[var(--angel-pink)]/30 to-[var(--angel-lavender)]/40 md:block" />
-                  )}
-
-                  <div className="roman-medallion">{step.num}</div>
-
-                  <h3 className="mt-5 text-[15px] font-semibold tracking-[0.04em] text-[var(--angel-text)]">
-                    {step.kor}
-                  </h3>
-                  <p className="mt-2 max-w-[200px] text-[13px] leading-[1.75] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[14px]">
-                    {step.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-20 flex flex-col items-center md:mt-24">
-              <Link href="/generate" className="winged-cta">
-                <LineHeart size={13} className="text-[var(--angel-pink)]" />
-                지금 시작하기
-                <LineHeart size={13} className="text-[var(--angel-pink)]" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer sign-off — echoes the section divider */}
-        <div className="pb-16 pt-4 text-center">
-          <div className="mx-auto flex items-center justify-center gap-4">
-            <span className="h-px w-16 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/55 md:w-24" />
-            <span className="text-[14px] text-[var(--angel-lavender)] twinkle">✦</span>
-            <span className="h-px w-16 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/55 md:w-24" />
-          </div>
-          <p className="mt-4 font-script text-[22px] leading-none text-[var(--angel-lavender)]/75 md:text-[26px]">
-            sincerely, your angel
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════
-   Local helpers
-   ═══════════════════════════════════════════════════════ */
-
-const STEPS = [
-  { num: "I",   kor: "입력", desc: "원하는 이미지를 한 문장으로 설명해요" },
-  { num: "II",  kor: "분해", desc: "장면을 구성 요소 단위로 자동 분해해요" },
-  { num: "III", kor: "편집", desc: "각 요소의 속성을 세밀하게 조절해요" },
-  { num: "IV",  kor: "강화", desc: "추상적 표현을 구체적으로 개선해요" },
-  { num: "V",   kor: "생성", desc: "최적화된 프롬프트로 이미지를 만들어요" },
+const PRODUCT_FLOW = [
+  {
+    href: "/generate",
+    icon: ImagePlus,
+    label: "Generate",
+    title: "이미지 생성",
+    body: "문장이나 참고 이미지로 첫 결과를 만듭니다.",
+  },
+  {
+    href: "/edit",
+    icon: MousePointerClick,
+    label: "Edit",
+    title: "부분 수정",
+    body: "원하는 곳만 골라 추가·삭제·교체합니다.",
+    primary: true,
+  },
+  {
+    href: "/discover",
+    icon: Share2,
+    label: "Share",
+    title: "저장·공유",
+    body: "완성본을 보관하고 갤러리에 공유합니다.",
+  },
 ];
 
-function SectionTitle({
-  eyebrow,
-  title,
-  subtitle,
-}: {
-  eyebrow: string;
-  title: string;
-  subtitle?: string;
-}) {
+const TECH_POINTS = [
+  { title: "고칠 곳만 콕 집기", body: "수정할 영역을 마커로 지정합니다.", icon: CircleDot },
+  { title: "주변은 그대로 유지", body: "선택하지 않은 배경과 분위기는 건드리지 않습니다.", icon: ScanLine },
+  { title: "만든 뒤 바로 수정", body: "생성 결과를 다시 업로드하지 않고 이어서 고칩니다.", icon: Layers3 },
+  { title: "결과 저장·공유", body: "마음에 든 이미지를 보관하고 링크로 보여줍니다.", icon: Share2 },
+];
+
+const BEFORE_IMAGE = "/demo/same-base-before.webp";
+
+const EDIT_EXAMPLES = [
+  {
+    title: "추가하기",
+    body: "마커로 표시한 빈 공간에 별 조명을 새로 넣었어요.",
+    afterImage: "/demo/same-add-after.webp",
+    beforeAlt: "수정 전 하늘색 책상 원본 이미지",
+    afterAlt: "같은 책상 이미지에 별 모양 조명이 추가된 결과",
+    icon: ImagePlus,
+    markers: [{ cx: 39, cy: 41, r: 12, color: "#22c55e", label: "추가" }],
+  },
+  {
+    title: "삭제하기",
+    body: "마커로 표시한 종이와 테이프만 지우고 책상을 채웠어요.",
+    afterImage: "/demo/same-remove-after.webp",
+    beforeAlt: "수정 전 구겨진 종이와 테이프가 있는 책상 이미지",
+    afterAlt: "같은 책상 이미지에서 구겨진 종이와 테이프가 삭제된 결과",
+    icon: Eraser,
+    markers: [{ cx: 56, cy: 43, r: 10, color: "#ef4444", label: "삭제" }],
+  },
+  {
+    title: "교체하기",
+    body: "마커로 표시한 머그컵을 날개 달린 오브제로 바꿨어요.",
+    afterImage: "/demo/same-replace-after.webp",
+    beforeAlt: "수정 전 오른쪽에 흰 머그컵이 있는 책상 이미지",
+    afterAlt: "같은 책상 이미지에서 머그컵이 날개 달린 오브제로 교체된 결과",
+    icon: RefreshCcw,
+    markers: [{ cx: 82, cy: 42, r: 13, color: "#3877ea", label: "교체" }],
+  },
+  {
+    title: "섞어서 사용하기",
+    body: "추가·삭제·교체 영역을 각각 표시하고 한 번에 적용했어요.",
+    afterImage: "/demo/same-mix-after.webp",
+    beforeAlt: "수정 전 별 조명과 날개 오브제가 없는 책상 이미지",
+    afterAlt: "같은 책상 이미지에서 추가, 삭제, 교체가 함께 적용된 결과",
+    icon: Sparkles,
+    markers: [
+      { cx: 39, cy: 41, r: 12, color: "#22c55e", label: "추가" },
+      { cx: 56, cy: 43, r: 10, color: "#ef4444", label: "삭제" },
+      { cx: 84, cy: 42, r: 13, color: "#3877ea", label: "교체" },
+    ],
+  },
+];
+
+const WORKFLOW_STEPS = [
+  ["01", "첫 이미지 만들기", "문장이나 참고 이미지로 시작합니다."],
+  ["02", "원하는 부분 고치기", "추가·삭제·교체할 곳만 고릅니다."],
+  ["03", "결과 공유하기", "완성본을 저장하고 공개 페이지로 보여줍니다."],
+];
+
+const PREVIEW_MARKERS = [
+  { cx: 39, cy: 38, r: 8.4, color: "#22c55e", label: "1·추가", selected: true },
+  { cx: 57, cy: 49, r: 5.5, color: "#ef4444", label: "2·제거" },
+  { cx: 86, cy: 47, r: 8.2, color: "#3877ea", label: "3·교체" },
+] as const;
+
+export default function HomePage() {
   return (
-    <div className="text-center">
-      <p className="text-[10px] font-medium uppercase tracking-[0.36em] text-[var(--angel-text-faint)] md:text-[11px]">
-        {eyebrow}
-      </p>
-      <h2 className="mt-4 font-heading text-[32px] leading-[1.05] tracking-[0.02em] text-[var(--angel-text)] md:mt-5 md:text-[46px]">
-        {title}
-      </h2>
-      <div className="mx-auto mt-5 flex items-center justify-center gap-4 md:mt-6">
-        <span className="h-px w-14 bg-gradient-to-r from-transparent to-[var(--angel-lavender)]/60 md:w-20" />
-        <span className="text-[14px] text-[var(--angel-lavender)] twinkle">✦</span>
-        <span className="h-px w-14 bg-gradient-to-l from-transparent to-[var(--angel-lavender)]/60 md:w-20" />
+    <div className="bg-[var(--background)]">
+      <section className="mx-auto grid min-h-[calc(100vh-7rem)] w-[min(100%-32px,1120px)] gap-7 py-9 md:grid-cols-[0.88fr_1.12fr] md:items-center md:py-10">
+        <div>
+          <p className="home-eyebrow">AI 이미지 생성·편집·공유</p>
+          <h1 className="home-title">
+            만들고,
+            <br />
+            원하는 곳만 고치고,
+            <br />
+            바로 공유하세요.
+          </h1>
+          <p className="home-lead">
+            이미지를 생성한 뒤 필요한 부분만 다시 수정하고, 완성본을 저장·공유하는 AI 이미지 스튜디오입니다.
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Link href="/generate" prefetch={false} className="primary-action min-h-[50px] px-6">
+              첫 이미지 만들기
+              <ArrowRight size={17} />
+            </Link>
+            <Link href="/edit" prefetch={false} className="secondary-action min-h-[50px] px-5 text-[15px]">
+              부분 수정하기
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid gap-3">
+          <PipelinePreview />
+          <div className="grid gap-3 md:grid-cols-3">
+            {PRODUCT_FLOW.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch={false}
+                  className={`home-action p-4 ${item.primary ? "home-action-primary" : ""}`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--angel-border)] bg-white text-[var(--angel-blue)]">
+                      <Icon size={19} />
+                    </span>
+                    <span lang="en" className="font-en text-[11px] font-bold text-[var(--angel-text-faint)]">
+                      {item.label}
+                    </span>
+                  </div>
+                  <h2 className="mt-4 text-[15px] font-bold text-[var(--angel-text)]">{item.title}</h2>
+                  <p className="mt-2 text-[12.5px] leading-5 text-[var(--angel-text-soft)]">{item.body}</p>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-[min(100%-32px,1120px)] py-10 md:py-12">
+        <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="page-kicker">수정 예시</p>
+            <h2 className="font-ko-display mt-2 text-[24px] leading-tight text-[var(--angel-text)] md:text-[31px]">
+              수정 전후를 한눈에 비교합니다.
+            </h2>
+          </div>
+          <p className="max-w-[430px] text-[14px] leading-7 text-[var(--angel-text-soft)] md:text-right">
+            수정할 영역만 표시하고, 결과에서 바뀐 부분을 바로 확인할 수 있습니다.
+          </p>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          {EDIT_EXAMPLES.map(({ title, body, afterImage, beforeAlt, afterAlt, icon: Icon, markers }) => (
+            <article key={title} className="result-card">
+              <div className="grid grid-cols-2 gap-px bg-[var(--angel-border)]">
+                <DemoFrame src={BEFORE_IMAGE} alt={beforeAlt} label="Before" markers={markers} />
+                <DemoFrame src={afterImage} alt={afterAlt} label="After" markers={[]} active />
+              </div>
+              <div className="p-4">
+                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--angel-border)] bg-[var(--angel-blue-pale)] text-[var(--angel-blue)]">
+                  <Icon size={17} />
+                </div>
+                <h3 className="text-[15px] font-bold text-[var(--angel-text)]">{title}</h3>
+                <p className="mt-1.5 text-[12.5px] leading-5 text-[var(--angel-text-soft)]">{body}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-y border-[var(--angel-border)] bg-[var(--angel-surface)]">
+        <div className="mx-auto grid w-[min(100%-32px,1120px)] gap-3 py-6 md:grid-cols-4">
+          {TECH_POINTS.map(({ title, body, icon: Icon }) => (
+            <article key={title} className="surface-card p-4">
+              <Icon size={18} className="mb-3 text-[var(--angel-blue)]" />
+              <h2 className="text-[14px] font-bold text-[var(--angel-text)]">{title}</h2>
+              <p className="mt-1.5 text-[12.5px] leading-5 text-[var(--angel-text-soft)]">{body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto grid w-[min(100%-32px,1120px)] gap-4 py-12 md:grid-cols-[0.8fr_1.2fr] md:items-start">
+        <div>
+          <p className="page-kicker">서비스 흐름</p>
+          <h2 className="font-ko-display mt-2 text-[25px] leading-tight text-[var(--angel-text)] md:text-[32px]">
+            생성부터 공유까지 한 흐름으로 이어집니다.
+          </h2>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {WORKFLOW_STEPS.map(([num, title, body]) => (
+            <article key={num} className="surface-card p-4">
+              <p lang="en" className="font-en text-[22px] font-bold leading-none text-[var(--angel-blue)]">{num}</p>
+              <h3 className="mt-4 text-[14px] font-bold text-[var(--angel-text)]">{title}</h3>
+              <p className="mt-2 text-[12.5px] leading-5 text-[var(--angel-text-soft)]">{body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function PipelinePreview() {
+  return (
+    <div className="tool-surface overflow-hidden">
+      <div className="flex items-center justify-between border-b border-[var(--angel-border)] bg-[var(--angel-surface-muted)] px-4 py-3">
+        <div className="flex items-center gap-2 text-[13px] font-bold text-[var(--angel-text)]">
+          <PenLine size={16} className="text-[var(--angel-blue)]" />
+          실시간 작업 흐름
+        </div>
+        <span lang="en" className="font-en text-[11px] font-bold text-[var(--angel-text-faint)]">
+          generate / edit / share
+        </span>
       </div>
-      {subtitle && (
-        <p className="mx-auto mt-5 max-w-md text-[14px] leading-[1.85] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
-          {subtitle}
-        </p>
+
+      <div className="grid gap-0 md:grid-cols-[1fr_190px]">
+        <div className="p-4">
+          <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-[var(--angel-border)] bg-white">
+            <Image
+              src={BEFORE_IMAGE}
+              alt="부분 수정을 위해 마커를 표시한 하늘색 책상 원본 이미지"
+              fill
+              loading="eager"
+              fetchPriority="high"
+              quality={70}
+              sizes="(min-width: 768px) 620px, calc(100vw - 64px)"
+              className="object-cover"
+            />
+            <svg
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full"
+              viewBox="0 0 100 62.5"
+              preserveAspectRatio="none"
+            >
+              {PREVIEW_MARKERS.map((marker) => (
+                <PreviewMarker key={marker.label} {...marker} />
+              ))}
+            </svg>
+          </div>
+        </div>
+
+        <div className="border-t border-[var(--angel-border)] bg-[var(--angel-surface-muted)] p-4 md:border-l md:border-t-0">
+          <MiniStatus icon={ImagePlus} label="이미지 생성" />
+          <MiniStatus icon={MousePointerClick} label="수정할 곳 선택" />
+          <MiniStatus icon={Sparkles} label="그 부분만 다시 생성" />
+          <MiniStatus icon={Share2} label="저장·공유" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PreviewMarker({
+  cx,
+  cy,
+  r,
+  color,
+  label,
+  selected = false,
+}: {
+  cx: number;
+  cy: number;
+  r: number;
+  color: string;
+  label: string;
+  selected?: boolean;
+}) {
+  const handleX = cx + r * 0.7071;
+  const handleY = cy + r * 0.7071;
+  const closeX = cx + r * 0.7071;
+  const closeY = cy - r * 0.7071;
+
+  return (
+    <g>
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill={color}
+        fillOpacity={selected ? 0.18 : 0.13}
+        stroke={color}
+        strokeWidth={selected ? 0.52 : 0.34}
+      />
+      <text
+        x={cx}
+        y={cy - r - 1.5}
+        fill={color}
+        fontSize="2.35"
+        fontWeight="700"
+        textAnchor="middle"
+        style={{ fontFamily: "var(--font-ko), sans-serif" }}
+      >
+        {label}
+      </text>
+      <circle
+        cx={handleX}
+        cy={handleY}
+        r="1.45"
+        fill="white"
+        stroke={color}
+        strokeWidth="0.34"
+      />
+      {selected && (
+        <g>
+          <circle cx={closeX} cy={closeY} r="1.55" fill="#ef4444" stroke="white" strokeWidth="0.34" />
+          <path
+            d={`M ${closeX - 0.55} ${closeY - 0.55} L ${closeX + 0.55} ${closeY + 0.55} M ${closeX + 0.55} ${closeY - 0.55} L ${closeX - 0.55} ${closeY + 0.55}`}
+            stroke="white"
+            strokeWidth="0.34"
+            strokeLinecap="round"
+          />
+        </g>
       )}
+    </g>
+  );
+}
+
+function DemoFrame({
+  src,
+  alt,
+  label,
+  markers,
+  active = false,
+}: {
+  src: string;
+  alt: string;
+  label: "Before" | "After";
+  markers: Array<{ cx: number; cy: number; r: number; color: string; label: string }>;
+  active?: boolean;
+}) {
+  return (
+    <div className="relative aspect-[16/10] bg-[var(--angel-surface-muted)]">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        loading="lazy"
+        quality={60}
+        sizes="(min-width: 768px) 280px, 50vw"
+        className="object-cover"
+      />
+      <svg
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full"
+        viewBox="0 0 100 62.5"
+        preserveAspectRatio="none"
+      >
+        {markers.map((marker) => (
+          <DemoMarker key={`${marker.label}-${marker.cx}-${marker.cy}`} {...marker} />
+        ))}
+      </svg>
+      <span
+        lang="en"
+        className={`font-en absolute left-2 top-2 rounded-md border px-2 py-1 text-[10px] font-bold leading-none shadow-sm ${
+          active
+            ? "border-[var(--angel-blue)] bg-[var(--angel-blue)] text-white"
+            : "border-white/80 bg-white/90 text-[var(--angel-text-soft)]"
+        }`}
+      >
+        {label}
+      </span>
     </div>
   );
 }
 
-function BenefitCard({
-  icon,
-  title,
-  desc,
+function DemoMarker({
+  cx,
+  cy,
+  r,
+  color,
+  label,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
+  cx: number;
+  cy: number;
+  r: number;
+  color: string;
+  label: string;
 }) {
   return (
-    <div className="group relative px-5 py-6 text-center">
-      <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[var(--angel-lavender)]/45 to-transparent" />
-      <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--angel-lavender)]/30 bg-white/70">
-        {icon}
-      </div>
-      <p className="text-[14px] font-semibold tracking-[0.04em] text-[var(--angel-text)]">
-        {title}
-      </p>
-      <p className="mx-auto mt-1.5 max-w-[180px] text-[12px] leading-[1.7] text-[var(--angel-text-soft)] [word-break:keep-all]">
-        {desc}
-      </p>
-    </div>
+    <g>
+      <circle cx={cx} cy={cy} r={r} fill={color} fillOpacity="0.14" stroke="white" strokeWidth="1.25" />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="0.86" strokeDasharray="2 1.4" />
+      <rect
+        x={Math.max(2, cx - 5.4)}
+        y={Math.max(2, cy - r - 6)}
+        width="10.8"
+        height="4.4"
+        rx="1.8"
+        fill={color}
+      />
+      <text
+        x={cx}
+        y={Math.max(5.1, cy - r - 2.9)}
+        fill="white"
+        fontSize="2.35"
+        fontWeight="800"
+        textAnchor="middle"
+        style={{ fontFamily: "var(--font-ko), sans-serif" }}
+      >
+        {label}
+      </text>
+    </g>
   );
 }
 
-function DevotionalRow({
-  icon,
-  title,
-  body,
+function MiniStatus({
+  icon: Icon,
+  label,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  body: React.ReactNode;
+  icon: typeof Sparkles;
+  label: string;
 }) {
   return (
-    <div className="group relative flex items-start gap-5 px-2 py-6">
-      <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-[var(--angel-lavender)]/40 to-transparent" />
-      <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--angel-lavender)]/30 bg-white/70">
-        {icon}
-      </div>
-      <div className="flex-1">
-        <h3 className="text-[16px] font-semibold tracking-[0.03em] text-[var(--angel-text)] md:text-[17px]">
-          {title}
-        </h3>
-        <p className="mt-2 text-[14px] leading-[1.9] text-[var(--angel-text-soft)] [word-break:keep-all] md:text-[15px]">
-          {body}
-        </p>
-      </div>
+    <div className="flex items-center gap-2 border-b border-[var(--angel-border)] py-2 last:border-b-0">
+      <Icon size={15} className="text-[var(--angel-blue)]" />
+      <span className="text-[12px] font-bold text-[var(--angel-text-soft)]">{label}</span>
     </div>
   );
 }

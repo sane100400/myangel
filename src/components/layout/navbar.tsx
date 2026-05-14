@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { AngelLogo } from "@/components/ui/angel-logo";
-import { createClient } from "@/lib/supabase/client";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import type { User } from "@supabase/supabase-js";
+import { Menu, X } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
-  { href: "/generate", label: "Studio" },
+  { href: "/generate", label: "Generate" },
   { href: "/discover", label: "Discover" },
   { href: "/boards", label: "Mypage" },
 ];
@@ -22,25 +23,36 @@ export function Navbar() {
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
+    let mounted = true;
+    let unsubscribe: (() => void) | null = null;
 
-    // 초기 유저 로드
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+    void import("@/lib/supabase/client").then(({ createClient }) => {
+      if (!mounted) return;
+      const supabase = createClient();
+
+      // 초기 유저 로드
+      supabase.auth.getUser().then(({ data }) => {
+        if (mounted) setUser(data.user);
+      });
+
+      // auth 상태 변경 구독
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          if (mounted) setUser(session?.user ?? null);
+        }
+      );
+      unsubscribe = () => subscription.unsubscribe();
     });
 
-    // auth 상태 변경 구독
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      unsubscribe?.();
+    };
   }, []);
 
   const handleLogout = async () => {
     setLoggingOut(true);
+    const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null);
@@ -51,38 +63,37 @@ export function Navbar() {
   // 아바타 URL (Google/Kakao 프로필 이미지)
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
   const displayEmail = user?.email ? (user.email.length > 18 ? user.email.slice(0, 15) + "..." : user.email) : "";
+  const displayName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email;
 
   return (
-    <header className="sticky top-0 z-50 lace-bottom">
-      {/* Background — mobile: opaque (no blur), desktop: glassmorphism */}
-      <div className="absolute inset-0 bg-[#f0f4fb] md:bg-[#f0f4fb]/85 md:backdrop-blur-xl" />
-
-      <nav className="relative mx-auto flex h-14 max-w-5xl items-center justify-between px-4 md:h-[72px] md:px-5">
+    <header className="sticky top-0 z-50 border-b border-[var(--angel-border)] bg-[var(--angel-surface)]/94 backdrop-blur-md">
+      <nav className="relative mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:h-16 md:px-5">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <AngelLogo size={32} priority className="transition-transform duration-300 group-hover:scale-110" />
-          <span className="text-base tracking-[0.1em] text-[var(--angel-text)] font-heading md:text-lg">
+        <Link href="/" prefetch={false} className="flex items-center gap-2 group">
+          <AngelLogo size={28} priority className="transition-transform duration-200 group-hover:scale-[1.04]" />
+          <span lang="en" className="text-base text-[var(--angel-text)] font-heading md:text-lg">
             My<span className="text-[var(--angel-blue)]">Angel</span>
           </span>
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 rounded-lg border border-[var(--angel-border)] bg-[var(--angel-surface-muted)] p-1 md:flex">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              pathname === item.href ||
+              (item.href === "/generate" && pathname === "/edit");
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`nav-link flex flex-col items-center gap-0.5 px-4 py-1 text-[14px] tracking-[0.08em] ${
+                prefetch={false}
+                lang="en"
+                className={`nav-link font-en flex min-h-8 items-center rounded-md px-3 text-[13px] font-bold ${
                   isActive
-                    ? "nav-link-active text-[var(--angel-text)]"
+                    ? "bg-[var(--angel-surface)] text-[var(--angel-blue)] shadow-[0_1px_0_rgba(53,111,165,0.08)]"
                     : "text-[var(--angel-text-soft)]"
                 }`}
               >
-                <span className={`text-[12px] text-[var(--angel-lavender)] transition-opacity duration-200 ${isActive ? "opacity-100" : "opacity-0"}`}>
-                  ✦
-                </span>
                 {item.label}
               </Link>
             );
@@ -93,31 +104,30 @@ export function Navbar() {
         <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <>
-              {avatarUrl && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={avatarUrl}
-                  alt=""
-                  className="h-7 w-7 rounded-full border border-[var(--angel-border)] object-cover"
-                />
-              )}
+              <UserAvatar
+                src={avatarUrl}
+                name={displayName}
+                className="h-7 w-7"
+                fallbackClassName="text-[11px]"
+              />
               <span className="text-[13px] text-[var(--angel-text-soft)] max-w-[120px] truncate">
                 {displayEmail}
               </span>
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-4 py-1.5 text-[13px] tracking-[0.08em] text-[var(--angel-text-soft)] transition-all hover:bg-white/80 hover:border-red-300 hover:text-red-500 disabled:opacity-50"
+                className="secondary-action min-h-8 px-3 text-[12px] disabled:opacity-50"
               >
-                {loggingOut ? "..." : "Logout"}
+                <span lang="en" className="font-en">{loggingOut ? "..." : "Logout"}</span>
               </button>
             </>
           ) : (
             <Link
               href="/auth/login"
-              className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-5 py-1.5 text-[13px] tracking-[0.08em] text-[var(--angel-text)] transition-all hover:bg-white/80 hover:border-[var(--angel-blue)]/40 hover:text-[var(--angel-blue)]"
+              prefetch={false}
+              className="secondary-action min-h-8 px-4 text-[12px]"
             >
-              Login
+              <span lang="en" className="font-en">Login</span>
             </Link>
           )}
         </div>
@@ -127,64 +137,56 @@ export function Navbar() {
           {!user && (
             <Link
               href="/auth/login"
-              className="rounded-full border border-[var(--angel-text)]/20 bg-white/50 px-3.5 py-1.5 text-[13px] tracking-[0.06em] text-[var(--angel-text-soft)] transition-all active:bg-white/80"
+              prefetch={false}
+              className="secondary-action min-h-8 px-3 text-[12px]"
             >
-              Login
+              <span lang="en" className="font-en">Login</span>
             </Link>
           )}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors active:bg-white/50"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--angel-border)] bg-[var(--angel-surface)] text-[var(--angel-text-soft)] transition-colors active:bg-[var(--angel-bg-soft)]"
             aria-label="메뉴"
           >
-          <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="text-[var(--angel-text-soft)]">
-            {mobileOpen ? (
-              <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-            ) : (
-              <>
-                <path d="M2 4H14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                <path d="M4 8H12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                <path d="M2 12H14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-              </>
-            )}
-          </svg>
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </nav>
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="relative border-t border-white/20 bg-[#edf1fa]/95 backdrop-blur-xl px-5 pb-4 pt-2 md:hidden">
+        <div className="relative border-t border-[var(--angel-border)] bg-[var(--angel-surface)] px-5 pb-4 pt-2 md:hidden">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              pathname === item.href ||
+              (item.href === "/generate" && pathname === "/edit");
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 py-3 text-[14px] tracking-[0.06em] transition-colors ${
+                lang="en"
+                className={`font-en flex items-center gap-3 rounded-md px-2 py-3 text-[14px] font-bold transition-colors ${
                   isActive
-                    ? "text-[var(--angel-text)] font-medium"
+                    ? "bg-[var(--angel-surface-muted)] text-[var(--angel-blue)]"
                     : "text-[var(--angel-text-soft)]"
                 }`}
               >
-                <span className={`text-[8px] text-[var(--angel-lavender)] ${isActive ? "opacity-100" : "opacity-30"}`}>✦</span>
                 {item.label}
               </Link>
             );
           })}
-          <div className="mt-2 pt-3 border-t border-white/20">
+          <div className="mt-2 border-t border-[var(--angel-border)] pt-3">
             {user ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                  {avatarUrl && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={avatarUrl}
-                      alt=""
-                      className="h-7 w-7 rounded-full border border-[var(--angel-border)] object-cover shrink-0"
-                    />
-                  )}
+                  <UserAvatar
+                    src={avatarUrl}
+                    name={displayName}
+                    className="h-7 w-7"
+                    fallbackClassName="text-[11px]"
+                  />
                   <span className="text-[14px] text-[var(--angel-text-soft)] truncate">
                     {displayEmail}
                   </span>
@@ -192,18 +194,19 @@ export function Navbar() {
                 <button
                   onClick={() => { setMobileOpen(false); handleLogout(); }}
                   disabled={loggingOut}
-                  className="shrink-0 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 px-4 py-2 text-[14px] text-red-400 transition-colors hover:bg-red-50"
+                  className="secondary-action shrink-0 text-red-500"
                 >
-                  Logout
+                  <span lang="en" className="font-en">Logout</span>
                 </button>
               </div>
             ) : (
               <Link
                 href="/auth/login"
+                prefetch={false}
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center py-2.5 rounded-xl border border-[var(--angel-text)]/15 bg-white/50 text-[15px] tracking-[0.06em] text-[var(--angel-text-soft)]"
+                className="secondary-action flex w-full"
               >
-                Login
+                <span lang="en" className="font-en">Login</span>
               </Link>
             )}
           </div>

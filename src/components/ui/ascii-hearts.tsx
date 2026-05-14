@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
 /**
  * 4 visually distinct SVG hearts for the hero section.
- * Each appears at a random position within its designated zone on every visit.
  */
 
 const HEART =
@@ -76,55 +73,34 @@ interface HProps {
   style?: React.CSSProperties;
 }
 
-/** Random float between min and max */
-const rand = (min: number, max: number) => Math.random() * (max - min) + min;
-
 /**
  * Each heart has a zone (top/left ranges in %) and size range.
- * Position is randomized within the zone on every page load.
  */
 // Desktop zones (큰 하트, 넓은 영역)
 const DESKTOP_ZONE_DEFS = [
-  { Comp: DotHeart,     sizeRange: [120, 160], topRange: [12, 30], leftRange: [5, 25]  },
-  { Comp: OutlineHeart, sizeRange: [90, 130],  topRange: [10, 28], rightRange: [5, 25] },
-  { Comp: CrossHeart,   sizeRange: [80, 120],  topRange: [55, 75], rightRange: [5, 25] },
-  { Comp: StripedHeart, sizeRange: [60, 100],  topRange: [60, 80], leftRange: [5, 25]  },
+  { Comp: DotHeart, size: 138, top: "18%", left: "9%" },
+  { Comp: OutlineHeart, size: 112, top: "15%", right: "12%" },
+  { Comp: CrossHeart, size: 96, top: "63%", right: "10%" },
+  { Comp: StripedHeart, size: 78, top: "68%", left: "15%" },
 ];
 
 // Mobile zones — 좌상단 + 우중단, 자연스럽게 분산
 const MOBILE_ZONE_DEFS = [
-  { Comp: OutlineHeart, sizeRange: [75, 95],  topRange: [5, 15],  leftRange: [3, 12]  },
-  { Comp: OutlineHeart, sizeRange: [65, 85],  topRange: [35, 48], rightRange: [3, 12] },
+  { Comp: OutlineHeart, size: 84, top: "9%", left: "5%" },
+  { Comp: OutlineHeart, size: 72, top: "42%", right: "6%" },
 ];
 
-interface ZoneDef {
+interface HeartDef {
   Comp: React.ComponentType<HProps>;
-  sizeRange: number[];
-  topRange: number[];
-  leftRange?: number[];
-  rightRange?: number[];
-}
-
-function generate(zones: ZoneDef[]) {
-  return zones.map((z) => ({
-    ...z,
-    size: Math.round(rand(z.sizeRange[0], z.sizeRange[1])),
-    top: `${rand(z.topRange[0], z.topRange[1]).toFixed(1)}%`,
-    left: z.leftRange ? `${rand(z.leftRange[0], z.leftRange[1]).toFixed(1)}%` : undefined,
-    right: z.rightRange ? `${rand(z.rightRange[0], z.rightRange[1]).toFixed(1)}%` : undefined,
-  }));
+  size: number;
+  top: string;
+  left?: string;
+  right?: string;
 }
 
 export function AsciiHearts() {
-  const [desktopHearts, setDesktopHearts] = useState<ReturnType<typeof generate> | null>(null);
-  const [mobileHearts, setMobileHearts] = useState<ReturnType<typeof generate> | null>(null);
-
-  useEffect(() => {
-    setDesktopHearts(generate(DESKTOP_ZONE_DEFS));
-    setMobileHearts(generate(MOBILE_ZONE_DEFS));
-  }, []);
-
-  if (!desktopHearts || !mobileHearts) return null;
+  const desktopHearts: HeartDef[] = DESKTOP_ZONE_DEFS;
+  const mobileHearts: HeartDef[] = MOBILE_ZONE_DEFS;
 
   return (
     <>
