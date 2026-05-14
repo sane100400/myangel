@@ -204,7 +204,6 @@ export default function MyPage() {
           sourceGenerationId: image.id,
           title: cleanTitle,
           prompt: promptText,
-          tags: [],
         }),
       });
       const data = await res.json().catch(() => ({}));

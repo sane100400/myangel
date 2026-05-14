@@ -218,7 +218,7 @@ Supabase
 |---|---|---|
 | `user_generations` | 사용자의 생성·편집 결과 메타데이터 저장 | RLS로 본인만 조회·삭제 |
 | `user-generations` Storage | 개인 저장 이미지 원본 보관 | private bucket, signed URL로 접근 |
-| `discover_images` | 공개 공유 이미지의 제목, 태그, 프롬프트, 작성자 스냅샷, 생성 시각 저장 | 공개 조회, 작성자만 수정·삭제 |
+| `discover_images` | 공개 공유 이미지의 제목, 프롬프트, 작성자 스냅샷, 생성 시각 저장 | 공개 조회, 작성자만 수정·삭제 |
 | `shared-images` Storage | Discover 공개 이미지와 썸네일 보관 | public read, 작성자 경로에만 업로드/삭제 |
 | `user_credits`, `credit_ledger` | 크레딧 잔액과 거래 원장 | 본인 조회, 쓰기는 service-role RPC |
 | `pricing_config` | 생성·편집 단가와 가입 보너스 설정 | 공개 조회, 운영자가 DB에서 조정 |

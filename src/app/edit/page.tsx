@@ -932,7 +932,6 @@ export default function EditPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: shareTitle,
-          tags: [],
           prompt: item.prompt,
           sourceGenerationId: savedId,
         }),

@@ -243,7 +243,6 @@ CREATE TABLE IF NOT EXISTS discover_images (
   storage_path TEXT NOT NULL,
   thumb_path TEXT,
   title TEXT NOT NULL DEFAULT '',
-  tags TEXT[] NOT NULL DEFAULT '{}',
   prompt TEXT NOT NULL DEFAULT '',
   user_name TEXT,
   user_avatar TEXT,

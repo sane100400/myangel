@@ -22,7 +22,6 @@ export async function GET(
         image_url: publicUrl(img.storage_path),
         thumb_url: img.thumb_path ? publicUrl(img.thumb_path) : publicUrl(img.storage_path),
         title: img.title,
-        tags: img.tags,
         prompt: img.prompt,
         user_id: img.user_id,
         user_name: img.user_name,

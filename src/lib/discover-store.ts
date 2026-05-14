@@ -12,7 +12,6 @@ export interface DiscoverImage {
   storage_path: string;
   thumb_path: string | null;
   title: string;
-  tags: string[];
   prompt: string;
   user_name: string | null;
   user_avatar: string | null;
@@ -43,7 +42,6 @@ export function hashIP(ip: string): string {
 
 interface ListOptions {
   userFilter?: string | null;
-  tag?: string | null;
   query?: string | null;
   dateFrom?: string | null;
   dateTo?: string | null;
@@ -63,9 +61,6 @@ export async function listImages(
     .select("*");
   if (opts.userFilter) {
     q = q.eq("user_id", opts.userFilter);
-  }
-  if (opts.tag) {
-    q = q.contains("tags", [opts.tag]);
   }
   if (opts.query) {
     const escaped = opts.query.replace(/[%_]/g, "\\$&");
@@ -121,7 +116,6 @@ export interface CreateImageInput {
   storage_path: string;
   thumb_path?: string | null;
   title: string;
-  tags: string[];
   prompt: string;
   user_name: string | null;
   user_avatar: string | null;
@@ -142,7 +136,6 @@ export async function createImage(
       storage_path: input.storage_path,
       thumb_path: input.thumb_path ?? null,
       title: input.title,
-      tags: input.tags,
       prompt: input.prompt,
       user_name: input.user_name,
       user_avatar: input.user_avatar,

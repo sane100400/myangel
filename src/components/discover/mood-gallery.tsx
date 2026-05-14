@@ -10,7 +10,6 @@ interface MoodImage {
   image_url: string;       // full image URL (Supabase Storage)
   thumb_url?: string;
   title?: string | null;
-  tags?: string[];
   prompt?: string;
 }
 
@@ -77,7 +76,6 @@ export function MoodGallery({
             imageUrl={image.image_url}
             thumbUrl={image.thumb_url}
             title={image.title}
-            tags={image.tags}
             index={index}
           />
         ))}

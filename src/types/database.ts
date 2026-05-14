@@ -41,7 +41,6 @@ export interface Database {
           storage_path: string;
           thumb_path: string | null;
           title: string;
-          tags: string[];
           prompt: string;
           user_name: string | null;
           user_avatar: string | null;
@@ -57,7 +56,6 @@ export interface Database {
           storage_path: string;
           thumb_path?: string | null;
           title?: string;
-          tags?: string[];
           prompt?: string;
           user_name?: string | null;
           user_avatar?: string | null;

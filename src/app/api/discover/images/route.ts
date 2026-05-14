@@ -5,7 +5,6 @@ import { logger } from "@/lib/logger";
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const userFilter = url.searchParams.get("user")?.trim() || null;
-  const tag = url.searchParams.get("tag")?.trim() || null;
   const query = url.searchParams.get("q")?.trim().slice(0, 80) || null;
   const dateFrom = url.searchParams.get("from")?.trim() || null;
   const dateTo = url.searchParams.get("to")?.trim() || null;
@@ -20,7 +19,6 @@ export async function GET(req: NextRequest) {
   try {
     const rows = await listImages({
       userFilter,
-      tag,
       query,
       dateFrom,
       dateTo,
@@ -34,7 +32,6 @@ export async function GET(req: NextRequest) {
       image_url: publicUrl(img.storage_path),
       thumb_url: img.thumb_path ? publicUrl(img.thumb_path) : publicUrl(img.storage_path),
       title: img.title,
-      tags: img.tags,
       prompt: img.prompt,
       user_id: img.user_id,
       user_name: img.user_name,
@@ -52,7 +49,6 @@ export async function GET(req: NextRequest) {
         limit,
         offset,
         userFilter,
-        tag,
         query,
         dateFrom,
         dateTo,

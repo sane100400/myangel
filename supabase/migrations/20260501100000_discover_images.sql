@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS discover_images (
   storage_path TEXT NOT NULL,            -- Supabase Storage 'shared-images' 버킷 내 경로 (예: '<user_id>/<id>.webp')
   thumb_path  TEXT,                      -- 썸네일 storage 경로 (선택)
   title       TEXT NOT NULL DEFAULT '',
-  tags        TEXT[] NOT NULL DEFAULT '{}',
   prompt      TEXT NOT NULL DEFAULT '',
   user_name   TEXT,                      -- 표시용 이름 스냅샷 (공유 시점)
   user_avatar TEXT,                      -- 표시용 아바타 URL 스냅샷

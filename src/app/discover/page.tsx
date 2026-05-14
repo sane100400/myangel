@@ -6,7 +6,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { MoodGallery } from "@/components/discover/mood-gallery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { DEFAULT_DISCOVER_TAGS } from "@/lib/discover-tags";
 import { Search, X } from "lucide-react";
 
 const DISCOVER_PAGE_SIZE = 12;
@@ -16,7 +15,6 @@ interface DiscoverImage {
   image_url: string;
   thumb_url?: string;
   title?: string | null;
-  tags?: string[];
   prompt?: string;
   user_id?: string | null;
   user_name?: string | null;
@@ -28,7 +26,6 @@ function DiscoverContent() {
   const router = useRouter();
   const userFilter = searchParams.get("user");
   const refreshKey = searchParams.get("refresh");
-  const tagFilter = searchParams.get("tag") ?? "";
   const rawSortFilter = searchParams.get("sort") ?? "latest";
   const sortFilter =
     rawSortFilter === "oldest" || rawSortFilter === "title" ? rawSortFilter : "latest";
@@ -62,7 +59,6 @@ function DiscoverContent() {
   const buildImageQuery = useCallback((offset: number) => {
     const qs = new URLSearchParams();
     if (userFilter) qs.set("user", userFilter);
-    if (tagFilter) qs.set("tag", tagFilter);
     if (queryFilter) qs.set("q", queryFilter);
     if (fromFilter) qs.set("from", fromFilter);
     if (toFilter) qs.set("to", toFilter);
@@ -71,7 +67,7 @@ function DiscoverContent() {
     qs.set("limit", String(DISCOVER_PAGE_SIZE));
     qs.set("offset", String(offset));
     return qs;
-  }, [fromFilter, queryFilter, refreshKey, sortFilter, tagFilter, toFilter, userFilter]);
+  }, [fromFilter, queryFilter, refreshKey, sortFilter, toFilter, userFilter]);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,7 +131,7 @@ function DiscoverContent() {
   }, [buildImageQuery, hasMore, images.length, isLoading, isLoadingMore]);
 
   const clearFilter = () => router.push("/discover");
-  const hasFilters = Boolean(userFilter || tagFilter || queryFilter || fromFilter || toFilter || sortFilter !== "latest");
+  const hasFilters = Boolean(userFilter || queryFilter || fromFilter || toFilter || sortFilter !== "latest");
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -236,21 +232,6 @@ function DiscoverContent() {
             </button>
           )}
         </form>
-        <div className="mt-3 flex max-w-full gap-1.5 overflow-x-auto pb-1">
-          {DEFAULT_DISCOVER_TAGS.map((tag) => {
-            const active = tagFilter === tag;
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => updateFilters({ tag: active ? null : tag })}
-                className={`angel-tag shrink-0 text-[12px] ${active ? "angel-tag-active" : ""}`}
-              >
-                #{tag}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {/* Gallery */}

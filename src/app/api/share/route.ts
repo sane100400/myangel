@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
-import { DEFAULT_DISCOVER_TAGS } from "@/lib/discover-tags";
 import {
   hashIP,
   getRateLimitCount,
@@ -32,7 +31,6 @@ const ALLOWED_MIME: Record<string, Buffer> = {
   "image/webp": Buffer.from([0x52, 0x49, 0x46, 0x46]),
 };
 
-const TAGS_SET = new Set(DEFAULT_DISCOVER_TAGS);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface LoadedImage {
@@ -120,10 +118,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "잘못된 요청 본문" }, { status: 400 });
     }
 
-    const { image, title, tags, prompt, sourceGenerationId } = body as {
+    const { image, title, prompt, sourceGenerationId } = body as {
       image?: string;
       title?: string;
-      tags?: string[];
       prompt?: string;
       sourceGenerationId?: string;
     };
@@ -271,12 +268,6 @@ export async function POST(request: NextRequest) {
     const cleanTitle =
       sanitizeText(title ?? "", TITLE_MAX_LENGTH) ||
       buildImageTitle(cleanPrompt, "공유 이미지", TITLE_MAX_LENGTH);
-    const cleanTags = (Array.isArray(tags) ? tags : [])
-      .map((t) => sanitizeText(t, 30))
-      .filter((t) => t && TAGS_SET.has(t))
-      .slice(0, 8);
-
-    const finalTags = cleanTags;
 
     // ── 작성자 스냅샷 ──
     const userMeta = (user.user_metadata ?? {}) as Record<string, unknown>;
@@ -310,7 +301,6 @@ export async function POST(request: NextRequest) {
       storage_path: storagePath,
       thumb_path: thumbPath,
       title: cleanTitle,
-      tags: finalTags,
       prompt: cleanPrompt,
       user_name: userName,
       user_avatar: userAvatar,

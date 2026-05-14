@@ -12,7 +12,6 @@ import { CalendarClock, ChevronLeft, Clipboard, ImageOff, Loader2, PenLine, Refr
 interface SharedImageData {
   id: string;
   title: string;
-  tags: string[];
   prompt: string;
   user_id?: string | null;
   user_name?: string | null;

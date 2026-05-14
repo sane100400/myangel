@@ -651,7 +651,6 @@ export default function GeneratePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: shareTitle,
-          tags: [],
           prompt: prompt.trim(),
           sourceGenerationId: savedId,
         }),

@@ -7,11 +7,10 @@ interface MoodCardProps {
   imageUrl: string;        // full image URL (Supabase Storage)
   thumbUrl?: string;       // thumbnail URL — falls back to full
   title?: string | null;
-  tags?: string[];
   index?: number;
 }
 
-export function MoodCard({ id, imageUrl, thumbUrl, title, tags, index = 0 }: MoodCardProps) {
+export function MoodCard({ id, imageUrl, thumbUrl, title, index = 0 }: MoodCardProps) {
   const isEager = index < 4;
   const src = thumbUrl || imageUrl;
   return (
@@ -36,18 +35,6 @@ export function MoodCard({ id, imageUrl, thumbUrl, title, tags, index = 0 }: Moo
         <p className="line-clamp-2 text-[13px] font-bold leading-snug text-[var(--angel-text)] [word-break:keep-all]">
           {title || "공유 이미지"}
         </p>
-        {tags && tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-md border border-[var(--angel-border)] bg-[var(--angel-surface-muted)] px-2 py-0.5 text-[10.5px] text-[var(--angel-text-soft)]"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
     </Link>
   );
