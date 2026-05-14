@@ -1,46 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { getImageUrl } from "@/lib/seed-data";
 
 interface MoodCardProps {
   id: string;
+  imageUrl: string;        // full image URL (Supabase Storage)
+  thumbUrl?: string;       // thumbnail URL — falls back to full
   title?: string | null;
   tags?: string[];
   index?: number;
 }
 
-export function MoodCard({ id, title, tags, index = 0 }: MoodCardProps) {
-  const isEager = index < 2;
+export function MoodCard({ id, imageUrl, thumbUrl, title, tags, index = 0 }: MoodCardProps) {
+  const isEager = index < 4;
+  const src = thumbUrl || imageUrl;
   return (
     <Link
       href={`/discover/${id}`}
-      className="group relative overflow-hidden rounded-xl glass-card block aspect-[3/4]"
+      className="result-card group block transition-[border-color,box-shadow] duration-200 hover:border-[var(--angel-blue-light)]"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={getImageUrl(id, "thumb")}
-        srcSet={`${getImageUrl(id, "thumb_sm")} 200w, ${getImageUrl(id, "thumb")} 400w`}
-        sizes="(max-width: 640px) 50vw, 25vw"
-        alt={title || "무드 이미지"}
-        loading={isEager ? "eager" : "lazy"}
-        decoding="async"
-        {...(isEager ? { fetchPriority: "high" as const } : {})}
-        className="w-full h-full object-cover absolute inset-0"
-        style={{ backgroundColor: "var(--angel-bg-soft, #e8ecf4)" }}
-      />
+      <div className="aspect-[3/4] overflow-hidden bg-[var(--angel-surface-muted)]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={title || "공유 이미지"}
+          loading={isEager ? "eager" : "lazy"}
+          decoding="async"
+          {...(isEager ? { fetchPriority: "high" as const } : {})}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.015]"
+          style={{ backgroundColor: "var(--angel-bg-soft, #e8ecf4)" }}
+        />
+      </div>
 
-      {/* Hover overlay — tags/title */}
-      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-[#1a1a2e]/60 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        {title && (
-          <p className="mb-1.5 text-[13px] font-medium text-white/90 tracking-[0.04em]">{title}</p>
-        )}
+      <div className="min-h-[78px] border-t border-[var(--angel-border)] bg-[var(--angel-surface)] p-3">
+        <p className="line-clamp-2 text-[13px] font-bold leading-snug text-[var(--angel-text)] [word-break:keep-all]">
+          {title || "공유 이미지"}
+        </p>
         {tags && tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-1">
             {tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="rounded-full bg-white/15 backdrop-blur-sm px-2 py-0.5 text-[11px] text-white/80 border border-white/10"
+                className="rounded-md border border-[var(--angel-border)] bg-[var(--angel-surface-muted)] px-2 py-0.5 text-[10.5px] text-[var(--angel-text-soft)]"
               >
                 #{tag}
               </span>

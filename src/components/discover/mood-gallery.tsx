@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { MoodCard } from "./mood-card";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const PAGE_SIZE = 8;
+import { ImagePlus } from "lucide-react";
 
 interface MoodImage {
   id: string;
-  image_url: string; // image ID (not a URL path)
+  image_url: string;       // full image URL (Supabase Storage)
+  thumb_url?: string;
   title?: string | null;
   tags?: string[];
   prompt?: string;
@@ -16,77 +16,66 @@ interface MoodImage {
 
 interface MoodGalleryProps {
   images: MoodImage[];
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
-export function MoodGallery({ images }: MoodGalleryProps) {
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+export function MoodGallery({
+  images,
+  hasMore = false,
+  isLoadingMore = false,
+  onLoadMore,
+}: MoodGalleryProps) {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-  const hasMore = visibleCount < images.length;
-
-  // Reset when images change (e.g. tag filter)
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [images]);
-
-  const loadMore = useCallback(() => {
-    if (!hasMore || isLoadingMore) return;
-    setIsLoadingMore(true);
-    // Small delay for UX feedback
-    setTimeout(() => {
-      setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, images.length));
-      setIsLoadingMore(false);
-    }, 300);
-  }, [hasMore, isLoadingMore, images.length]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (!sentinel || !onLoadMore) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMore();
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          onLoadMore();
         }
       },
       { rootMargin: "200px" }
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [loadMore]);
+  }, [hasMore, isLoadingMore, onLoadMore]);
 
   if (images.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--angel-blue)]/8">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--angel-blue)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <polyline points="21 15 16 10 5 21" />
-          </svg>
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-lg border border-[var(--angel-border)] bg-[var(--angel-surface-muted)]">
+          <ImagePlus size={28} className="text-[var(--angel-blue)]" />
         </div>
         <p className="text-[15px] font-medium text-[var(--angel-text)]">아직 공유된 이미지가 없어요</p>
-        <p className="mt-2 text-[13px] text-[var(--angel-text-soft)] max-w-xs">
-          Studio에서 이미지를 생성하고 공유하면 여기에 표시돼요
+        <p className="mt-2 text-[13.5px] text-[var(--angel-text-soft)] max-w-xs leading-[1.7] [word-break:keep-all]">
+          이미지를 생성·편집하고 공유하면 여기에 표시돼요
         </p>
-        <a href="/generate" className="mt-6 angel-btn angel-btn-primary text-[13px]">
-          <span className="text-[11px]">✦</span>
-          이미지 만들러 가기
-        </a>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+          <a href="/generate" className="primary-action discover-empty-action">
+            이미지 생성
+          </a>
+          <a href="/edit" className="secondary-action discover-empty-action">
+            이미지 편집
+          </a>
+        </div>
       </div>
     );
   }
 
-  const visibleImages = images.slice(0, visibleCount);
-
   return (
     <div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {visibleImages.map((image, index) => (
+        {images.map((image, index) => (
           <MoodCard
             key={image.id}
             id={image.id}
+            imageUrl={image.image_url}
+            thumbUrl={image.thumb_url}
             title={image.title}
             tags={image.tags}
             index={index}
@@ -100,18 +89,13 @@ export function MoodGallery({ images }: MoodGalleryProps) {
           {isLoadingMore && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="mb-3 h-48 rounded-xl" />
+                <Skeleton key={i} className="mb-3 h-48 rounded-lg" />
               ))}
             </div>
           )}
         </div>
       ) : (
-        <div className="mt-10 flex flex-col items-center gap-2 text-center">
-          <div className="flex items-center gap-3">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/30" />
-            <span className="text-[12px] text-[var(--angel-lavender)] twinkle">✦ ✧ ✦</span>
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/30" />
-          </div>
+        <div className="mt-10 flex flex-col items-center gap-2 border-t border-[var(--angel-border)] pt-6 text-center">
           <p className="text-[13px] text-[var(--angel-text-soft)]">모든 이미지를 불러왔어요</p>
         </div>
       )}

@@ -1,11 +1,13 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { getImageUrl } from "@/lib/seed-data";
 import { createClient } from "@/lib/supabase/client";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { saveEditorTransfer } from "@/lib/editor-transfer";
 import { toast } from "sonner";
+import { CalendarClock, ChevronLeft, Clipboard, ImageOff, Loader2, PenLine, RefreshCw, Trash2 } from "lucide-react";
 
 interface SharedImageData {
   id: string;
@@ -13,6 +15,26 @@ interface SharedImageData {
   tags: string[];
   prompt: string;
   user_id?: string | null;
+  user_name?: string | null;
+  user_avatar?: string | null;
+  image_url: string;
+  thumb_url?: string;
+  created_at?: string;
+  width?: number | null;
+  height?: number | null;
+}
+
+const TITLE_MAX_LENGTH = 32;
+
+function formatImageTimestamp(value?: string): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("ko-KR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Seoul",
+  }).format(date);
 }
 
 export default function DiscoverDetailPage() {
@@ -27,6 +49,8 @@ export default function DiscoverDetailPage() {
 
   // 현재 유저
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isSendingToEdit, setIsSendingToEdit] = useState(false);
+  const [isSendingToGenerate, setIsSendingToGenerate] = useState(false);
 
   // 제목 수정 state
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -56,15 +80,12 @@ export default function DiscoverDetailPage() {
 
     async function fetchImage() {
       try {
-        const res = await fetch(`/api/discover/images`);
+        const res = await fetch(`/api/discover/images/${id}`, { cache: "no-store" });
         if (!res.ok) throw new Error();
         const data = await res.json();
-        const found = data.images?.find(
-          (img: SharedImageData) => img.id === id
-        );
         if (!cancelled) {
-          if (found) {
-            setSharedItem(found);
+          if (data.image) {
+            setSharedItem(data.image as SharedImageData);
           } else {
             setFetchError(true);
           }
@@ -98,7 +119,7 @@ export default function DiscoverDetailPage() {
     return (
       <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 md:px-5 md:pt-24">
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
+          <Loader2 size={24} className="mb-3 animate-spin text-[var(--angel-blue)]" />
           <p className="text-[14px] text-[var(--angel-text-soft)]">이미지를 불러오는 중...</p>
         </div>
       </div>
@@ -111,9 +132,11 @@ export default function DiscoverDetailPage() {
   if (!item || fetchError) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4">
-        <div className="text-2xl text-[var(--angel-lavender)] twinkle mb-3">✦</div>
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--angel-border)] bg-[var(--angel-surface-muted)]">
+          <ImageOff size={22} className="text-[var(--angel-text-faint)]" />
+        </div>
         <p className="text-[15px] text-[var(--angel-text-soft)]">이미지를 찾을 수 없어요</p>
-        <Link href="/discover" className="mt-4 angel-btn angel-btn-secondary text-[14px]">
+        <Link href="/discover" prefetch={false} className="secondary-action mt-4">
           Discover로 돌아가기
         </Link>
       </div>
@@ -125,10 +148,13 @@ export default function DiscoverDetailPage() {
     item.user_id !== null &&
     item.user_id !== undefined &&
     item.user_id === currentUserId;
+  const createdAtLabel = formatImageTimestamp(item.created_at);
+  const dimensionLabel =
+    item.width && item.height ? `${item.width.toLocaleString()} × ${item.height.toLocaleString()}px` : null;
 
   // 제목 수정 핸들러
   const handleStartEdit = () => {
-    setEditTitle(item.title);
+    setEditTitle(item.title.slice(0, TITLE_MAX_LENGTH));
     setIsEditingTitle(true);
   };
 
@@ -144,7 +170,7 @@ export default function DiscoverDetailPage() {
       const res = await fetch(`/api/share/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: editTitle.trim() }),
+        body: JSON.stringify({ title: editTitle.trim().slice(0, TITLE_MAX_LENGTH) }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -164,6 +190,63 @@ export default function DiscoverDetailPage() {
     }
   };
 
+  // 이미지를 편집기로 보내기: 이미지 URL → transfer → /edit
+  const handleEditThis = async () => {
+    if (isSendingToEdit) return;
+    setIsSendingToEdit(true);
+    try {
+      if (!sharedItem) throw new Error("이미지가 아직 로드되지 않았어요");
+      const transferId = await saveEditorTransfer({
+        baseUrl: sharedItem.image_url,
+        sourcePrompt: sharedItem.prompt?.trim() || undefined,
+      });
+      router.push(transferId ? `/edit?transfer=${encodeURIComponent(transferId)}` : "/edit");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "편집기로 보내지 못했어요");
+    } finally {
+      setIsSendingToEdit(false);
+    }
+  };
+
+  const handleGenerateWithReference = async () => {
+    if (isSendingToGenerate) return;
+    setIsSendingToGenerate(true);
+    try {
+      if (!sharedItem) throw new Error("이미지가 아직 로드되지 않았어요");
+      const res = await fetch(sharedItem.image_url);
+      if (!res.ok) throw new Error("이미지를 불러오지 못했어요");
+      const blob = await res.blob();
+      if (blob.size > 8 * 1024 * 1024) {
+        toast.error("이미지가 너무 커서 레퍼런스로 가져갈 수 없어요.");
+        return;
+      }
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("read fail"));
+        reader.readAsDataURL(blob);
+      });
+      try {
+        sessionStorage.setItem(
+          "generate:reference",
+          JSON.stringify({
+            dataUrl,
+            prompt: sharedItem.prompt || "",
+            title: sharedItem.title || "",
+          })
+        );
+      } catch {
+        toast.error("브라우저 저장공간이 부족해요.");
+        return;
+      }
+      router.push(`/generate?prompt=${encodeURIComponent(sharedItem.prompt || "")}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "생성 페이지로 보내지 못했어요");
+    } finally {
+      setIsSendingToGenerate(false);
+    }
+  };
+
   // 삭제 핸들러
   const handleDelete = async () => {
     if (isDeleting) return;
@@ -179,7 +262,10 @@ export default function DiscoverDetailPage() {
         return;
       }
       toast.success("이미지가 삭제되었어요.");
-      router.push("/discover");
+      setSharedItem(null);
+      setFetchError(true);
+      router.replace(`/discover?refresh=${Date.now()}`);
+      router.refresh();
     } catch {
       toast.error("삭제 중 오류가 발생했어요.");
     } finally {
@@ -188,15 +274,13 @@ export default function DiscoverDetailPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 md:px-5 md:pt-24">
+    <div className="page-shell max-w-4xl">
       {/* Back */}
       <button
         onClick={() => router.back()}
-        className="mb-6 flex items-center gap-1.5 text-[14px] text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)] transition-colors"
+        className="secondary-action mb-6"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
+        <ChevronLeft size={15} />
         뒤로가기
       </button>
 
@@ -209,8 +293,8 @@ export default function DiscoverDetailPage() {
               ? "md:w-[38%]"                         /* 세로형: 좁게 */
               : "md:w-[45%]"                         /* 정방형/미감지: 중간 */
         }`}>
-          <div className="glass-card rounded-2xl p-2 relative">
-            <div className="absolute top-4 left-4 z-10 flex items-center gap-1 rounded-full bg-[var(--angel-blue)]/80 px-2.5 py-1 shadow-md">
+          <div className="result-card relative p-2">
+            <div className="absolute top-4 left-4 z-10 flex items-center gap-1 rounded-md bg-[var(--angel-blue)]/90 px-2.5 py-1 shadow-md">
               <span className="text-[12px] font-medium text-white">AI 생성</span>
             </div>
             <div className="relative">
@@ -218,31 +302,35 @@ export default function DiscoverDetailPage() {
               {!fullLoaded && (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
-                  src={getImageUrl(item.id, "thumb_sm")}
+                  src={item.thumb_url || item.image_url}
                   alt=""
                   aria-hidden="true"
+                  loading="eager"
+                  decoding="async"
                   onLoad={(e) => {
                     if (!aspect) {
                       const img = e.currentTarget;
                       detectAspect(img.naturalWidth, img.naturalHeight);
                     }
                   }}
-                  className="w-full h-auto rounded-xl filter blur-[8px] scale-[1.02]"
+                  className="w-full h-auto rounded-md filter blur-[8px] scale-[1.02]"
                 />
               )}
               {/* 풀 이미지 */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 ref={fullImgRef}
-                src={getImageUrl(item.id, "full")}
+                src={item.image_url}
                 alt={item.title || "무드 이미지"}
+                loading="eager"
+                fetchPriority="high"
                 decoding="async"
                 onLoad={(e) => {
                   setFullLoaded(true);
                   const img = e.currentTarget;
                   detectAspect(img.naturalWidth, img.naturalHeight);
                 }}
-                className={`w-full h-auto rounded-xl ${fullLoaded ? "" : "absolute inset-0 opacity-0"}`}
+                className={`w-full h-auto rounded-md ${fullLoaded ? "" : "absolute inset-0 opacity-0"}`}
               />
             </div>
           </div>
@@ -256,9 +344,9 @@ export default function DiscoverDetailPage() {
               <input
                 type="text"
                 value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                maxLength={100}
-                className="flex-1 rounded-lg border border-[var(--angel-blue)]/40 bg-white/70 px-3 py-2 text-lg font-heading font-medium text-[var(--angel-text)] outline-none focus:border-[var(--angel-blue)]"
+                onChange={(e) => setEditTitle(e.target.value.slice(0, TITLE_MAX_LENGTH))}
+                maxLength={TITLE_MAX_LENGTH}
+                className="flex-1 rounded-lg border border-[var(--angel-blue)]/40 bg-white/70 px-3 py-2 text-[18px] font-semibold text-[var(--angel-text)] outline-none focus:border-[var(--angel-blue)]"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSaveTitle();
@@ -281,7 +369,7 @@ export default function DiscoverDetailPage() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <h1 className="font-heading text-2xl font-medium tracking-[0.06em] text-[var(--angel-text)] md:text-3xl">
+              <h1 className="text-[22px] font-semibold leading-[1.3] text-[var(--angel-text)] [word-break:keep-all] md:text-[26px]">
                 {item.title}
               </h1>
               {isOwner && (
@@ -299,24 +387,52 @@ export default function DiscoverDetailPage() {
             </div>
           )}
 
-          {/* Divider */}
-          <div className="mt-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--angel-blue)]/20" />
-            <span className="text-[11px] text-[var(--angel-lavender)] twinkle">✦</span>
-            <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--angel-blue)]/20" />
-          </div>
+          {/* Author */}
+          {item.user_id && (
+            <div className="mt-4 flex items-center gap-2.5">
+              <UserAvatar
+                src={item.user_avatar}
+                name={item.user_name}
+                className="h-8 w-8"
+                fallbackClassName="text-[12px]"
+              />
+              <div className="flex flex-col leading-tight">
+                <span className="text-[13.5px] font-medium text-[var(--angel-text)]">
+                  {item.user_name ?? "익명 작가"}
+                </span>
+                <Link
+                  href={`/discover?user=${encodeURIComponent(item.user_id)}`}
+                  prefetch={false}
+                  className="text-[11.5px] text-[var(--angel-blue)] hover:underline"
+                >
+                  이 사람의 작품 모두 보기 →
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {createdAtLabel && (
+            <div className="mt-4 inline-flex w-fit items-center gap-2 rounded-lg border border-[var(--angel-border)] bg-[var(--angel-surface-muted)] px-3 py-2 text-[12.5px] font-bold text-[var(--angel-text-soft)]">
+              <CalendarClock size={14} className="text-[var(--angel-blue)]" />
+              <span>생성 시각</span>
+              <time dateTime={item.created_at} className="tabular-nums text-[var(--angel-text)]">
+                {createdAtLabel}
+              </time>
+            </div>
+          )}
+
+          <div className="mt-5 border-t border-[var(--angel-border)]" />
 
           {/* Prompt section */}
           <div className="mt-5">
             <div className="mb-2 flex items-center gap-1.5">
-              <span className="text-[11px] text-[var(--angel-lavender)]">✦</span>
-              <span className="text-[13px] font-medium text-[var(--angel-text-soft)] tracking-wider uppercase">
+              <span className="text-[13px] font-bold text-[var(--angel-text-soft)]">
                 Prompt
               </span>
             </div>
 
             {item.prompt ? (
-              <div className="glass-card rounded-xl p-4">
+              <div className="surface-card p-4">
                 <p className="text-[15px] leading-[1.9] text-[var(--angel-text)] [word-break:keep-all]">
                   {item.prompt}
                 </p>
@@ -327,38 +443,53 @@ export default function DiscoverDetailPage() {
           </div>
 
           {/* Action buttons */}
-          <div className="mt-6 space-y-3">
-            <Link
-              href={`/generate?prompt=${encodeURIComponent(item.prompt || "")}`}
-              className="w-full angel-btn angel-btn-primary py-3 text-[15px] flex items-center justify-center gap-2"
+          <div className="mt-6 space-y-2.5">
+            <button
+              onClick={handleEditThis}
+              disabled={isSendingToEdit}
+              className="primary-action w-full disabled:opacity-60"
             >
-              <span className="text-[12px]">✦</span>
-              이 프롬프트로 이미지 생성하기
-            </Link>
+              <PenLine size={16} />
+              {isSendingToEdit ? "편집기로 보내는 중..." : "이 이미지 편집하기"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleGenerateWithReference}
+              disabled={isSendingToGenerate}
+              className="secondary-action w-full disabled:opacity-60"
+            >
+              <RefreshCw size={15} />
+              {isSendingToGenerate ? "생성 페이지로 보내는 중..." : "같은 이미지로 새로 생성"}
+            </button>
 
             <button
               onClick={() => {
                 if (item.prompt) {
                   navigator.clipboard.writeText(item.prompt);
+                  toast.success("프롬프트를 복사했어요");
                 }
               }}
               disabled={!item.prompt}
-              className="w-full angel-btn angel-btn-secondary py-2.5 text-[14px] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="secondary-action w-full disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-              프롬프트 복사하기
+              <Clipboard size={14} />
+              프롬프트 복사
             </button>
           </div>
 
           {/* Style info */}
-          <div className="mt-6 glass-card rounded-xl p-4">
-            <div className="flex items-center justify-between text-[13px]">
+          <div className="surface-card mt-6 p-4">
+            <div className="flex items-center justify-between gap-4 text-[13px]">
               <span className="text-[var(--angel-text-soft)]">출처</span>
               <span className="text-[var(--angel-blue)]">AI 생성 (커뮤니티 공유)</span>
             </div>
+            {dimensionLabel && (
+              <div className="mt-3 flex items-center justify-between gap-4 border-t border-[var(--angel-border)] pt-3 text-[13px]">
+                <span className="text-[var(--angel-text-soft)]">이미지 크기</span>
+                <span className="tabular-nums text-[var(--angel-text)]">{dimensionLabel}</span>
+              </div>
+            )}
           </div>
 
           {/* Owner: Delete button */}
@@ -366,14 +497,9 @@ export default function DiscoverDetailPage() {
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="mt-4 w-full rounded-xl border border-red-200 bg-red-50/80 py-2.5 text-[14px] text-red-500 transition-colors hover:bg-red-100 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="mt-4 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 text-[14px] font-medium text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
+              <Trash2 size={14} />
               {isDeleting ? "삭제 중..." : "이 이미지 삭제하기"}
             </button>
           )}

@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { SavedImage } from "@/lib/saved-images";
+import { Download, PenLine, Share2, Trash2, X } from "lucide-react";
 
 interface ImageDetailModalProps {
   image: SavedImage;
   onClose: () => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<boolean>;
+  onShare: (image: SavedImage) => Promise<boolean>;
+  onEdit?: (image: SavedImage) => void;
 }
 
-export function ImageDetailModal({ image, onClose, onDelete }: ImageDetailModalProps) {
+export function ImageDetailModal({ image, onClose, onDelete, onShare, onEdit }: ImageDetailModalProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+
   // Close on Escape
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -32,55 +38,57 @@ export function ImageDetailModal({ image, onClose, onDelete }: ImageDetailModalP
     link.click();
   };
 
-  const handleDelete = () => {
-    onDelete(image.id);
-    onClose();
+  const handleDelete = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    const ok = await onDelete(image.id);
+    setIsDeleting(false);
+    if (ok) onClose();
+  };
+
+  const handleShare = async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    await onShare(image);
+    setIsSharing(false);
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center md:p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="glass-card relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white/95 p-5">
+      <div className="surface-panel relative w-full max-h-[92dvh] overflow-y-auto rounded-t-lg bg-[var(--angel-surface)] p-5 md:max-w-lg md:max-h-[90vh] md:rounded-lg">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--angel-bg-soft)] text-[var(--angel-text-soft)] hover:bg-[var(--angel-border)] transition-colors"
+          aria-label="닫기"
+          className="absolute top-3 right-3 flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--angel-bg-soft)] text-[var(--angel-text-soft)] hover:bg-[var(--angel-border)] transition-colors md:h-8 md:w-8"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <X size={16} />
         </button>
 
         {/* Image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={image.image}
-          alt={image.prompt}
-          className="w-full rounded-xl mb-4"
+          alt={image.prompt ?? ""}
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          className="w-full rounded-lg mb-4"
         />
 
         {/* Prompt */}
         <div className="mb-4">
           <div className="mb-1.5 flex items-center gap-1.5">
-            <span className="text-[11px] text-[var(--angel-lavender)]">✦</span>
-            <span className="text-[12px] font-medium text-[var(--angel-text-soft)] tracking-wider uppercase">Prompt</span>
+            <span className="text-[12px] font-bold text-[var(--angel-text-soft)]">Prompt</span>
           </div>
-          <p className="text-[15px] leading-[1.8] text-[var(--angel-text)] [word-break:keep-all]">
-            {image.prompt}
+          <p className="whitespace-pre-line text-[15px] leading-[1.8] text-[var(--angel-text)] [word-break:keep-all]">
+            {image.prompt ?? ""}
           </p>
         </div>
-
-        {/* Tags */}
-        {image.style_tags.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-1.5">
-            {image.style_tags.map((tag) => (
-              <span key={tag} className="angel-tag angel-tag-active text-[12px]">#{tag}</span>
-            ))}
-          </div>
-        )}
 
         {/* Date */}
         <p className="mb-5 text-[12px] text-[var(--angel-text-faint)]">
@@ -92,21 +100,32 @@ export function ImageDetailModal({ image, onClose, onDelete }: ImageDetailModalP
         </p>
 
         {/* Actions */}
-        <div className="flex gap-2">
-          <button onClick={handleDownload} className="angel-btn angel-btn-secondary text-[14px] flex-1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {onEdit && (
+            <button onClick={() => onEdit(image)} className="secondary-action">
+              <PenLine size={14} />
+              편집
+            </button>
+          )}
+          <button onClick={handleDownload} className="secondary-action flex-1">
+            <Download size={14} />
             다운로드
           </button>
-          <button onClick={handleDelete} className="angel-btn angel-btn-secondary text-[14px] text-red-400 hover:text-red-500 flex-1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
-            삭제
+          <button
+            onClick={handleShare}
+            disabled={isSharing}
+            className="secondary-action flex-1 disabled:opacity-50"
+          >
+            <Share2 size={14} />
+            {isSharing ? "공유 중..." : "공유"}
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="secondary-action flex-1 text-red-500 hover:text-red-600 disabled:opacity-50"
+          >
+            <Trash2 size={14} />
+            {isDeleting ? "삭제 중..." : "삭제"}
           </button>
         </div>
       </div>
