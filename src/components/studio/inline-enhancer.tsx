@@ -239,7 +239,7 @@ export function InlineEnhancer({
         </div>
 
         {/* Footer status bar */}
-        <div className="grid min-h-[44px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t border-[var(--angel-border)] bg-[var(--angel-surface-muted)] px-4 py-1.5 sm:px-5">
+        <div className="grid min-h-[44px] grid-cols-1 items-center gap-2 border-t border-[var(--angel-border)] bg-[var(--angel-surface-muted)] px-4 py-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:px-5 sm:py-1.5">
           <div className="min-w-0">
             {isAnalyzing ? (
               <span className="flex min-w-0 items-center gap-1.5 text-[12px] font-medium leading-4 text-[var(--angel-lavender)]">
@@ -254,15 +254,16 @@ export function InlineEnhancer({
             ) : (
               <span className="flex min-w-0 items-center gap-1.5 text-[12px] leading-4 text-[var(--angel-text-faint)]">
                 <WandSparkles size={12} className="shrink-0" />
-                <span className="min-w-0 truncate">약한 표현을 AI가 더 구체적으로 다듬어드려요</span>
+                <span className="min-w-0 truncate sm:hidden">AI가 더 구체적으로 다듬어요</span>
+                <span className="hidden min-w-0 truncate sm:inline">약한 표현을 AI가 더 구체적으로 다듬어드려요</span>
               </span>
             )}
           </div>
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="grid w-full shrink-0 grid-cols-2 items-center gap-1.5 sm:flex sm:w-auto">
             <button
               onClick={handleManualAnalyze}
               disabled={!canAnalyze || disabled}
-              className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-md bg-[var(--angel-blue)] px-2 text-[11.5px] font-bold leading-none text-white shadow-[0_1px_0_rgba(53,111,165,0.16)] transition-colors hover:bg-[var(--angel-blue-strong)] disabled:opacity-40"
+              className="inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-md bg-[var(--angel-blue)] px-2 text-[11.5px] font-bold leading-none text-white shadow-[0_1px_0_rgba(53,111,165,0.16)] transition-colors hover:bg-[var(--angel-blue-strong)] disabled:opacity-40 sm:h-7"
             >
               <WandSparkles size={11} />
               {analyzedText ? "다시 강화" : "프롬프트 강화"}
@@ -270,7 +271,7 @@ export function InlineEnhancer({
             <button
               onClick={handleRewrite}
               disabled={!hasReplacements || isRewriting || disabled}
-              className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-md border border-[var(--angel-border)] bg-white/80 px-2 text-[11.5px] font-bold leading-none text-[var(--angel-text-soft)] transition-colors hover:border-[var(--angel-blue)]/45 hover:text-[var(--angel-blue)] disabled:opacity-40"
+              className="inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-md border border-[var(--angel-border)] bg-white/80 px-2 text-[11.5px] font-bold leading-none text-[var(--angel-text-soft)] transition-colors hover:border-[var(--angel-blue)]/45 hover:text-[var(--angel-blue)] disabled:opacity-40 sm:h-7"
             >
               <WandSparkles size={11} />
               다듬기
@@ -280,9 +281,8 @@ export function InlineEnhancer({
       </div>
 
       {/* ── Issue counter badge (Grammarly-style) ── */}
-      <div className="mt-3 flex min-h-10 items-center gap-3">
-        {validSpans.length > 0 && !isAnalyzing ? (
-          <>
+      {validSpans.length > 0 && !isAnalyzing ? (
+        <div className="mt-3 flex min-h-10 items-center gap-3">
           <div className={`flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium ${
             unresolvedCount > 0
               ? "bg-amber-50 border border-amber-200/60 text-amber-800"
@@ -305,11 +305,12 @@ export function InlineEnhancer({
           <span className="text-[12px] text-[var(--angel-text-faint)]">
             아래 추천 표현을 선택하세요
           </span>
-          </>
-        ) : (
+        </div>
+      ) : (
+        <div className="mt-3 hidden min-h-10 items-center gap-3 sm:flex">
           <span aria-hidden="true" className="invisible text-[13px]">상태 자리</span>
-        )}
-      </div>
+        </div>
+      )}
 
       {unresolvedSpans.length > 0 && !isAnalyzing && (
         <div className="grid gap-2">

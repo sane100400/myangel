@@ -6,6 +6,10 @@ import { deductCredits, refundCredits, getEditCost } from "@/lib/credits";
 import { assertSameOrigin } from "@/lib/api-guard";
 import { createSSEStream } from "@/lib/sse";
 import { reportServerError } from "@/lib/logger";
+import {
+  assessCopyrightRisk,
+  formatCopyrightRiskError,
+} from "@/lib/copyright-guard";
 
 export const maxDuration = 360;
 const HEARTBEAT_MS = 15_000;
@@ -32,6 +36,30 @@ export async function POST(request: NextRequest) {
   const validated = validateEditRequest(body);
   if ("error" in validated) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
+  }
+
+  const copyrightReviewText = [
+    ...(validated.globalAdjust
+      ? [
+          validated.globalAdjust.mood,
+          validated.globalAdjust.lighting,
+          validated.globalAdjust.note,
+        ]
+      : []),
+    ...validated.markers.map((marker) => marker.note),
+  ]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join("\n");
+  const copyrightRisk = assessCopyrightRisk(copyrightReviewText);
+  if (copyrightRisk.action === "block") {
+    return NextResponse.json(
+      {
+        error: formatCopyrightRiskError(copyrightRisk),
+        code: "copyright_risk",
+        copyrightRisk,
+      },
+      { status: 400 }
+    );
   }
 
   const cost = await getEditCost(validated.quality, validated.count);

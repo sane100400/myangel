@@ -6,9 +6,12 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { AngelLogo } from "@/components/ui/angel-logo";
 
+const JUDGE_LOGIN = process.env.NEXT_PUBLIC_JUDGE_LOGIN ?? "";
+const JUDGE_EMAIL = process.env.NEXT_PUBLIC_JUDGE_EMAIL ?? "";
+
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState(process.env.NEXT_PUBLIC_JUDGE_EMAIL ?? "");
+  const [email, setEmail] = useState(JUDGE_LOGIN || JUDGE_EMAIL);
   const [password, setPassword] = useState("");
   const [isEmailSigningIn, setIsEmailSigningIn] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -29,13 +32,18 @@ export default function LoginPage() {
     setIsEmailSigningIn(true);
     setEmailError(null);
     const supabase = createClient();
+    const loginValue = email.trim();
+    const loginEmail =
+      JUDGE_LOGIN && JUDGE_EMAIL && loginValue.toLowerCase() === JUDGE_LOGIN.toLowerCase()
+        ? JUDGE_EMAIL
+        : loginValue;
     const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: loginEmail,
       password,
     });
     setIsEmailSigningIn(false);
     if (error) {
-      setEmailError("이메일 또는 비밀번호를 확인해주세요.");
+      setEmailError("아이디 또는 비밀번호를 확인해주세요.");
       return;
     }
     router.push("/generate");
@@ -64,12 +72,12 @@ export default function LoginPage() {
             </p>
             <div className="space-y-2">
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="이메일"
+                placeholder="아이디 또는 이메일"
                 className="h-11 w-full rounded-lg border border-[var(--angel-border)] bg-white px-3 text-[14px] outline-none focus:border-[var(--angel-blue)]"
-                autoComplete="email"
+                autoComplete="username"
               />
               <input
                 type="password"

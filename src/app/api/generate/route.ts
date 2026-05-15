@@ -28,6 +28,10 @@ import {
   buildGptImage2GenerateRequest,
 } from "@/lib/openai-image-requests";
 import { normalizeImageToAspectQuality } from "@/lib/image-output";
+import {
+  assessCopyrightRisk,
+  formatCopyrightRiskError,
+} from "@/lib/copyright-guard";
 
 type ModelChoice = ImageModelChoice;
 
@@ -273,6 +277,18 @@ export async function POST(request: NextRequest) {
   const refResult = validateRefImages(referenceImages);
   if (!Array.isArray(refResult)) {
     return NextResponse.json({ error: refResult.error }, { status: 400 });
+  }
+
+  const copyrightRisk = assessCopyrightRisk(prompt.trim());
+  if (copyrightRisk.action === "block") {
+    return NextResponse.json(
+      {
+        error: formatCopyrightRiskError(copyrightRisk),
+        code: "copyright_risk",
+        copyrightRisk,
+      },
+      { status: 400 }
+    );
   }
 
   const cost = await getGenerateCost(quality, count);

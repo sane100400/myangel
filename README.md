@@ -131,6 +131,8 @@ src/
 
 주요 mutating endpoint는 Origin 검증, Supabase 인증, RLS, 매직 바이트 검증, rate limit, SSRF 방어를 사용합니다. 자세한 내용은 [docs/SECURITY.md](./docs/SECURITY.md)를 참고하세요.
 
+이미지 생성·편집의 저작권·상표권 리스크 대응 기준은 [docs/COPYRIGHT_RISK_MITIGATION.md](./docs/COPYRIGHT_RISK_MITIGATION.md)를 참고하세요.
+
 ## 로컬 개발
 
 ```bash

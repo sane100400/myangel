@@ -246,26 +246,22 @@ const QUALITY_LABEL: Record<Quality, string> = {
 const ASPECT_OPTIONS: Array<{
   value: AspectRatio;
   label: string;
-  useCase: string;
-  frameClass: string;
+  previewClass: string;
 }> = [
   {
     value: "1:1",
     label: "정방형",
-    useCase: "제품 · 피드",
-    frameClass: "h-12 w-12",
+    previewClass: "h-8 w-8 sm:h-10 sm:w-10",
   },
   {
     value: "4:3",
     label: "가로형",
-    useCase: "사진 · 썸네일 · 배너",
-    frameClass: "h-10 w-[54px]",
+    previewClass: "h-7 w-10 sm:h-9 sm:w-[52px]",
   },
   {
     value: "3:4",
     label: "세로형",
-    useCase: "카드 · 포스터 · 스토리",
-    frameClass: "h-[54px] w-10",
+    previewClass: "h-10 w-7 sm:h-[52px] sm:w-9",
   },
 ];
 
@@ -696,7 +692,7 @@ export default function GeneratePage() {
   return (
     <div className="studio-shell">
       {/* ─── Top utility bar: tabs + balance ─── */}
-      <div className="mb-8 flex items-center justify-between gap-3">
+      <div className="mb-6 flex items-center justify-between gap-3 md:mb-8">
         <div className="app-tabs">
           <Link
             href="/generate"
@@ -745,7 +741,7 @@ export default function GeneratePage() {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-5 md:space-y-6">
         {/* ─── Prompt — the centerpiece ─── */}
         <div className="surface-panel">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -783,9 +779,9 @@ export default function GeneratePage() {
 
         {/* Reference images */}
         <div className="surface-panel">
-          <div className="mb-2.5 flex items-center gap-2 text-[15px] font-bold text-[var(--angel-text)] md:text-[16px]">
-            <span>레퍼런스 이미지</span>
-            <span className="text-[12.5px] font-normal text-[var(--angel-text-faint)]">
+          <div className="mb-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[15px] font-bold text-[var(--angel-text)] md:text-[16px]">
+            <span className="whitespace-nowrap">레퍼런스 이미지</span>
+            <span className="whitespace-nowrap text-[12px] font-normal text-[var(--angel-text-faint)] sm:text-[12.5px]">
               ({refImages.length}/{MAX_REFS}) · 업로드 또는 붙여넣기
             </span>
           </div>
@@ -876,12 +872,12 @@ export default function GeneratePage() {
         <div className="surface-panel">
           <fieldset className="mb-5">
             <legend className="sr-only">캔버스 비율</legend>
-            <div className="mb-3 flex flex-col items-start gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
-              <div>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
                 <div className="text-[12.5px] font-bold text-[var(--angel-text-soft)]">
                   캔버스 비율
                 </div>
-                <p className="mt-1 text-[12px] leading-5 text-[var(--angel-text-faint)]">
+                <p className="mt-1 hidden text-[12px] leading-5 text-[var(--angel-text-faint)] sm:block">
                   결과를 어디에 쓸지 기준으로 골라요.
                 </p>
               </div>
@@ -889,8 +885,8 @@ export default function GeneratePage() {
                 {aspectLabel(aspectRatio)}
               </span>
             </div>
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-              {ASPECT_OPTIONS.map(({ value, label, useCase, frameClass }) => {
+            <div className="grid grid-cols-3 gap-2 rounded-xl border border-[var(--angel-border)] bg-[var(--angel-surface-muted)] p-1.5">
+              {ASPECT_OPTIONS.map(({ value, label, previewClass }) => {
                 const active = aspectRatio === value;
                 return (
                   <button
@@ -898,35 +894,39 @@ export default function GeneratePage() {
                     type="button"
                     onClick={() => setAspectRatio(value)}
                     aria-pressed={active}
-                    title={`${label} - ${useCase}`}
-                    className={`group flex min-h-[92px] min-w-0 flex-col rounded-lg border p-2.5 text-left transition-[border-color,box-shadow,background-color,color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--angel-blue)]/25 sm:min-h-[112px] sm:p-3 ${
+                    aria-label={`${label} 캔버스 비율`}
+                    title={`${label} 캔버스 비율`}
+                    className={`group flex min-h-[76px] min-w-0 flex-col items-center justify-center gap-1.5 rounded-lg border px-1.5 py-2 text-center transition-[border-color,box-shadow,background-color,color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--angel-blue)]/25 sm:min-h-[106px] sm:gap-2 sm:px-3 ${
                       active
-                        ? "border-[var(--angel-blue)] bg-[var(--angel-blue-pale)] text-[var(--angel-blue)] shadow-[0_8px_22px_rgba(53,111,165,0.12)]"
-                        : "border-[var(--angel-border)] bg-[var(--angel-surface-muted)] text-[var(--angel-text-soft)] hover:-translate-y-0.5 hover:border-[var(--angel-blue)]/40 hover:bg-white hover:text-[var(--angel-blue)]"
+                        ? "border-[var(--angel-blue)] bg-white text-[var(--angel-blue)] shadow-[0_8px_20px_rgba(53,111,165,0.12)]"
+                        : "border-transparent bg-transparent text-[var(--angel-text-soft)] hover:border-[var(--angel-blue)]/35 hover:bg-white hover:text-[var(--angel-blue)] sm:hover:-translate-y-0.5"
                     }`}
                   >
                     <span
-                      className={`flex h-[50px] w-full shrink-0 items-center justify-center rounded-lg border sm:h-[66px] ${
+                      className={`flex h-9 w-full shrink-0 items-center justify-center rounded-md sm:h-14 ${
                         active
-                          ? "border-[var(--angel-blue)]/35 bg-white"
-                          : "border-[var(--angel-border)] bg-white/80"
+                          ? "bg-[var(--angel-blue-pale)]"
+                          : "bg-white/60"
                       }`}
                     >
                       <span
-                        className={`${frameClass} rounded-[5px] border-2 transition-transform duration-200 group-hover:scale-[1.03] ${
+                        className={`${previewClass} rounded-[5px] border-2 transition-transform duration-200 group-hover:scale-[1.03] ${
                           active
                             ? "border-[var(--angel-blue)] bg-[var(--angel-blue)]/10 shadow-[inset_0_0_0_1px_rgba(53,111,165,0.08)]"
                             : "border-[var(--angel-text-faint)]/45 bg-[var(--angel-surface-muted)]"
                         }`}
                       />
                     </span>
-                    <span className="mt-2 flex w-full min-w-0 items-center justify-between gap-2">
-                      <span className="min-w-0 truncate text-[13px] font-bold leading-tight">
+                    <span className="flex min-h-[18px] w-full min-w-0 items-center justify-center gap-1.5">
+                      <span className="min-w-0 truncate text-[12.5px] font-bold leading-tight sm:text-[13.5px]">
                         {label}
                       </span>
-                    </span>
-                    <span className="mt-1 block w-full truncate text-[11.5px] leading-4 opacity-70">
-                      {useCase}
+                      {active && (
+                        <span
+                          aria-hidden="true"
+                          className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--angel-blue)]"
+                        />
+                      )}
                     </span>
                   </button>
                 );
@@ -934,7 +934,7 @@ export default function GeneratePage() {
             </div>
           </fieldset>
 
-          <div className="flex flex-wrap items-start justify-between gap-y-5 gap-x-6 border-t border-[var(--angel-border)]/60 pt-5">
+          <div className="grid gap-5 border-t border-[var(--angel-border)]/60 pt-5 sm:grid-cols-[minmax(0,1fr)_200px] sm:items-start sm:gap-x-6">
             {/* Quality */}
             <div className="min-w-0">
               <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -946,7 +946,7 @@ export default function GeneratePage() {
                   4K는 Nano Banana Pro 전용
                 </span>
               </div>
-              <div className="inline-flex gap-1 rounded-lg bg-[var(--angel-bg-soft)] p-1">
+              <div className="grid w-full grid-cols-3 gap-1 rounded-lg bg-[var(--angel-bg-soft)] p-1 sm:inline-flex sm:w-auto">
                 {(["1K", "2K", "4K"] as const).map((q) => {
                   const active = quality === q;
                   const disabled = !supportsImageQuality(model, q);
@@ -957,7 +957,7 @@ export default function GeneratePage() {
                       onClick={() => handleQualitySelect(q)}
                       disabled={disabled}
                       title={disabled ? unsupportedQualityMessage(model, q) : QUALITY_LABEL[q]}
-                      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
+                      className={`inline-flex min-w-0 items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 transition-all sm:px-3 ${
                         active
                           ? "bg-[var(--angel-surface)] text-[var(--angel-blue)] shadow-[0_1px_0_rgba(53,111,165,0.08)]"
                           : "text-[var(--angel-text-soft)] hover:text-[var(--angel-blue)]"
@@ -972,7 +972,7 @@ export default function GeneratePage() {
             </div>
 
             {/* Count */}
-            <div className="w-full max-w-[220px] sm:w-[200px]">
+            <div className="w-full sm:w-[200px]">
               <div className="mb-2 flex items-baseline justify-between">
                 <label className="text-[12.5px] font-bold text-[var(--angel-text-soft)]">
                   Count

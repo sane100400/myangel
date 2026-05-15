@@ -22,6 +22,10 @@ import {
   type ImageQuality as Quality,
 } from "@/lib/image-models";
 import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
   CircleDot,
   ClipboardPaste,
   Coins,
@@ -29,6 +33,7 @@ import {
   Eraser,
   ImagePlus,
   ListOrdered,
+  Minus,
   MousePointerClick,
   Move,
   Plus,
@@ -190,6 +195,23 @@ function createClientId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function markersChanged(before: Marker[], after: Marker[]): boolean {
+  if (before.length !== after.length) return true;
+  return before.some((m, i) => {
+    const a = after[i];
+    if (!a) return true;
+    return (
+      m.id !== a.id ||
+      m.op !== a.op ||
+      m.refIndex !== a.refIndex ||
+      m.note !== a.note ||
+      Math.abs(m.cx - a.cx) > 1e-4 ||
+      Math.abs(m.cy - a.cy) > 1e-4 ||
+      Math.abs(m.r - a.r) > 1e-4
+    );
+  });
+}
+
 export default function EditPage() {
   const router = useRouter();
 
@@ -278,12 +300,14 @@ export default function EditPage() {
 
   // Image natural dimensions (for accurate aspect-preserving SVG overlay)
   const [imgDims, setImgDims] = useState<{ w: number; h: number } | null>(null);
+  const [renderedSize, setRenderedSize] = useState<{ w: number; h: number } | null>(null);
 
   const baseFileRef = useRef<HTMLInputElement>(null);
   const refFileRef = useRef<HTMLInputElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const pendingAutoBind = useRef<{ markerId: string; beforeCount: number } | null>(null);
+  const suppressNextCanvasClick = useRef(false);
 
   const syncImageDims = useCallback((img: HTMLImageElement | null = imageRef.current) => {
     if (!img || img.naturalWidth <= 0 || img.naturalHeight <= 0) return;
@@ -292,9 +316,38 @@ export default function EditPage() {
 
   useEffect(() => {
     setImgDims(null);
+    setRenderedSize(null);
     const frame = requestAnimationFrame(() => syncImageDims());
     return () => cancelAnimationFrame(frame);
   }, [base?.dataUrl, syncImageDims]);
+
+  useEffect(() => {
+    const img = imageRef.current;
+    if (!img) return;
+
+    const updateRenderedSize = () => {
+      const rect = img.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      setRenderedSize((prev) =>
+        prev && Math.abs(prev.w - rect.width) < 0.5 && Math.abs(prev.h - rect.height) < 0.5
+          ? prev
+          : { w: rect.width, h: rect.height }
+      );
+    };
+
+    updateRenderedSize();
+    window.addEventListener("resize", updateRenderedSize);
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(updateRenderedSize);
+      observer.observe(img);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateRenderedSize);
+      observer?.disconnect();
+    };
+  }, [base?.dataUrl, imgDims?.w, imgDims?.h]);
 
   const getImageRect = useCallback(() => {
     return imageRef.current?.getBoundingClientRect() ?? canvasWrapRef.current?.getBoundingClientRect() ?? null;
@@ -391,6 +444,38 @@ export default function EditPage() {
     return `원본 프롬프트:\n${original}\n\n편집 내용:\n${editSummary}`;
   }, [buildEditSummary, sourcePrompt]);
 
+  const dragRef = useRef<{
+    id: string;
+    mode: "move" | "resize";
+    startX: number;
+    startY: number;
+    startCx: number;
+    startCy: number;
+    startR: number;
+    startPointerDistancePx: number;
+  } | null>(null);
+
+  const dragSnapshot = useRef<Marker[] | null>(null);
+  const controlEditSnapshot = useRef<Marker[] | null>(null);
+  const markersRef = useRef<Marker[]>(markers);
+  useEffect(() => {
+    markersRef.current = markers;
+  }, [markers]);
+
+  const beginControlEdit = useCallback(() => {
+    if (!controlEditSnapshot.current) {
+      controlEditSnapshot.current = markersRef.current;
+    }
+  }, []);
+
+  const commitControlEdit = useCallback(() => {
+    const before = controlEditSnapshot.current;
+    if (!before) return;
+    const after = markersRef.current;
+    if (markersChanged(before, after)) pushHistory(before);
+    controlEditSnapshot.current = null;
+  }, [pushHistory]);
+
   // ── Marker manipulation ──
 
   // 툴바의 "+ 추가" 버튼: 즉시 마커를 추가하지 않고 placement 모드 진입.
@@ -411,28 +496,60 @@ export default function EditPage() {
     });
   };
 
-  const placeMarkerAt = (cx: number, cy: number) => {
-    if (!pendingOp) return;
+  const placeMarkerAt = (cx: number, cy: number): string | null => {
+    const op = pendingOp;
+    if (!op) return null;
     if (markers.length >= MAX_MARKERS) {
       setPendingOp(null);
-      return;
+      return null;
     }
     pushHistory(markers);
     const id = `m${++markerIdSeq}`;
     setMarkers((prev) => [
       ...prev,
-      { id, op: pendingOp, cx, cy, r: 0.15 },
+      { id, op, cx, cy, r: 0.15 },
     ]);
     setSelected(id);
     setPendingOp(null);
     setPlacementPreview(null);
+    return id;
   };
 
   const onCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (suppressNextCanvasClick.current) {
+      suppressNextCanvasClick.current = false;
+      return;
+    }
     if (!pendingOp) return;
     const point = getClampedImagePoint(e.clientX, e.clientY);
     if (!point) return;
     placeMarkerAt(point.cx, point.cy);
+  };
+
+  const onCanvasPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!pendingOp || dragRef.current) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const point = getClampedImagePoint(e.clientX, e.clientY);
+    const rect = getImageRect();
+    if (!point || !rect) return;
+
+    e.preventDefault();
+    suppressNextCanvasClick.current = true;
+    const id = placeMarkerAt(point.cx, point.cy);
+    if (!id) return;
+
+    (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    dragSnapshot.current = null;
+    dragRef.current = {
+      id,
+      mode: "move",
+      startX: e.clientX,
+      startY: e.clientY,
+      startCx: point.cx,
+      startCy: point.cy,
+      startR: 0.15,
+      startPointerDistancePx: 0,
+    };
   };
 
   const updatePlacementPreview = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -446,6 +563,48 @@ export default function EditPage() {
     setMarkers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
   }, []);
 
+  const setSelectedMarkerRadius = useCallback(
+    (radius: number) => {
+      if (!selected) return;
+      updateMarker(selected, { r: clampMarkerRadius(radius) });
+    },
+    [selected, updateMarker]
+  );
+
+  const resizeMarkerBy = useCallback(
+    (id: string, delta: number) => {
+      const marker = markersRef.current.find((m) => m.id === id);
+      if (!marker) return;
+      pushHistory(markersRef.current);
+      updateMarker(id, { r: clampMarkerRadius(marker.r + delta) });
+    },
+    [pushHistory, updateMarker]
+  );
+
+  const nudgeMarker = useCallback(
+    (id: string, dx: number, dy: number) => {
+      const marker = markersRef.current.find((m) => m.id === id);
+      if (!marker) return;
+      const { cx, cy } = clampMarkerCenter({
+        cx: marker.cx + dx,
+        cy: marker.cy + dy,
+      });
+      pushHistory(markersRef.current);
+      updateMarker(id, { cx, cy });
+    },
+    [pushHistory, updateMarker]
+  );
+
+  const setMarkerOp = useCallback(
+    (id: string, op: Op) => {
+      const marker = markersRef.current.find((m) => m.id === id);
+      if (!marker || marker.op === op) return;
+      pushHistory(markersRef.current);
+      updateMarker(id, { op });
+    },
+    [pushHistory, updateMarker]
+  );
+
   const removeMarker = (id: string) => {
     pushHistory(markers);
     setMarkers((prev) => prev.filter((m) => m.id !== id));
@@ -453,22 +612,6 @@ export default function EditPage() {
   };
 
   // ── Drag handlers (move + resize) ──
-  const dragRef = useRef<{
-    id: string;
-    mode: "move" | "resize";
-    startX: number;
-    startY: number;
-    startCx: number;
-    startCy: number;
-    startR: number;
-    startPointerDistancePx: number;
-  } | null>(null);
-
-  const dragSnapshot = useRef<Marker[] | null>(null);
-  const markersRef = useRef<Marker[]>(markers);
-  useEffect(() => {
-    markersRef.current = markers;
-  }, [markers]);
   const onPointerDown = (e: React.PointerEvent, id: string, mode: "move" | "resize") => {
     e.stopPropagation();
     e.preventDefault();
@@ -500,6 +643,7 @@ export default function EditPage() {
       const d = dragRef.current;
       const rect = getImageRect();
       if (!d || !rect) return;
+      e.preventDefault();
       const dx = (e.clientX - d.startX) / rect.width;
       const dy = (e.clientY - d.startY) / rect.height;
       if (d.mode === "move") {
@@ -523,18 +667,7 @@ export default function EditPage() {
       if (dragRef.current && dragSnapshot.current) {
         const before = dragSnapshot.current;
         const after = markersRef.current;
-        const changed =
-          before.length !== after.length ||
-          before.some((m, i) => {
-            const a = after[i];
-            return (
-              m.id !== a?.id ||
-              Math.abs(m.cx - a.cx) > 1e-4 ||
-              Math.abs(m.cy - a.cy) > 1e-4 ||
-              Math.abs(m.r - a.r) > 1e-4
-            );
-          });
-        if (changed) pushHistory(before);
+        if (markersChanged(before, after)) pushHistory(before);
       }
       dragRef.current = null;
       dragSnapshot.current = null;
@@ -979,17 +1112,17 @@ export default function EditPage() {
     ? markers.findIndex((m) => m.id === selectedMarker.id)
     : -1;
   const canvasStatus = pendingOp
-    ? `${OP_LABEL[pendingOp]} 마커를 놓을 위치를 이미지에서 클릭`
+    ? `${OP_LABEL[pendingOp]} 마커 위치 지정 중`
     : selectedMarker
       ? `마커 ${selectedMarkerIndex + 1} 선택됨`
       : markers.length > 0
-        ? "오른쪽 목록에서 마커를 선택"
-        : "마커 방식을 고른 뒤 이미지 클릭";
+        ? "마커 목록에서 선택"
+        : "마커 방식을 고른 뒤 이미지에서 위치 지정";
 
   return (
     <div className="studio-shell">
       {/* ─── Top utility bar: tabs + balance (mirrors /generate) ─── */}
-      <div className="mb-8 flex items-center justify-between gap-3">
+      <div className="mb-6 flex items-center justify-between gap-3 md:mb-8">
         <div className="app-tabs">
           <Link
             href="/generate"
@@ -1039,7 +1172,7 @@ export default function EditPage() {
 
       {/* Base picker */}
       {!base ? (
-        <div className="surface-panel border-dashed p-8 text-center" tabIndex={0}>
+        <div className="surface-panel border-dashed p-6 text-center md:p-8" tabIndex={0}>
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--angel-border)] bg-[var(--angel-surface-muted)] text-[var(--angel-blue)]">
             <Upload size={22} />
           </div>
@@ -1115,17 +1248,42 @@ export default function EditPage() {
                 </div>
               </div>
 
+              <div className="mobile-marker-toolbar" aria-label="마커 빠른 선택">
+                {OP_ORDER.map((op) => {
+                  const active = pendingOp === op;
+                  return (
+                    <button
+                      key={op}
+                      type="button"
+                      onClick={() => startPlacingMarker(op)}
+                      disabled={markers.length >= MAX_MARKERS && !active}
+                      aria-pressed={active}
+                      className={`mobile-marker-tool ${active ? "is-active" : ""}`}
+                      style={{
+                        borderColor: active ? OP_COLOR[op] : `${OP_COLOR[op]}44`,
+                        backgroundColor: active ? `${OP_COLOR[op]}14` : undefined,
+                        color: OP_COLOR[op],
+                      }}
+                    >
+                      <MarkerOpIcon op={op} size={15} />
+                      <span>{OP_LABEL[op]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
               <div className="edit-canvas-stage">
                 <div
                   className={`relative mx-auto ${pendingOp ? "edit-canvas-placing" : ""}`}
                   ref={canvasWrapRef}
                   onClick={onCanvasClick}
+                  onPointerDown={onCanvasPointerDown}
                   onPointerMove={updatePlacementPreview}
                   onPointerLeave={() => setPlacementPreview(null)}
                   style={{
                     maxWidth: imgDims ? `${imgDims.w}px` : undefined,
                     cursor: pendingOp ? "crosshair" : undefined,
-                    touchAction: dragRef.current ? "none" : undefined,
+                    touchAction: pendingOp ? "none" : "pan-y",
                   }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1146,12 +1304,19 @@ export default function EditPage() {
                     const W = imgDims?.w ?? 1000;
                     const H = imgDims?.h ?? 1000;
                     const minSide = Math.min(W, H);
-                    const stroke = minSide * 0.004;
-                    const handleR = Math.max(minSide * 0.016, 11);
-                    const closeR = Math.max(minSide * 0.018, 12);
-                    const fontPx = Math.max(minSide * 0.02, 10);
-                    const badgeR = Math.max(fontPx * 0.95, 13);
-                    const labelGap = minSide * 0.012;
+                    const fallbackRenderedW = Math.min(W, 390);
+                    const renderedW = renderedSize?.w && renderedSize.w > 0 ? renderedSize.w : fallbackRenderedW;
+                    const cssToSvg = W / renderedW;
+                    const compactCanvas = renderedW < 560;
+                    const stroke = Math.max(minSide * 0.004, (compactCanvas ? 2.4 : 1.8) * cssToSvg);
+                    const handleR = Math.max(minSide * 0.016, (compactCanvas ? 14 : 11) * cssToSvg);
+                    const handleHitR = Math.max(handleR, (compactCanvas ? 30 : 22) * cssToSvg);
+                    const closeR = Math.max(minSide * 0.018, (compactCanvas ? 14 : 12) * cssToSvg);
+                    const closeHitR = Math.max(closeR, (compactCanvas ? 30 : 22) * cssToSvg);
+                    const fontPx = Math.max(minSide * 0.02, (compactCanvas ? 12 : 10) * cssToSvg);
+                    const badgeR = Math.max(fontPx * 0.95, (compactCanvas ? 13 : 11) * cssToSvg);
+                    const centerHitR = Math.max(badgeR * 1.4, (compactCanvas ? 30 : 22) * cssToSvg);
+                    const labelGap = Math.max(minSide * 0.012, 8 * cssToSvg);
                     const clampSvg = (value: number, min: number, max: number) =>
                       Math.min(max, Math.max(min, value));
                     return (
@@ -1181,7 +1346,7 @@ export default function EditPage() {
                               textAnchor="middle"
                               style={{ userSelect: "none" }}
                             >
-                              클릭해서 {OP_LABEL[pendingOp]}
+                              {OP_LABEL[pendingOp]} 위치
                             </text>
                           </g>
                         )}
@@ -1198,6 +1363,15 @@ export default function EditPage() {
                           const labelY = clampSvg(cy - r - labelGap, fontPx + 2, H - 4);
                           return (
                             <g key={m.id}>
+                              <circle
+                                cx={cx}
+                                cy={cy}
+                                r={Math.max(r, centerHitR)}
+                                fill={color}
+                                fillOpacity={0}
+                                style={{ pointerEvents: "all", cursor: "move", touchAction: "none" }}
+                                onPointerDown={(e) => onPointerDown(e, m.id, "move")}
+                              />
                               <circle
                                 cx={cx}
                                 cy={cy}
@@ -1240,6 +1414,15 @@ export default function EditPage() {
                               <circle
                                 cx={handleX}
                                 cy={handleY}
+                                r={handleHitR}
+                                fill={color}
+                                fillOpacity={0}
+                                style={{ pointerEvents: "all", cursor: "nwse-resize", touchAction: "none" }}
+                                onPointerDown={(e) => onPointerDown(e, m.id, "resize")}
+                              />
+                              <circle
+                                cx={handleX}
+                                cy={handleY}
                                 r={handleR}
                                 fill="white"
                                 stroke={color}
@@ -1253,6 +1436,14 @@ export default function EditPage() {
                                   onPointerDown={(e) => e.stopPropagation()}
                                   onClick={(e) => { e.stopPropagation(); removeMarker(m.id); }}
                                 >
+                                  <circle
+                                    cx={closeX}
+                                    cy={closeY}
+                                    r={closeHitR}
+                                    fill="#ef4444"
+                                    fillOpacity={0}
+                                    style={{ pointerEvents: "all" }}
+                                  />
                                   <circle
                                     cx={closeX}
                                     cy={closeY}
@@ -1278,6 +1469,134 @@ export default function EditPage() {
                 </div>
               </div>
 
+              {selectedMarker && (
+                <div
+                  className="mobile-marker-adjust"
+                  style={{ borderColor: `${OP_COLOR[selectedMarker.op]}40` }}
+                >
+                  <div className="mobile-marker-adjust-head">
+                    <span style={{ color: OP_COLOR[selectedMarker.op] }}>
+                      마커 {selectedMarkerIndex + 1}
+                    </span>
+                    <b>{OP_LABEL[selectedMarker.op]}</b>
+                  </div>
+
+                  <div className="mobile-marker-size-row">
+                    <button
+                      type="button"
+                      onClick={() => resizeMarkerBy(selectedMarker.id, -0.02)}
+                      aria-label="마커 작게"
+                      className="mobile-marker-adjust-button"
+                    >
+                      <Minus size={15} />
+                    </button>
+                    <input
+                      type="range"
+                      min={0.02}
+                      max={0.5}
+                      step={0.01}
+                      value={selectedMarker.r}
+                      onPointerDown={beginControlEdit}
+                      onPointerUp={commitControlEdit}
+                      onPointerCancel={commitControlEdit}
+                      onBlur={commitControlEdit}
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "ArrowLeft" ||
+                          e.key === "ArrowRight" ||
+                          e.key === "ArrowUp" ||
+                          e.key === "ArrowDown" ||
+                          e.key === "Home" ||
+                          e.key === "End" ||
+                          e.key === "PageUp" ||
+                          e.key === "PageDown"
+                        ) {
+                          beginControlEdit();
+                        }
+                      }}
+                      onKeyUp={commitControlEdit}
+                      onChange={(e) => setSelectedMarkerRadius(Number(e.target.value))}
+                      aria-label="마커 크기"
+                      style={{ accentColor: OP_COLOR[selectedMarker.op] }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => resizeMarkerBy(selectedMarker.id, 0.02)}
+                      aria-label="마커 크게"
+                      className="mobile-marker-adjust-button"
+                    >
+                      <Plus size={15} />
+                    </button>
+                  </div>
+
+                  <div className="mobile-marker-nudge" role="group" aria-label="마커 위치 미세 조정">
+                    <button
+                      type="button"
+                      onClick={() => nudgeMarker(selectedMarker.id, 0, -0.02)}
+                      aria-label="위로 이동"
+                      className="mobile-nudge-up"
+                    >
+                      <ArrowUp size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => nudgeMarker(selectedMarker.id, -0.02, 0)}
+                      aria-label="왼쪽으로 이동"
+                      className="mobile-nudge-left"
+                    >
+                      <ArrowLeft size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => nudgeMarker(selectedMarker.id, 0, 0.02)}
+                      aria-label="아래로 이동"
+                      className="mobile-nudge-down"
+                    >
+                      <ArrowDown size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => nudgeMarker(selectedMarker.id, 0.02, 0)}
+                      aria-label="오른쪽으로 이동"
+                      className="mobile-nudge-right"
+                    >
+                      <ArrowRight size={15} />
+                    </button>
+                  </div>
+
+                  <div className="mobile-marker-action-row" role="group" aria-label="마커 동작 변경">
+                    {OP_ORDER.map((op) => {
+                      const active = selectedMarker.op === op;
+                      return (
+                        <button
+                          key={op}
+                          type="button"
+                          onClick={() => setMarkerOp(selectedMarker.id, op)}
+                          aria-pressed={active}
+                          className={`mobile-marker-action-button ${active ? "is-active" : ""}`}
+                          style={{
+                            borderColor: active ? OP_COLOR[op] : `${OP_COLOR[op]}44`,
+                            backgroundColor: active ? OP_COLOR[op] : undefined,
+                            color: active ? "white" : OP_COLOR[op],
+                          }}
+                        >
+                          <MarkerOpIcon op={op} size={14} />
+                          <span>{OP_LABEL[op]}</span>
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => removeMarker(selectedMarker.id)}
+                      className="mobile-marker-action-button is-danger"
+                    >
+                      <Trash2 size={14} />
+                      <span>삭제</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {imgDims && Math.min(imgDims.w, imgDims.h) < 512 && (
                 <p className="mt-2 text-center text-[11.5px] text-amber-600">
                   ⚠ 원본 해상도가 낮아요 ({imgDims.w}×{imgDims.h}). 편집 결과 품질이 제한될 수 있어요.
@@ -1291,7 +1610,7 @@ export default function EditPage() {
                   <span className="edit-step-number">1</span>
                   <div>
                     <h2>마커 작업</h2>
-                    <p>{pendingOp ? `${OP_LABEL[pendingOp]} 위치 대기 중` : "방식 선택 → 이미지 클릭"}</p>
+                    <p>{pendingOp ? `${OP_LABEL[pendingOp]} 위치 대기 중` : "방식 선택 → 위치 지정"}</p>
                   </div>
                 </div>
                 <span className="edit-marker-count">{markers.length}/{MAX_MARKERS}</span>
@@ -1333,7 +1652,7 @@ export default function EditPage() {
                 <MousePointerClick size={15} />
                 <span>
                   {pendingOp
-                    ? `이미지에서 ${OP_LABEL[pendingOp]}할 지점을 클릭하세요.`
+                    ? `이미지에서 ${OP_LABEL[pendingOp]}할 지점을 누르고 위치를 잡으세요.`
                     : markers.length >= MAX_MARKERS
                       ? "마커 3개를 모두 사용했어요."
                       : "마커 방식을 누르면 배치 모드가 켜져요."}
@@ -1357,7 +1676,7 @@ export default function EditPage() {
                   <div className="marker-empty">
                     <CircleDot size={18} />
                     <b>아직 마커가 없어요</b>
-                    <span>위 버튼을 누른 뒤 이미지에서 위치를 찍으세요.</span>
+                    <span>위 버튼을 누른 뒤 이미지에서 위치를 잡으세요.</span>
                   </div>
                 ) : (
                   markers.map((m, i) => {
@@ -1455,10 +1774,7 @@ export default function EditPage() {
                       <button
                         key={op}
                         type="button"
-                        onClick={() => {
-                          pushHistory(markers);
-                          updateMarker(selectedMarker.id, { op });
-                        }}
+                        onClick={() => setMarkerOp(selectedMarker.id, op)}
                         className={selectedMarker.op === op ? "is-active" : ""}
                         style={{
                           backgroundColor: selectedMarker.op === op ? OP_COLOR[op] : undefined,
